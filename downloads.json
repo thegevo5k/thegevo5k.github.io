@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Amtrak ALC-42 Pack",
+    "description": "Modern Siemens Charger locos with sounds and variants",
+    "version": "1.0",
+    "size": "128 MB",
+    "compatibility": "TSC 2024+",
+    "download_url": "https://github.com/thegevo5k/thegevo5k.github.io/raw/main/downloads/alc42-pack.zip",
+    "category": "Locomotives"
+  },
+  {
+    "name": "Example Route - Northeast Corridor",
+    "description": "Short test route with Amtrak traffic",
+    "version": "0.5",
+    "size": "245 MB",
+    "compatibility": "TSC 2024+",
+    "download_url": "#",
+    "category": "Routes"
+  }
+]
