@@ -122,3 +122,54 @@ h2 {
   cursor: pointer;
   color: #aaa;
 }
+
+footer {
+  background: #0a0a0a;
+  padding: 3rem 1rem 2rem;
+  margin-top: 4rem;
+  border-top: 3px solid var(--teal);
+  text-align: center;
+  font-size: 0.95rem;
+  color: #888;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-logo {
+  width: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+}
+
+.footer-right a {
+  color: var(--gold);
+  margin: 0 12px;
+  text-decoration: none;
+}
+
+.footer-right a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
