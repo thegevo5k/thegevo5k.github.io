@@ -1,29 +1,33 @@
-// script.js - We Play Simulators
+// script.js
 async function loadDownloads() {
   try {
-    // Cache-busting to force fresh load (fixes Firefox caching)
     const timestamp = new Date().getTime();
     const response = await fetch(`downloads.json?t=${timestamp}`);
     const downloads = await response.json();
 
-    // Render each section
     renderSection('routes-grid', downloads.filter(d => d.category === "Routes"));
     renderSection('locomotives-grid', downloads.filter(d => d.category === "Locomotives"));
     renderSection('rollingstock-grid', downloads.filter(d => d.category === "Rolling Stock"));
 
-    // Show last updated time
-    document.getElementById('last-updated').textContent = 
-      `Last updated: ${new Date().toLocaleString()}`;
+    // Safe last-updated (won't crash if element doesn't exist)
+    const lastUpdatedEl = document.getElementById('last-updated');
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
+    }
     
   } catch (error) {
     console.error("Could not load downloads.json", error);
-    document.getElementById('routes-grid').innerHTML = 
-      "<p style='color:#ff6666;'>Error loading downloads. Please refresh the page.</p>";
+    const routesGrid = document.getElementById('routes-grid');
+    if (routesGrid) {
+      routesGrid.innerHTML = "<p style='color:#ff6666; text-align:center;'>Error loading downloads. Please refresh the page.</p>";
+    }
   }
 }
 
 function renderSection(containerId, items) {
   const container = document.getElementById(containerId);
+  if (!container) return;
+  
   container.innerHTML = '';
 
   if (items.length === 0) {
@@ -74,11 +78,9 @@ function closeModal() {
   document.getElementById('itemModal').style.display = 'none';
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
   const modal = document.getElementById('itemModal');
   if (event.target === modal) closeModal();
 };
 
-// Load everything when page loads
 window.onload = loadDownloads;
