@@ -4,108 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>We Play Simulators | TSC Community</title>
+  <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="logo.png">
-  <style>
-    :root {
-      --teal: #1A5C5C;
-      --gold: #E8B923;
-      --dark: #0F0F0F;
-    }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--dark);
-      color: #ddd;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-    }
-    header {
-      background: linear-gradient(135deg, var(--teal), #0F3F3F);
-      text-align: center;
-      padding: 3rem 1rem;
-      border-bottom: 5px solid var(--gold);
-    }
-    .logo {
-      width: 260px;
-      border-radius: 50%;
-      border: 6px solid var(--gold);
-      box-shadow: 0 0 30px rgba(232, 185, 35, 0.5);
-    }
-    nav {
-      background: #1a1a1a;
-      padding: 1rem;
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    nav a {
-      color: #ddd;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav a:hover { color: var(--gold); }
-
-    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-
-    h2 { color: var(--gold); border-bottom: 2px solid var(--teal); padding-bottom: 10px; }
-
-    .download-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    .download-item {
-      background: #1f1f1f;
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: all 0.3s;
-    }
-    .download-item:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 10px 20px rgba(232, 185, 35, 0.2);
-    }
-    .download-item h3 { margin: 0 0 0.8rem; color: var(--gold); }
-
-    .btn-small {
-      background: var(--gold);
-      color: #111;
-      padding: 12px 24px;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 12px;
-      font-weight: bold;
-    }
-    .btn-small:hover { background: #f5d14d; }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-    }
-    .modal-content {
-      background: #1a1a1a;
-      margin: 5% auto;
-      padding: 2rem;
-      width: 90%;
-      max-width: 700px;
-      border-radius: 12px;
-      position: relative;
-    }
-    .close {
-      position: absolute;
-      top: 15px; right: 25px;
-      font-size: 42px;
-      cursor: pointer;
-      color: #aaa;
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -151,66 +51,10 @@
     </div>
   </div>
 
-  <footer style="text-align:center; padding:3rem; background:#111; margin-top:3rem;">
+  <footer>
     <p>&copy; 2026 We Play Simulators • Fan project, not affiliated with Dovetail Games</p>
   </footer>
 
-  <script>
-    // Paste your downloads.json content here for now
-    const downloads = [
-      {
-        "id": 1, "category": "Routes", "name": "Northeast Corridor - Amtrak",
-        "short": "Short test segment with modern Amtrak traffic",
-        "description": "Detailed section of the NEC with Amtrak ACS-64 and ALC-42 operations.",
-        "version": "1.0", "size": "185 MB", "compatibility": "TSC 2024+",
-        "download_url": "#"
-      },
-      {
-        "id": 2, "category": "Locomotives", "name": "Amtrak ALC-42 Pack",
-        "short": "Siemens Charger locos with 50th Anniversary livery",
-        "description": "High-detail ALC-42 models with multiple liveries and custom sounds.",
-        "version": "1.1", "size": "128 MB", "compatibility": "TSC 2024+",
-        "download_url": "#"
-      }
-    ];
-
-    function renderSection(containerId, items) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'download-item';
-        div.innerHTML = `
-          <h3>${item.name}</h3>
-          <p>${item.short}</p>
-          <button onclick="showItemModal(${item.id})" class="btn-small">Download</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function showItemModal(id) {
-      const item = downloads.find(i => i.id === id);
-      document.getElementById('modal-content').innerHTML = `
-        <h2>${item.name}</h2>
-        <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
-        <p><strong>Compatibility:</strong> ${item.compatibility}</p>
-        <p>${item.description}</p>
-        <a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem;">⬇ Download Now</a>
-      `;
-      document.getElementById('itemModal').style.display = 'block';
-    }
-
-    function closeModal() {
-      document.getElementById('itemModal').style.display = 'none';
-    }
-
-    // Load content
-    window.onload = () => {
-      renderSection('routes-grid', downloads.filter(d => d.category === "Routes"));
-      renderSection('locomotives-grid', downloads.filter(d => d.category === "Locomotives"));
-      renderSection('rollingstock-grid', downloads.filter(d => d.category === "Rolling Stock"));
-    };
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
