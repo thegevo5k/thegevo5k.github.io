@@ -1,0 +1,94 @@
+:root {
+  --teal: #1A5C5C;
+  --gold: #E8B923;
+  --dark: #0F0F0F;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--dark);
+  color: #ddd;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: linear-gradient(135deg, var(--teal), #0F3F3F);
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.logo {
+  width: 260px;
+  border-radius: 50%;
+  border: 6px solid var(--gold);
+  box-shadow: 0 0 30px rgba(232, 185, 35, 0.4);
+}
+
+nav {
+  background: #1a1a1a;
+  padding: 1rem;
+  text-align: center;
+}
+
+nav a {
+  color: #ddd;
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover { color: var(--gold); }
+
+.btn {
+  background: var(--gold);
+  color: #111;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  margin: 10px;
+}
+
+.btn:hover { background: #f5d14d; }
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #1a1a1a;
+  margin: 5% auto;
+  padding: 2rem;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 15px; right: 25px;
+  font-size: 36px;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.download-item {
+  background: #252525;
+  padding: 1.2rem;
+  border-radius: 10px;
+}
