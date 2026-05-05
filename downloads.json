@@ -31,5 +31,16 @@
     "size": "95 MB",
     "compatibility": "TSC 2024+",
     "download_url": "#"
+  },
+  {
+    "id": 4,
+    "category": "Locomotives",
+    "name": "Tri-Rail Charger Shit",
+    "short": "Phase VI livery passenger cars",
+    "description": "Set of modernized Amfleet coaches for use with ALC-42 and ACS-64.",
+    "version": "0.9",
+    "size": "95 MB",
+    "compatibility": "TSC 2024+",
+    "download_url": "#"
   }
 ]
