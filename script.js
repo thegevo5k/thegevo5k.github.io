@@ -1,22 +1,35 @@
-// script.js
+// script.js - We Play Simulators
 async function loadDownloads() {
   try {
-    const response = await fetch('downloads.json');
+    // Cache-busting to force fresh load (fixes Firefox caching)
+    const timestamp = new Date().getTime();
+    const response = await fetch(`downloads.json?t=${timestamp}`);
     const downloads = await response.json();
 
+    // Render each section
     renderSection('routes-grid', downloads.filter(d => d.category === "Routes"));
     renderSection('locomotives-grid', downloads.filter(d => d.category === "Locomotives"));
     renderSection('rollingstock-grid', downloads.filter(d => d.category === "Rolling Stock"));
+
+    // Show last updated time
+    document.getElementById('last-updated').textContent = 
+      `Last updated: ${new Date().toLocaleString()}`;
+    
   } catch (error) {
     console.error("Could not load downloads.json", error);
-    // Fallback message
-    document.getElementById('routes-grid').innerHTML = "<p>Error loading downloads. Please check downloads.json</p>";
+    document.getElementById('routes-grid').innerHTML = 
+      "<p style='color:#ff6666;'>Error loading downloads. Please refresh the page.</p>";
   }
 }
 
 function renderSection(containerId, items) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
+
+  if (items.length === 0) {
+    container.innerHTML = '<p>No items in this category yet.</p>';
+    return;
+  }
 
   items.forEach(item => {
     const div = document.createElement('div');
@@ -35,7 +48,8 @@ let allDownloads = [];
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
     try {
-      const res = await fetch('downloads.json');
+      const timestamp = new Date().getTime();
+      const res = await fetch(`downloads.json?t=${timestamp}`);
       allDownloads = await res.json();
     } catch (e) {
       console.error(e);
@@ -66,5 +80,5 @@ window.onclick = function(event) {
   if (event.target === modal) closeModal();
 };
 
-// Load on page start
+// Load everything when page loads
 window.onload = loadDownloads;
