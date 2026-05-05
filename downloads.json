@@ -8,28 +8,28 @@
     "version": "1.0",
     "size": "185 MB",
     "compatibility": "TSC 2024+",
-    "download_url": "https://github.com/thegevo5k/thegevo5k.github.io/raw/main/downloads/nec-amtrak.zip"
+    "download_url": "#"
   },
   {
     "id": 2,
     "category": "Locomotives",
     "name": "Amtrak ALC-42 Pack",
     "short": "Siemens Charger locos with 50th Anniversary livery",
-    "description": "High-detail ALC-42 models based on real Amtrak units. Includes multiple liveries, custom sounds, and physics.",
+    "description": "High-detail ALC-42 models with multiple liveries, custom sounds, and realistic physics.",
     "version": "1.1",
     "size": "128 MB",
     "compatibility": "TSC 2024+",
-    "download_url": "https://github.com/thegevo5k/thegevo5k.github.io/raw/main/downloads/alc42-pack.zip"
+    "download_url": "#"
   },
-    {
+  {
     "id": 3,
-    "category": "Locomotives",
-    "name": "Tri-Rail ALC-42 Pack",
-    "short": "Siemens Charger locos with 50th Anniversary livery",
-    "description": "High-detail ALC-42 models based on real Amtrak units. Includes multiple liveries, custom sounds, and physics.",
-    "version": "1.1",
-    "size": "128 MB",
+    "category": "Rolling Stock",
+    "name": "Amtrak Amfleet I Cars",
+    "short": "Phase VI livery passenger cars",
+    "description": "Set of modernized Amfleet coaches for use with ALC-42 and ACS-64.",
+    "version": "0.9",
+    "size": "95 MB",
     "compatibility": "TSC 2024+",
-    "download_url": "https://github.com/thegevo5k/thegevo5k.github.io/raw/main/downloads/alc42-pack.zip"
+    "download_url": "#"
   }
 ]
