@@ -4,91 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>We Play Simulators | TSC Community</title>
-  <style>
-    :root {
-      --teal: #1A5C5C;
-      --gold: #E8B923;
-    }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #0F0F0F;
-      color: #ddd;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-    }
-    header {
-      background: linear-gradient(135deg, var(--teal), #0F3F3F);
-      padding: 3rem 1rem;
-      text-align: center;
-      border-bottom: 4px solid var(--gold);
-    }
-    .logo {
-      width: 260px;
-      border-radius: 50%;
-      border: 6px solid var(--gold);
-      box-shadow: 0 0 30px rgba(232, 185, 35, 0.4);
-    }
-    h1 {
-      color: var(--gold);
-      margin: 1rem 0 0.5rem;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .btn {
-      background: var(--gold);
-      color: #111;
-      padding: 14px 28px;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      display: inline-block;
-      margin: 10px;
-      transition: all 0.3s;
-    }
-    .btn:hover {
-      transform: scale(1.05);
-      background: #f5d14d;
-    }
-    .section {
-      background: #1a1a1a;
-      padding: 2rem;
-      border-radius: 12px;
-      margin: 2rem 0;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="logo.png">
 </head>
 <body>
   <header>
     <img src="logo.png" alt="We Play Simulators Logo" class="logo">
     <h1>We Play Simulators</h1>
-    <p style="font-size:1.3rem; margin-top:0.5rem;">Train Simulator Classic Development Group</p>
+    <p>Train Simulator Classic Development Group</p>
   </header>
 
-  <div class="container">
-    <div class="section">
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#downloads">Downloads</a>
+    <a href="#projects">Projects</a>
+    <a href="#community">Community</a>
+  </nav>
+
+  <main>
+    <section id="home">
       <h2>Welcome Railfans!</h2>
-      <p>High-quality custom content for Train Simulator Classic. Routes, locomotives, scenarios, reskins & more.</p>
-      <a href="#downloads" class="btn">Browse Downloads</a>
-      <a href="https://discord.gg/YOURDISCORD" class="btn" target="_blank">Join Our Discord</a>
-    </div>
+      <p>High-quality custom content for Train Simulator Classic.</p>
+      <button onclick="showDownloadsModal()" class="btn primary">Browse Downloads</button>
+    </section>
 
-    <div class="section" id="downloads">
+    <section id="downloads">
       <h2>Downloads</h2>
-      <p>Coming soon — First routes and locomotives will be uploaded shortly.</p>
-    </div>
+      <p>Click the button above to open the full download library.</p>
+    </section>
 
-    <div class="section">
+    <section id="projects">
       <h2>Latest Projects</h2>
-      <p>Focused on modern Amtrak, passenger routes, and high-quality rolling stock for TSC.</p>
+      <p>Modern Amtrak routes, ALC-42 locos, and more coming soon.</p>
+    </section>
+
+    <section id="community">
+      <h2>Join the Community</h2>
+      <a href="https://discord.gg/YOURDISCORD" target="_blank" class="btn">Join Discord</a>
+    </section>
+  </main>
+
+  <!-- Download Modal -->
+  <div id="downloadsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Download Library</h2>
+      <div class="download-grid">
+        <!-- Add your items here -->
+        <div class="download-item">
+          <h3>Example Route</h3>
+          <p>Version 1.0 • TSC 2024</p>
+          <a href="https://example.com/file.zip" class="btn small">Download (45 MB)</a>
+        </div>
+        <!-- Duplicate this block for more items -->
+      </div>
     </div>
   </div>
 
-  <footer style="text-align:center; padding:2rem; background:#111; color:#777;">
+  <footer>
     <p>&copy; 2026 We Play Simulators • Fan project, not affiliated with Dovetail Games</p>
   </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
