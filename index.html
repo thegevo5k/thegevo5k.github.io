@@ -47,16 +47,12 @@
   <!-- Download Modal -->
   <div id="downloadsModal" class="modal">
     <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
+      <span class="close" onclick="closeModal()">×</span>
       <h2>Download Library</h2>
-      <div class="download-grid">
-        <!-- Add your items here -->
-        <div class="download-item">
-          <h3>Example Route</h3>
-          <p>Version 1.0 • TSC 2024</p>
-          <a href="https://example.com/file.zip" class="btn small">Download (45 MB)</a>
-        </div>
-        <!-- Duplicate this block for more items -->
+      <input type="text" id="searchInput" placeholder="Search downloads..." style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px;">
+      
+      <div id="downloadsTable" class="download-grid">
+        <!-- Populated automatically by JavaScript -->
       </div>
     </div>
   </div>
