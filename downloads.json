@@ -1,10 +1,11 @@
 [
   {
     "id": 1,
+    "sku": "WPS-NEC-01",
     "category": "Routes",
     "name": "Northeast Corridor - Amtrak",
     "short": "Short test segment with modern Amtrak traffic",
-    "description": "Detailed section of the NEC with Amtrak ACS-64 and ALC-42 operations. Includes signals, scenery, and AI traffic.",
+    "description": "Detailed section of the NEC with Amtrak ACS-64 and ALC-42 operations...",
     "version": "1.0",
     "size": "185 MB",
     "compatibility": "TSC 2024+",
@@ -12,13 +13,14 @@
   },
   {
     "id": 2,
+    "sku": "WPS-ALC-01",
     "category": "Locomotives",
     "name": "Amtrak ALC-42 Pack",
     "short": "Siemens Charger locos with 50th Anniversary livery",
-    "description": "High-detail ALC-42 models with multiple liveries, custom sounds, and realistic physics.",
+    "description": "High-detail ALC-42 models...",
     "version": "1.1",
     "size": "128 MB",
     "compatibility": "TSC 2024+",
     "download_url": "#"
-  },
+  }
 ]
