@@ -9,19 +9,15 @@ async function loadDownloads() {
     renderSection('locomotives-grid', downloads.filter(d => d.category === "Locomotives"));
     renderSection('rollingstock-grid', downloads.filter(d => d.category === "Rolling Stock"));
 
-    // Safe last-updated (won't crash if element doesn't exist)
     const lastUpdatedEl = document.getElementById('last-updated');
-    if (lastUpdatedEl) {
-      lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
-    }
-    
+    if (lastUpdatedEl) lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
   } catch (error) {
     console.error("Could not load downloads.json", error);
-    const routesGrid = document.getElementById('routes-grid');
-    if (routesGrid) {
-      routesGrid.innerHTML = "<p style='color:#ff6666; text-align:center;'>Error loading downloads. Please refresh the page.</p>";
-    }
   }
+}
+
+function getImagePath(sku, number = "01") {
+  return `images/${sku}/${number}.png`;
 }
 
 function renderSection(containerId, items) {
@@ -30,15 +26,14 @@ function renderSection(containerId, items) {
   
   container.innerHTML = '';
 
-  if (items.length === 0) {
-    container.innerHTML = '<p>No items in this category yet.</p>';
-    return;
-  }
-
   items.forEach(item => {
     const div = document.createElement('div');
     div.className = 'download-item';
+    
+    const coverSrc = getImagePath(item.sku, "01");
+    
     div.innerHTML = `
+      <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
       <h3>${item.name}</h3>
       <p>${item.short}</p>
       <button onclick="showItemModal(${item.id})" class="btn-small">Download</button>
@@ -51,19 +46,18 @@ let allDownloads = [];
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
-    try {
-      const timestamp = new Date().getTime();
-      const res = await fetch(`downloads.json?t=${timestamp}`);
-      allDownloads = await res.json();
-    } catch (e) {
-      console.error(e);
-    }
+    const timestamp = new Date().getTime();
+    const res = await fetch(`downloads.json?t=${timestamp}`);
+    allDownloads = await res.json();
   }
 
   const item = allDownloads.find(i => i.id === id);
   if (!item) return;
 
+  const mainImage = getImagePath(item.sku, "01");
+
   document.getElementById('modal-content').innerHTML = `
+    <img src="${mainImage}" alt="${item.name}" class="modal-main-image" onerror="this.style.display='none'">
     <h2>${item.name}</h2>
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
