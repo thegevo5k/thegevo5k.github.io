@@ -58,7 +58,7 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
-  maxImages = 0;
+  maxImages = 0;   // reset
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
@@ -80,20 +80,10 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  
-  // Clear container
-  container.innerHTML = '';
-
-  // Add arrows only if needed
-  let arrows = '';
-  if (currentImageIndex > 1) {
-    arrows += `<button onclick="prevImage()" class="arrow-btn left">←</button>`;
-  }
-  if (maxImages === 0 || currentImageIndex < maxImages) {
-    arrows += `<button onclick="nextImage()" class="arrow-btn right">→</button>`;
-  }
-
-  container.innerHTML = arrows;
+  container.innerHTML = `
+    <button onclick="prevImage()" class="arrow-btn left">←</button>
+    <button onclick="nextImage()" class="arrow-btn right">→</button>
+  `;
 
   const img = document.createElement('img');
   img.src = getImagePath(currentSKU, currentImageIndex);
@@ -101,6 +91,7 @@ function showCurrentImage() {
   
   img.onload = () => {
     if (currentImageIndex > maxImages) maxImages = currentImageIndex;
+    updateArrows();
   };
 
   img.onerror = () => {
@@ -112,6 +103,14 @@ function showCurrentImage() {
   };
   
   container.appendChild(img);
+}
+
+function updateArrows() {
+  const left = document.querySelector('.arrow-btn.left');
+  const right = document.querySelector('.arrow-btn.right');
+  
+  if (left) left.style.display = currentImageIndex > 1 ? 'block' : 'none';
+  if (right) right.style.display = (maxImages === 0 || currentImageIndex < maxImages) ? 'block' : 'none';
 }
 
 function nextImage() {
