@@ -44,6 +44,7 @@ function renderSection(containerId, items) {
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
+let maxImages = 0;
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -57,6 +58,7 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
+  maxImages = 0;
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
@@ -78,7 +80,6 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -88,9 +89,17 @@ function showCurrentImage() {
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
+  img.onload = () => {
+    if (currentImageIndex > maxImages) maxImages = currentImageIndex;
+  };
+
   img.onerror = () => {
+    // We hit the end of images
     if (currentImageIndex > 1) {
-      currentImageIndex = 1;   // went past the end → go back to first
+      maxImages = currentImageIndex - 1;
+      // Wrap around
+      if (currentImageIndex > maxImages + 1) currentImageIndex = 1;
+      else currentImageIndex = maxImages;
       showCurrentImage();
     }
   };
@@ -105,8 +114,12 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = 1;
-  showCurrentImage();
+  if (currentImageIndex < 1) {
+    currentImageIndex = maxImages || 20;   // Try high number to trigger wrap
+    showCurrentImage();
+  } else {
+    showCurrentImage();
+  }
 }
 
 function closeModal() {
