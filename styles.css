@@ -67,8 +67,9 @@ h2 {
 .download-item {
   background: #1f1f1f;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.2rem;
   transition: all 0.3s;
+  overflow: hidden;
 }
 
 .download-item:hover {
@@ -76,9 +77,12 @@ h2 {
   box-shadow: 0 10px 20px rgba(232, 185, 35, 0.2);
 }
 
-.download-item h3 { 
-  margin: 0 0 0.8rem; 
-  color: var(--gold); 
+.item-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
 
 .btn-small {
@@ -123,53 +127,17 @@ h2 {
   color: #aaa;
 }
 
+.modal-main-image {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+/* Footer */
 footer {
   background: #0a0a0a;
-  padding: 3rem 1rem 2rem;
-  margin-top: 4rem;
-  border-top: 3px solid var(--teal);
+  padding: 2rem 1rem;
   text-align: center;
-  font-size: 0.95rem;
-  color: #888;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-}
-
-.footer-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.footer-logo {
-  width: 60px;
-  border-radius: 50%;
-  border: 3px solid var(--gold);
-}
-
-.footer-right a {
-  color: var(--gold);
-  margin: 0 12px;
-  text-decoration: none;
-}
-
-.footer-right a:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .footer-content {
-    flex-direction: column;
-    text-align: center;
-  }
+  color: #777;
+  margin-top: 4rem;
 }
