@@ -152,19 +152,23 @@ h2 {
 .slideshow-container {
   position: relative;
   width: 100%;
-  min-height: 340px;
+  min-height: auto; /* Changed from 340px to auto */
   margin-bottom: 20px;
   background: #111;
   border-radius: 10px;
   overflow: hidden;
+  display: flex; /* Helps center and contain the image */
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-main-image {
   width: 100%;
   height: auto;
-  max-height: 55vh;
+  max-height: 70vh; /* Increased slightly for better mobile viewing[cite: 7] */
   object-fit: contain;
   border-radius: 10px;
+  display: block; /* Removes the bottom gap caused by inline alignment[cite: 7] */
   opacity: 0;
   transition: opacity 0.6s ease-in-out;
 }
