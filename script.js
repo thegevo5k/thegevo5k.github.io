@@ -81,21 +81,22 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  container.innerHTML = `
-    <button onclick="prevImage()" class="arrow-btn left">←</button>
-    <button onclick="nextImage()" class="arrow-btn right">→</button>
-  `;   // Clear previous images
+  // Keep only the arrows, remove old images
+  const arrowsHTML = container.innerHTML;
+  container.innerHTML = arrowsHTML;
 
   const img = document.createElement('img');
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
   img.onerror = () => {
-    // No more images - wrap around
+    // Wrap around if we went too far
     if (currentImageIndex > 1) {
-      currentImageIndex = 1;
-      showCurrentImage();
+      currentImageIndex = 1;        // went past the end → back to first
+    } else {
+      currentImageIndex = 20;       // went before 1 → try a high number so it wraps to last image
     }
+    showCurrentImage();
   };
   
   container.appendChild(img);
@@ -108,7 +109,7 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = 20; // large number so it will wrap on error
+  if (currentImageIndex < 1) currentImageIndex = 20; // high number to trigger wrap to last image
   showCurrentImage();
 }
 
