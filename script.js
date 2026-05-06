@@ -41,6 +41,8 @@ function renderSection(containerId, items) {
   });
 }
 
+// ... keep loadDownloads, getImagePath, and renderSection as they were ...
+
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
@@ -56,22 +58,21 @@ async function showItemModal(id) {
   const item = allDownloads.find(i => i.id === id);
   if (!item) return;
 
+  // Set the global state for the slideshow
   currentSKU = item.sku;
   currentImageIndex = 1;
-  maxImages = 0;
+  maxImages = item.imageCount || 1; // Default to 1 if missing
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
       <h2>${item.name}</h2>
       <span class="close" onclick="closeModal()">×</span>
     </div>
-    
     <div class="slideshow-container" id="slideshow"></div>
-
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
     <p>${item.description}</p>
-    <a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>
+    <a href="${item.download_url}" target="_blank" class="btn-small">Download</a>
   `;
 
   document.getElementById('itemModal').style.display = 'block';
@@ -80,6 +81,8 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
+  
+  // Clear and add buttons
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -89,46 +92,26 @@ function showCurrentImage() {
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
-  img.onload = () => {
-    if (currentImageIndex > maxImages) maxImages = currentImageIndex;
-  };
-
-  img.onerror = () => {
-    // We hit the end of images
-    if (currentImageIndex > 1) {
-      maxImages = currentImageIndex - 1;
-      // Wrap around
-      if (currentImageIndex > maxImages + 1) currentImageIndex = 1;
-      else currentImageIndex = maxImages;
-      showCurrentImage();
-    }
-  };
-  
+  // We no longer need the complex img.onerror logic[cite: 1]
   container.appendChild(img);
 }
 
 function nextImage() {
   currentImageIndex++;
+  // If we go past the last image, go back to the first[cite: 1]
+  if (currentImageIndex > maxImages) {
+    currentImageIndex = 1;
+  }
   showCurrentImage();
 }
 
 function prevImage() {
   currentImageIndex--;
+  // If we go before the first image, go to the last[cite: 1]
   if (currentImageIndex < 1) {
-    currentImageIndex = maxImages || 20;   // Try high number to trigger wrap
-    showCurrentImage();
-  } else {
-    showCurrentImage();
+    currentImageIndex = maxImages;
   }
+  showCurrentImage();
 }
 
-function closeModal() {
-  document.getElementById('itemModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-  const modal = document.getElementById('itemModal');
-  if (event.target === modal) closeModal();
-};
-
-window.onload = loadDownloads;
+// ... keep closeModal and window click events as they were ...
