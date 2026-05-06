@@ -11,5 +11,31 @@
     "size": "Unavailable",
     "compatibility": "TSC 64-bit",
     "download_url": "#"
+  },
+  {
+    "id": 2,
+    "sku": "WPS-ALC-01",
+    "category": "Locomotives",
+    "name": "Amtrak ALC-42 Pack",
+    "imageCount": 6,
+    "short": "The newest Amtrak locomotive to-date, the ALC-42 makes its debut into Train Simulator Classic.",
+    "description": "The ALC-42 is a highly-detailed model built by Anton Wigovsky. It comes in Day One, Phase VI, Phase VII, America 250 and Freedom 250 variations. It's built with basic functionality, including brakes, a reverser, throttle and headlights. Special features include a working engine room light and a proper ditchlight pattern, true to life.",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#"
+  },
+  {
+    "id": 3,
+    "sku": "WPS-ALC-01",
+    "category": "Locomotives",
+    "name": "Amtrak ALC-42 Pack",
+    "imageCount": 6,
+    "short": "The newest Amtrak locomotive to-date, the ALC-42 makes its debut into Train Simulator Classic.",
+    "description": "The ALC-42 is a highly-detailed model built by Anton Wigovsky. It comes in Day One, Phase VI, Phase VII, America 250 and Freedom 250 variations. It's built with basic functionality, including brakes, a reverser, throttle and headlights. Special features include a working engine room light and a proper ditchlight pattern, true to life.",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#"
   }
 ]
