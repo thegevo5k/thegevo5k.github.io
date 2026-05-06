@@ -64,15 +64,12 @@ async function showItemModal(id) {
       <span class="close" onclick="closeModal()">×</span>
     </div>
     
-    <div class="slideshow-container" id="slideshow">
-      <button onclick="prevImage()" class="arrow-btn left">←</button>
-      <button onclick="nextImage()" class="arrow-btn right">→</button>
-    </div>
+    <div class="slideshow-container" id="slideshow"></div>
 
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
     <p>${item.description}</p>
-    <a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">⬇ Download Now</a>
+    <a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>
   `;
 
   document.getElementById('itemModal').style.display = 'block';
@@ -81,20 +78,21 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  // Keep only the arrows, remove old images
-  const arrowsHTML = container.innerHTML;
-  container.innerHTML = arrowsHTML;
+  
+  container.innerHTML = `
+    <button onclick="prevImage()" class="arrow-btn left">←</button>
+    <button onclick="nextImage()" class="arrow-btn right">→</button>
+  `;
 
   const img = document.createElement('img');
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
   img.onerror = () => {
-    // Wrap around if we went too far
     if (currentImageIndex > 1) {
-      currentImageIndex = 1;        // went past the end → back to first
+      currentImageIndex = 1;
     } else {
-      currentImageIndex = 20;       // went before 1 → try a high number so it wraps to last image
+      currentImageIndex = 20;
     }
     showCurrentImage();
   };
@@ -109,7 +107,7 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = 20; // high number to trigger wrap to last image
+  if (currentImageIndex < 1) currentImageIndex = 20;
   showCurrentImage();
 }
 
