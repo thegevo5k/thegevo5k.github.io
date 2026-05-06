@@ -136,6 +136,7 @@ h2 {
 .slideshow-container {
   position: relative;
   width: 100%;
+  min-height: 300px;
   margin-bottom: 20px;
 }
 
@@ -146,7 +147,15 @@ h2 {
   object-fit: contain;
   border-radius: 10px;
   background: #111;
-  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.fade-in {
+  opacity: 1;
 }
 
 /* Footer */
