@@ -44,6 +44,7 @@ function renderSection(containerId, items) {
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
+let maxImages = 0;
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -57,6 +58,7 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
+  maxImages = 0;
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
@@ -79,19 +81,32 @@ async function showItemModal(id) {
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
   
-  container.innerHTML = `
-    <button onclick="prevImage()" class="arrow-btn left">←</button>
-    <button onclick="nextImage()" class="arrow-btn right">→</button>
-  `;
+  // Clear container
+  container.innerHTML = '';
+
+  // Add arrows only if needed
+  let arrows = '';
+  if (currentImageIndex > 1) {
+    arrows += `<button onclick="prevImage()" class="arrow-btn left">←</button>`;
+  }
+  if (maxImages === 0 || currentImageIndex < maxImages) {
+    arrows += `<button onclick="nextImage()" class="arrow-btn right">→</button>`;
+  }
+
+  container.innerHTML = arrows;
 
   const img = document.createElement('img');
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
+  img.onload = () => {
+    if (currentImageIndex > maxImages) maxImages = currentImageIndex;
+  };
+
   img.onerror = () => {
-    // If we go past the last image, wrap to 1
     if (currentImageIndex > 1) {
-      currentImageIndex = 1;
+      maxImages = currentImageIndex - 1;
+      currentImageIndex = maxImages;
       showCurrentImage();
     }
   };
@@ -105,11 +120,10 @@ function nextImage() {
 }
 
 function prevImage() {
-  currentImageIndex--;
-  if (currentImageIndex < 1) {
-    currentImageIndex = 12;   // Try a high number — onerror will catch it and wrap to last image
+  if (currentImageIndex > 1) {
+    currentImageIndex--;
+    showCurrentImage();
   }
-  showCurrentImage();
 }
 
 function closeModal() {
