@@ -44,7 +44,6 @@ function renderSection(containerId, items) {
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
-let totalImages = 1;   // We'll detect this dynamically
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -82,14 +81,21 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
+  container.innerHTML = `
+    <button onclick="prevImage()" class="arrow-btn left">←</button>
+    <button onclick="nextImage()" class="arrow-btn right">→</button>
+  `;   // Clear previous images
+
   const img = document.createElement('img');
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
   img.onerror = () => {
-    totalImages = currentImageIndex - 1;
-    if (totalImages < 1) totalImages = 1;
-    if (currentImageIndex > totalImages) currentImageIndex = totalImages;
+    // No more images - wrap around
+    if (currentImageIndex > 1) {
+      currentImageIndex = 1;
+      showCurrentImage();
+    }
   };
   
   container.appendChild(img);
@@ -102,7 +108,7 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = 999; // large number so it will hit onerror and reset
+  if (currentImageIndex < 1) currentImageIndex = 20; // large number so it will wrap on error
   showCurrentImage();
 }
 
