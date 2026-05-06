@@ -59,17 +59,20 @@ h2 {
 
 .download-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 380px));
+  gap: 2rem;
+  margin-top: 1.5rem;
+  justify-content: center;           /* Centers single or multiple cards */
+  padding: 0 20px;
 }
 
 .download-item {
   background: #1f1f1f;
   border-radius: 12px;
-  padding: 1.2rem;
+  padding: 1.4rem;
   transition: all 0.3s;
-  overflow: hidden;
+  max-width: 380px;                  /* Prevents stretching */
+  margin: 0 auto;                    /* Extra centering safety */
 }
 
 .download-item:hover {
