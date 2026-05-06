@@ -44,6 +44,7 @@ function renderSection(containerId, items) {
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
+let maxImages = 0;   // Will be detected automatically
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -57,6 +58,7 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
+  maxImages = 0; // reset
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
@@ -78,7 +80,6 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -88,13 +89,16 @@ function showCurrentImage() {
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
+  img.onload = () => {
+    if (currentImageIndex > maxImages) maxImages = currentImageIndex;
+  };
+
   img.onerror = () => {
     if (currentImageIndex > 1) {
-      currentImageIndex = 1;
-    } else {
-      currentImageIndex = 20;
+      maxImages = currentImageIndex - 1;
+      currentImageIndex = maxImages;   // go to last image
+      showCurrentImage();
     }
-    showCurrentImage();
   };
   
   container.appendChild(img);
@@ -107,7 +111,9 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = 20;
+  if (currentImageIndex < 1) {
+    currentImageIndex = maxImages || 20;   // go to last known image
+  }
   showCurrentImage();
 }
 
