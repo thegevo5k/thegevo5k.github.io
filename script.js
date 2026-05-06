@@ -1,4 +1,4 @@
-// script.js[cite: 6]
+// script.js
 async function loadDownloads() {
   try {
     const timestamp = new Date().getTime();
@@ -58,18 +58,17 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
-  // Use the imageCount from downloads.json[cite: 4]
-  maxImages = item.imageCount || 1; 
+  maxImages = item.imageCount || 1; // Uses imageCount from downloads.json[cite: 4]
 
-  // Logic to handle "#" as Unavailable[cite: 4, 6]
+  // Conditional logic for the download button[cite: 4, 6]
   const downloadButton = item.download_url === "#" 
     ? `<span class="btn-small" style="background:#444; color:#888; cursor:not-allowed; font-size:1.1rem; padding:16px 32px;">Unavailable</span>`
     : `<a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>`;
 
+  // Removed the extra <span> close button from this template
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
       <h2>${item.name}</h2>
-      <span class="close" onclick="closeModal()">×</span>
     </div>
     
     <div class="slideshow-container" id="slideshow"></div>
@@ -86,6 +85,7 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
+  
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -105,18 +105,16 @@ function showCurrentImage() {
 
 function nextImage() {
   currentImageIndex++;
-  // Cycle back to first image[cite: 6]
   if (currentImageIndex > maxImages) {
-    currentImageIndex = 1;
+    currentImageIndex = 1; // Cycles back to first image[cite: 6]
   }
   showCurrentImage();
 }
 
 function prevImage() {
   currentImageIndex--;
-  // Cycle to last image[cite: 6]
   if (currentImageIndex < 1) {
-    currentImageIndex = maxImages;
+    currentImageIndex = maxImages; // Cycles back to last image[cite: 6]
   }
   showCurrentImage();
 }
