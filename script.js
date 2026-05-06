@@ -42,7 +42,8 @@ function renderSection(containerId, items) {
 }
 
 let allDownloads = [];
-let currentSlideInterval = null;
+let currentImageIndex = 1;
+let currentSKU = '';
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -54,9 +55,22 @@ async function showItemModal(id) {
   const item = allDownloads.find(i => i.id === id);
   if (!item) return;
 
+  currentSKU = item.sku;
+  currentImageIndex = 1;
+
   document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <h2>${item.name}</h2>
+      <span class="close" onclick="closeModal()">×</span>
+    </div>
+    
     <div class="slideshow-container" id="slideshow"></div>
-    <h2>${item.name}</h2>
+    
+    <div class="modal-controls">
+      <button onclick="prevImage()" class="arrow-btn">←</button>
+      <button onclick="nextImage()" class="arrow-btn">→</button>
+    </div>
+
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
     <p>${item.description}</p>
@@ -64,50 +78,41 @@ async function showItemModal(id) {
   `;
 
   document.getElementById('itemModal').style.display = 'block';
-  startSlideshow(item.sku);
+  showCurrentImage();
 }
 
-function startSlideshow(sku) {
+function showCurrentImage() {
   const container = document.getElementById('slideshow');
   container.innerHTML = '';
-  let currentIndex = 1;
-  let hasValidImage = false;
-
-  const showImage = (index) => {
-    const imgPath = getImagePath(sku, index);
-    const img = document.createElement('img');
-    img.src = imgPath;
-    img.className = 'modal-main-image fade-in';
-
-    img.onload = () => {
-      hasValidImage = true;
-      container.innerHTML = '';
-      container.appendChild(img);
-    };
-
-    img.onerror = () => {
-      if (!hasValidImage && index === 1) {
-        container.innerHTML = `<p style="color:#ff6666; text-align:center;">No images available</p>`;
-      }
-      // Stop when we run out of images
-      if (currentSlideInterval) clearInterval(currentSlideInterval);
-    };
+  
+  const img = document.createElement('img');
+  img.src = getImagePath(currentSKU, currentImageIndex);
+  img.className = 'modal-main-image fade-in';
+  
+  img.onerror = () => {
+    if (currentImageIndex > 1) {
+      currentImageIndex--;
+      showCurrentImage();
+    }
   };
+  
+  container.appendChild(img);
+}
 
-  // Show first image
-  showImage(currentIndex);
+function nextImage() {
+  currentImageIndex++;
+  showCurrentImage();
+}
 
-  // Start cycling every 3 seconds
-  if (currentSlideInterval) clearInterval(currentSlideInterval);
-  currentSlideInterval = setInterval(() => {
-    currentIndex++;
-    showImage(currentIndex);
-  }, 3000);
+function prevImage() {
+  if (currentImageIndex > 1) {
+    currentImageIndex--;
+    showCurrentImage();
+  }
 }
 
 function closeModal() {
   document.getElementById('itemModal').style.display = 'none';
-  if (currentSlideInterval) clearInterval(currentSlideInterval);
 }
 
 window.onclick = function(event) {
