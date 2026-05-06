@@ -133,15 +133,20 @@ h2 {
   color: #aaa;
 }
 
-/* Modal image */
+.slideshow-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
 .modal-main-image {
   width: 100%;
   height: auto;
   max-height: 55vh;
   object-fit: contain;
   border-radius: 10px;
-  margin-bottom: 15px;
   background: #111;
+  display: block;
 }
 
 /* Footer */

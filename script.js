@@ -16,8 +16,8 @@ async function loadDownloads() {
   }
 }
 
-function getImagePath(sku, number = "01") {
-  return `images/${sku}/${number}.png`;
+function getImagePath(sku, number) {
+  return `images/${sku}/${number.toString().padStart(2, '0')}.png`;
 }
 
 function renderSection(containerId, items) {
@@ -30,19 +30,20 @@ function renderSection(containerId, items) {
     const div = document.createElement('div');
     div.className = 'download-item';
     
-    const coverSrc = getImagePath(item.sku, "01");
+    const coverSrc = getImagePath(item.sku, 1);
     
     div.innerHTML = `
       <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
       <h3>${item.name}</h3>
       <p>${item.short}</p>
-      <button onclick="showItemModal(${item.id})" class="btn-small">Download</button>
+      <button onclick="showItemModal(${item.id})" class="btn-small">View & Download</button>
     `;
     container.appendChild(div);
   });
 }
 
 let allDownloads = [];
+let currentSlideInterval = null;
 
 async function showItemModal(id) {
   if (allDownloads.length === 0) {
@@ -54,10 +55,10 @@ async function showItemModal(id) {
   const item = allDownloads.find(i => i.id === id);
   if (!item) return;
 
-  const mainImage = getImagePath(item.sku, "01");
+  let imagesHTML = `<div class="slideshow-container" id="slideshow"></div>`;
 
   document.getElementById('modal-content').innerHTML = `
-    <img src="${mainImage}" alt="${item.name}" class="modal-main-image" onerror="this.style.display='none'">
+    ${imagesHTML}
     <h2>${item.name}</h2>
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
@@ -66,10 +67,54 @@ async function showItemModal(id) {
   `;
 
   document.getElementById('itemModal').style.display = 'block';
+
+  // Start slideshow
+  startSlideshow(item.sku);
+}
+
+function startSlideshow(sku) {
+  const container = document.getElementById('slideshow');
+  container.innerHTML = '';
+  
+  let index = 1;
+  let imagesLoaded = [];
+
+  const nextImage = () => {
+    const imgPath = getImagePath(sku, index);
+    const img = document.createElement('img');
+    img.src = imgPath;
+    img.className = 'modal-main-image';
+    img.style.display = 'none';
+
+    img.onload = () => {
+      container.innerHTML = '';
+      container.appendChild(img);
+      img.style.display = 'block';
+      index++;
+    };
+
+    img.onerror = () => {
+      // No more images
+      if (imagesLoaded.length === 0) {
+        container.innerHTML = `<img src="${getImagePath(sku, 1)}" class="modal-main-image">`;
+      }
+      clearInterval(currentSlideInterval);
+    };
+  };
+
+  // Initial image
+  nextImage();
+
+  // Autoplay every 4 seconds
+  if (currentSlideInterval) clearInterval(currentSlideInterval);
+  currentSlideInterval = setInterval(() => {
+    nextImage();
+  }, 4000);
 }
 
 function closeModal() {
   document.getElementById('itemModal').style.display = 'none';
+  if (currentSlideInterval) clearInterval(currentSlideInterval);
 }
 
 window.onclick = function(event) {
