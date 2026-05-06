@@ -71,26 +71,38 @@ function startSlideshow(sku) {
   const container = document.getElementById('slideshow');
   container.innerHTML = '';
   let currentIndex = 1;
+  let hasValidImage = false;
 
-  const showNextImage = () => {
+  const showImage = (index) => {
+    const imgPath = getImagePath(sku, index);
     const img = document.createElement('img');
-    img.src = getImagePath(sku, currentIndex);
+    img.src = imgPath;
     img.className = 'modal-main-image fade-in';
-    
-    // Remove old images
-    container.innerHTML = '';
-    container.appendChild(img);
 
-    currentIndex++;
+    img.onload = () => {
+      hasValidImage = true;
+      container.innerHTML = '';
+      container.appendChild(img);
+    };
+
+    img.onerror = () => {
+      if (!hasValidImage && index === 1) {
+        container.innerHTML = `<p style="color:#ff6666; text-align:center;">No images available</p>`;
+      }
+      // Stop when we run out of images
+      if (currentSlideInterval) clearInterval(currentSlideInterval);
+    };
   };
 
-  // Start the slideshow
-  showNextImage();
-  
+  // Show first image
+  showImage(currentIndex);
+
+  // Start cycling every 3 seconds
   if (currentSlideInterval) clearInterval(currentSlideInterval);
   currentSlideInterval = setInterval(() => {
-    showNextImage();
-  }, 3000); // 3 seconds
+    currentIndex++;
+    showImage(currentIndex);
+  }, 3000);
 }
 
 function closeModal() {
