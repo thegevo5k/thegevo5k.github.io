@@ -17,7 +17,7 @@ async function loadDownloads() {
 }
 
 function getImagePath(sku, number) {
-  return `images/${sku}/${number.toString().padStart(2, '0')}.png`;
+  return `images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
 }
 
 function renderSection(containerId, items) {
