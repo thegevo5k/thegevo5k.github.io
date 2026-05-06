@@ -58,17 +58,18 @@ async function showItemModal(id) {
 
   currentSKU = item.sku;
   currentImageIndex = 1;
-  maxImages = item.imageCount || 1; // Uses imageCount from downloads.json[cite: 4]
+  maxImages = item.imageCount || 1; //[cite: 4]
 
-  // Conditional logic for the download button[cite: 4, 6]
+  // Handle the download link logic[cite: 4, 6]
   const downloadButton = item.download_url === "#" 
     ? `<span class="btn-small" style="background:#444; color:#888; cursor:not-allowed; font-size:1.1rem; padding:16px 32px;">Unavailable</span>`
     : `<a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>`;
 
-  // Removed the extra <span> close button from this template
+  // Restore the JavaScript close button[cite: 6]
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
       <h2>${item.name}</h2>
+      <span class="close" onclick="closeModal()">×</span>
     </div>
     
     <div class="slideshow-container" id="slideshow"></div>
@@ -85,7 +86,6 @@ async function showItemModal(id) {
 
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
-  
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -106,7 +106,7 @@ function showCurrentImage() {
 function nextImage() {
   currentImageIndex++;
   if (currentImageIndex > maxImages) {
-    currentImageIndex = 1; // Cycles back to first image[cite: 6]
+    currentImageIndex = 1; // Cycle forward[cite: 6]
   }
   showCurrentImage();
 }
@@ -114,7 +114,7 @@ function nextImage() {
 function prevImage() {
   currentImageIndex--;
   if (currentImageIndex < 1) {
-    currentImageIndex = maxImages; // Cycles back to last image[cite: 6]
+    currentImageIndex = maxImages; // Cycle backward[cite: 6]
   }
   showCurrentImage();
 }
