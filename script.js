@@ -41,14 +41,13 @@ function renderSection(containerId, items) {
   });
 }
 
-// ... keep loadDownloads, getImagePath, and renderSection as they were ...
-
 let allDownloads = [];
 let currentSKU = '';
 let currentImageIndex = 1;
 let maxImages = 0;
 
 async function showItemModal(id) {
+  // Ensure we have the full download list to reference
   if (allDownloads.length === 0) {
     const timestamp = new Date().getTime();
     const res = await fetch(`downloads.json?t=${timestamp}`);
@@ -58,21 +57,23 @@ async function showItemModal(id) {
   const item = allDownloads.find(i => i.id === id);
   if (!item) return;
 
-  // Set the global state for the slideshow
+  // Set state based on the selected item and its new imageCount parameter
   currentSKU = item.sku;
   currentImageIndex = 1;
-  maxImages = item.imageCount || 1; // Default to 1 if missing
+  maxImages = item.imageCount || 1; // Uses the new parameter from your JSON[cite: 2]
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
       <h2>${item.name}</h2>
       <span class="close" onclick="closeModal()">×</span>
     </div>
+    
     <div class="slideshow-container" id="slideshow"></div>
+
     <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
     <p><strong>Compatibility:</strong> ${item.compatibility}</p>
     <p>${item.description}</p>
-    <a href="${item.download_url}" target="_blank" class="btn-small">Download</a>
+    <a href="${item.download_url}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>
   `;
 
   document.getElementById('itemModal').style.display = 'block';
@@ -82,7 +83,7 @@ async function showItemModal(id) {
 function showCurrentImage() {
   const container = document.getElementById('slideshow');
   
-  // Clear and add buttons
+  // Re-render buttons and image
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
@@ -92,13 +93,18 @@ function showCurrentImage() {
   img.src = getImagePath(currentSKU, currentImageIndex);
   img.className = 'modal-main-image fade-in';
   
-  // We no longer need the complex img.onerror logic[cite: 1]
+  // Error fallback: if an image fails to load, just hide it or show a placeholder[cite: 3]
+  img.onerror = () => {
+    img.alt = "Image not found";
+    img.style.display = 'none';
+  };
+  
   container.appendChild(img);
 }
 
 function nextImage() {
   currentImageIndex++;
-  // If we go past the last image, go back to the first[cite: 1]
+  // Cycle back to the first image if we exceed maxImages[cite: 3]
   if (currentImageIndex > maxImages) {
     currentImageIndex = 1;
   }
@@ -107,11 +113,20 @@ function nextImage() {
 
 function prevImage() {
   currentImageIndex--;
-  // If we go before the first image, go to the last[cite: 1]
+  // Cycle to the last image if we go below 1[cite: 3]
   if (currentImageIndex < 1) {
     currentImageIndex = maxImages;
   }
   showCurrentImage();
 }
 
-// ... keep closeModal and window click events as they were ...
+function closeModal() {
+  document.getElementById('itemModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('itemModal');
+  if (event.target === modal) closeModal();
+};
+
+window.onload = loadDownloads;
