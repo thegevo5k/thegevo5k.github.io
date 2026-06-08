@@ -17,7 +17,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* Core Layout Elements - Built to accommodate full viewport modes */
         html, body { height: 100%; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
         body { padding: 20px; display: flex; flex-direction: column; }
         
@@ -26,17 +25,14 @@
         h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; }
         .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 15px; }
 
-        /* Navigation Style */
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
         .nav-btn { flex: 1; padding: 14px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; }
         .nav-btn.active { background-color: var(--accent-color); border-color: var(--accent-color); }
 
-        /* Countdown Style */
         .countdown-container { background-color: #1a1a1a; border: 1px solid #3a3a3a; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
         .countdown-time { font-size: 1.6rem; color: var(--warning); font-family: monospace; margin-top: 4px; }
         .countdown-finished { font-size: 1.6rem; color: var(--success); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 
-        /* Pool Tracker */
         .donation-banner { background: linear-gradient(135deg, #e60012, #99000b); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         .donation-banner h2 { font-size: 1.2rem; text-transform: uppercase; opacity: 0.9; }
         .donation-total { font-size: 3rem; font-weight: 800; margin-top: 2px; }
@@ -44,12 +40,14 @@
         .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #2a2a2a; }
         .card h3 { font-size: 1.3rem; border-bottom: 2px solid #2a2a2a; padding-bottom: 8px; }
 
-        /* Registration Form Layout styling */
         #registrationSection { flex-shrink: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.95rem; }
         input[type="text"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
+
+        .tier-badge-container { display: flex; align-items: center; background-color: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; font-weight: bold; }
+        .tier-label-value { margin-left: auto; color: var(--warning); font-size: 1.05rem; }
 
         .search-box { margin-bottom: 12px; background-color: #1a1a1a; border-color: #2a2a2a; flex-shrink: 0; }
 
@@ -65,19 +63,17 @@
         .btn-danger.confirm-state { background-color: #ff0000; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { opacity: 0.8; } to { opacity: 1; } }
 
-        /* Dynamic Height Leaderboard Card Structure */
         #leaderboardSection { 
             display: flex; 
             flex-direction: column; 
             margin-bottom: 0;
         }
         
-        /* The container handles internal scrolling explicitly */
         #leaderboard-container { 
             overflow-y: auto; 
             flex-grow: 1;
             padding-right: 4px;
-            -webkit-overflow-scrolling: touch; /* Butter smooth scrolling momentum on iOS/iPadOS hardware */
+            -webkit-overflow-scrolling: touch; 
         }
 
         .leaderboard-item { background: #1a1a1a; padding: 14px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #2a2a2a; }
@@ -94,19 +90,18 @@
 
         .hidden { display: none !important; }
 
-        /* SPECIAL VIEWPORT CONTROLS FOR DEDICATED LEADERBOARD DISPLAY */
         body.kiosk-mode {
             height: 100vh;
             overflow: hidden;
             padding: 15px;
         }
         body.kiosk-mode .container {
-            max-width: 100%; /* Spreads dynamic widths effectively across the tablet viewport */
+            max-width: 100%; 
             height: 100%;
         }
         body.kiosk-mode #leaderboardSection {
             flex-grow: 1;
-            min-height: 0; /* Prevents card from bursting tracking limits */
+            min-height: 0; 
         }
     </style>
 </head>
@@ -135,19 +130,23 @@
 
     <!-- MAIN REGISTRATION FORM -->
     <div class="card view-section" id="registrationSection">
-        <h3>New Run / Buy-In Registration</h3>
+        <h3>New Run Registration</h3>
         <form id="entryForm">
-            <div class="form-group">
-                <label for="entryType">Entry Type</label>
-                <select id="entryType" onchange="handleTypeChange()">
-                    <option value="Initial">Initial Buy-In ($5 - 3 Attempts)</option>
-                    <option value="Retry">Retry ($2 - 3 Attempts)</option>
-                </select>
-            </div>
+            <!-- Hidden payload inputs replaced the visual layout dropdown completely -->
+            <input type="hidden" id="entryType" value="Initial">
+            
             <div class="form-group">
                 <label for="playerName">Player Name</label>
-                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off">
+                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()">
             </div>
+
+            <div class="form-group">
+                <div class="tier-badge-container">
+                    <span>Assigned Registration Tier</span>
+                    <span id="tierLabel" class="tier-label-value">Initial Buy-In ($5)</span>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Enter Times (Leave blank if running later)</label>
                 
@@ -180,11 +179,10 @@
         </form>
     </div>
 
-    <!-- LIVE LEADERBOARD (Self-Sustaining Grid Container) -->
+    <!-- LIVE LEADERBOARD -->
     <div class="card view-section" id="leaderboardSection">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink:0;">
+        <div style="margin-bottom: 12px; flex-shrink: 0;">
             <h3 id="board-title">Live Leaderboard & Log</h3>
-            <button class="btn-secondary" onclick="fetchData()" style="width: auto; padding: 8px 14px; margin: 0; font-size: 0.85rem;">🔄 Refresh</button>
         </div>
         
         <input type="text" id="searchDriver" class="search-box" placeholder="🔍 Search driver name..." onkeyup="filterLeaderboard()">
@@ -244,8 +242,8 @@
     let deleteTimeouts = {};
     let currentView = 'main';
     let isEventFinished = false;
+    let registeredPlayersCache = new Set(); 
 
-    // Countdown target configuration (2026-06-09 at 23:00 CDT)
     const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
 
     function updateCountdown() {
@@ -286,15 +284,19 @@
         if (view === 'leaderboard') {
             document.body.classList.add('kiosk-mode');
             document.getElementById('registrationSection').classList.add('hidden');
+            document.getElementById('searchDriver').classList.add('hidden');
             document.getElementById('board-title').innerText = "Championship Leaderboard";
             document.getElementById('leaderboardSection').style.flexGrow = '1';
         } else {
             document.body.classList.remove('kiosk-mode');
+            document.getElementById('searchDriver').classList.remove('hidden');
             document.getElementById('board-title').innerText = "Live Leaderboard & Log";
             if (!isEventFinished) {
                 document.getElementById('registrationSection').classList.remove('hidden');
             }
         }
+        
+        document.getElementById('searchDriver').value = "";
         fetchData();
     }
 
@@ -325,10 +327,25 @@
     setupInputFilters('e2m', 'e2s', 'e2ms');
     setupInputFilters('e3m', 'e3s', 'e3ms');
 
-    function handleTypeChange() {
-        const type = document.getElementById('entryType').value;
-        if (!isEventFinished) {
-            document.getElementById('submitBtn').innerText = type === 'Initial' ? 'Submit Buy-In ($5)' : 'Submit Retry ($2)';
+    // Automatically assigns tier and changes button styling/text based on local cache matching
+    function evaluatePlayerTier() {
+        const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
+        const typeField = document.getElementById('entryType');
+        const tierLabel = document.getElementById('tierLabel');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (isEventFinished) return;
+
+        if (nameInput && registeredPlayersCache.has(nameInput)) {
+            typeField.value = 'Retry';
+            tierLabel.innerText = 'Retry ($2)';
+            tierLabel.style.color = 'var(--warning)';
+            submitBtn.innerText = 'Submit Retry ($2)';
+        } else {
+            typeField.value = 'Initial';
+            tierLabel.innerText = 'Initial Buy-In ($5)';
+            tierLabel.style.color = 'var(--success)';
+            submitBtn.innerText = 'Submit Buy-In ($5)';
         }
     }
 
@@ -358,6 +375,10 @@
             alert("The registration period has ended!");
             return;
         }
+
+        const currentName = document.getElementById('playerName').value.trim();
+        const currentType = document.getElementById('entryType').value;
+
         const btn = document.getElementById('submitBtn');
         btn.disabled = true; btn.innerText = "Saving...";
 
@@ -365,20 +386,20 @@
         let t2 = parseTimeToMs(document.getElementById('t2m').value, document.getElementById('t2s').value, document.getElementById('t2ms').value);
         let t3 = parseTimeToMs(document.getElementById('t3m').value, document.getElementById('t3s').value, document.getElementById('t3ms').value);
 
-        const isInitial = document.getElementById('entryType').value === 'Initial';
+        const isInitial = currentType === 'Initial';
 
         fetch(API_URL, {
             method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 action: "add",
-                name: document.getElementById('playerName').value.trim(),
-                type: document.getElementById('entryType').value,
+                name: currentName,
+                type: currentType,
                 amount: isInitial ? 5 : 2,
                 time1: t1 ? t1.displayStr : "", time2: t2 ? t2.displayStr : "", time3: t3 ? t3.displayStr : ""
             })
         }).then(() => {
             document.getElementById('entryForm').reset();
-            handleTypeChange();
+            evaluatePlayerTier(); // Resets back to Initial view values safely
             btn.disabled = false;
             fetchData();
         }).catch(() => { alert("Error saving."); btn.disabled = false; });
@@ -386,12 +407,20 @@
 
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
-            let total = 0, itemArray = [];
-            
+            let total = 0;
+            let rawProcessedItems = [];
+            let newPlayersCache = new Set();
+
             data.forEach(entry => {
                 total += parseFloat(entry.amount || 0);
-                let bestMs = Infinity, bestDisplay = "—";
+                
+                if (entry.type === 'Initial' && entry.name) {
+                    newPlayersCache.add(entry.name.trim().toLowerCase());
+                }
+
                 let runCount = 0;
+                let bestMs = Infinity;
+                let bestDisplay = "—";
 
                 [entry.time1, entry.time2, entry.time3].forEach(str => {
                     if (str && str.includes(':')) {
@@ -402,17 +431,39 @@
                     }
                 });
 
-                let attemptsLeft = 3 - runCount;
-                itemArray.push({ ...entry, bestMs: bestMs, bestDisplay: bestDisplay, attemptsLeft: attemptsLeft });
+                let currentAttemptsLeft = 3 - runCount;
+                rawProcessedItems.push({ ...entry, bestMs: bestMs, bestDisplay: bestDisplay, attemptsLeft: currentAttemptsLeft });
             });
 
+            registeredPlayersCache = newPlayersCache;
+            evaluatePlayerTier(); // Keep current text tier updated with incoming background data updates
             document.getElementById('donation-total').innerText = `$${total}`;
-            itemArray.sort((a, b) => a.bestMs - b.bestMs);
+            
+            let finalRenderList = [];
+
+            if (currentView === 'leaderboard') {
+                let uniquePlayers = {};
+                rawProcessedItems.forEach(item => {
+                    let normalizedName = item.name.trim().toLowerCase();
+                    if (!uniquePlayers[normalizedName]) {
+                        uniquePlayers[normalizedName] = item;
+                    } else {
+                        if (item.bestMs < uniquePlayers[normalizedName].bestMs) {
+                            uniquePlayers[normalizedName] = item; 
+                        }
+                    }
+                });
+                finalRenderList = Object.values(uniquePlayers);
+            } else {
+                finalRenderList = rawProcessedItems;
+            }
+
+            finalRenderList.sort((a, b) => a.bestMs - b.bestMs);
 
             const container = document.getElementById('leaderboard-container');
-            container.innerHTML = itemArray.length ? "" : "<p style='color:var(--text-muted);text-align:center;'>No registrations yet.</p>";
+            container.innerHTML = finalRenderList.length ? "" : "<p style='color:var(--text-muted);text-align:center;'>No registrations yet.</p>";
             
-            itemArray.forEach((p, idx) => {
+            finalRenderList.forEach((p, idx) => {
                 let rank = idx + 1;
                 let emoji = "";
                 if (p.bestMs !== Infinity) {
@@ -423,25 +474,29 @@
                     rank = "—";
                 }
 
-                let attemptsBadge = p.attemptsLeft > 0 
-                    ? `<span class="retries-left">${p.attemptsLeft} left</span>` 
-                    : ``;
-
+                let nameSubtitle = currentView === 'leaderboard' ? '' : ` <small style="color:var(--text-muted); font-size:0.8rem;">(${p.type})</small>`;
                 let actionRowDisplay = currentView === 'leaderboard' ? 'hidden' : '';
+                
+                let metaRowContent = '';
+                if (currentView !== 'leaderboard') {
+                    let attemptsBadge = p.attemptsLeft > 0 ? `<span class="retries-left">${p.attemptsLeft} left</span>` : ``;
+                    metaRowContent = `
+                        <div class="log-meta-row">
+                            <div class="all-times">Runs: [${p.time1 || '—'}] [${p.time2 || '—'}] [${p.time3 || '—'}]</div>
+                            ${attemptsBadge}
+                        </div>`;
+                }
 
                 container.innerHTML += `
                     <div class="leaderboard-item" data-name="${p.name.toLowerCase()}">
                         <div class="lb-main">
                             <div class="player-info">
                                 <span style="width:24px; color:var(--text-muted); font-weight:bold;">${rank}</span>
-                                <span style="font-weight:500; font-size:1.1rem;" class="driver-display-name">${emoji}${p.name} <small style="color:var(--text-muted); font-size:0.8rem;">(${p.type})</small></span>
+                                <span style="font-weight:500; font-size:1.1rem;" class="driver-display-name">${emoji}${p.name}${nameSubtitle}</span>
                             </div>
                             <div class="player-time">${p.bestDisplay}</div>
                         </div>
-                        <div class="log-meta-row">
-                            <div class="all-times">Runs: [${p.time1 || '—'}] [${p.time2 || '—'}] [${p.time3 || '—'}]</div>
-                            ${attemptsBadge}
-                        </div>
+                        ${metaRowContent}
                         <div class="inline-actions ${actionRowDisplay}">
                             <button class="btn-secondary" onclick="openEditModal(${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.time1}', '${p.time2}', '${p.time3}')">✏️ Edit</button>
                             <button class="btn-danger" onclick="deleteEntry(this, ${p.rowId}, '${p.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
@@ -478,7 +533,6 @@
         document.getElementById('editModal').classList.remove('hidden');
     }
 
-    // Modal Close Helper
     function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 
     function saveEdit() {
@@ -520,11 +574,10 @@
         }).then(() => { fetchData(); }).catch(() => { alert("Delete failed."); fetchData(); });
     }
 
-    // Initial Processing
     updateCountdown();
     setInterval(updateCountdown, 1000);
     fetchData();
-    setInterval(fetchData, 20000);
+    setInterval(fetchData, 10000);
 </script>
 </body>
 </html>
