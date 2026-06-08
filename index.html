@@ -53,7 +53,6 @@
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background-color: #3a3a3a; }
         
-        /* Inline Delete Styling & Animation */
         .btn-danger { background-color: #99000b; }
         .btn-danger.confirm-state {
             background-color: #ff0000;
@@ -97,7 +96,8 @@
             <div class="form-group">
                 <label for="entryType">Entry Type</label>
                 <select id="entryType" onchange="handleTypeChange()">
-                    <option value="Initial">Initial Buy-In ($3 - 3 Attempts)</option>
+                    <!-- Updated to $5 buy-in standard -->
+                    <option value="Initial">Initial Buy-In ($5 - 3 Attempts)</option>
                     <option value="Retry">Retry ($2 - 3 Attempts)</option>
                 </select>
             </div>
@@ -133,7 +133,8 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" id="submitBtn">Submit Buy-In ($3)</button>
+            <!-- Default updated placeholder button text -->
+            <button type="submit" id="submitBtn">Submit Buy-In ($5)</button>
         </form>
     </div>
 
@@ -144,7 +145,6 @@
             <button class="btn-secondary" onclick="fetchData()" style="width: auto; padding: 6px 12px; margin: 0; font-size: 0.8rem;">🔄 Refresh</button>
         </div>
         
-        <!-- Search Filter Box -->
         <input type="text" id="searchDriver" class="search-box" placeholder="🔍 Search driver name..." onkeyup="filterLeaderboard()">
         
         <div id="leaderboard-container"></div>
@@ -199,7 +199,6 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyhgfGvVaVHY2B4kAH1I6gMMR92eadEaUQ_04wLJpnNRVM8uD-JPazcdxLkHesN0Xwoyw/exec"; 
     
-    // Tracks active timeouts for inline delete buttons
     let deleteTimeouts = {};
 
     function setupInputFilters(mId, sId, msId) {
@@ -236,7 +235,8 @@
 
     function handleTypeChange() {
         const type = document.getElementById('entryType').value;
-        document.getElementById('submitBtn').innerText = type === 'Initial' ? 'Submit Buy-In ($3)' : 'Submit Retry ($2)';
+        // Dynamically mirrors updated $5 logic to interface
+        document.getElementById('submitBtn').innerText = type === 'Initial' ? 'Submit Buy-In ($5)' : 'Submit Retry ($2)';
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -268,13 +268,16 @@
         let t2 = parseTimeToMs(document.getElementById('t2m').value, document.getElementById('t2s').value, document.getElementById('t2ms').value);
         let t3 = parseTimeToMs(document.getElementById('t3m').value, document.getElementById('t3s').value, document.getElementById('t3ms').value);
 
+        const isInitial = document.getElementById('entryType').value === 'Initial';
+
         fetch(API_URL, {
             method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 action: "add",
                 name: document.getElementById('playerName').value.trim(),
                 type: document.getElementById('entryType').value,
-                amount: document.getElementById('entryType').value === 'Initial' ? 3 : 2,
+                // Assigns 5 dollars dynamically into sheet cells instead of historical value 3
+                amount: isInitial ? 5 : 2,
                 time1: t1 ? t1.displayStr : "", time2: t2 ? t2.displayStr : "", time3: t3 ? t3.displayStr : ""
             })
         }).then(() => {
@@ -348,7 +351,6 @@
                     </div>`;
             });
 
-            // Prevent refresh cycles from overriding active search filtering
             filterLeaderboard();
         });
     }
@@ -399,14 +401,12 @@
     }
 
     function deleteEntry(btn, rowId, name) {
-        // First click transforms the button to a dangerous-looking confirmation state
         if (!btn.classList.contains('confirm-state')) {
             btn.classList.add('confirm-state');
             btn.innerText = "⚠️ Confirm?";
             
             if(deleteTimeouts[rowId]) clearTimeout(deleteTimeouts[rowId]);
             
-            // Automatically reset back to a safe look if left unclicked for 4 seconds
             deleteTimeouts[rowId] = setTimeout(() => {
                 btn.classList.remove('confirm-state');
                 btn.innerText = "🗑️ Delete";
@@ -415,7 +415,6 @@
             return; 
         }
 
-        // Second click executes actual delete script request
         btn.disabled = true;
         btn.innerText = "Erasing...";
         
