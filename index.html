@@ -22,12 +22,16 @@
         
         .container { width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; flex-grow: 1; }
         
-        h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; }
         .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 15px; }
 
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
-        .nav-btn { flex: 1; padding: 14px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; }
+        /* Unified Navigation Tab Layout */
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; width: 100%; }
+        .nav-btn { flex: 1; padding: 14px 10px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .nav-btn.active { background-color: var(--accent-color); border-color: var(--accent-color); }
+        
+        /* Fixed Lock Button scaling to match navigation width */
+        .lock-btn { flex: 1; padding: 14px 10px; background-color: #333; border: 1px solid #444; border-radius: 8px; color: white; cursor: pointer; font-size: 1rem; font-weight: bold; text-align: center; }
 
         .countdown-container { background-color: #1a1a1a; border: 1px solid #3a3a3a; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
         .countdown-time { font-size: 1.6rem; color: var(--warning); font-family: monospace; margin-top: 4px; }
@@ -43,7 +47,7 @@
         #registrationSection { flex-shrink: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.95rem; }
-        input[type="text"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
 
         .tier-badge-container { display: flex; align-items: center; background-color: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; font-weight: bold; }
@@ -90,6 +94,23 @@
 
         .hidden { display: none !important; }
 
+        /* Custom Popup Backdrop Overlays */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 200;
+        }
+        .html-popup {
+            background-color: var(--card-bg); border: 2px solid #333; border-radius: 16px;
+            padding: 25px; width: 90%; max-width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .html-popup h3 { margin-bottom: 12px; font-size: 1.4rem; color: #fff; }
+        .html-popup p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px; }
+        .html-popup input { text-align: center; font-size: 1.5rem; letter-spacing: 6px; margin-bottom: 15px; font-family: monospace; }
+        .popup-actions { display: flex; gap: 10px; }
+        .popup-actions button { width: 50%; }
+
         body.kiosk-mode {
             height: 100vh;
             overflow: hidden;
@@ -108,16 +129,15 @@
 <body>
 
 <div class="container">
-    <h1 id="mainheader">MK8D Championship</h1>
+    <h1 id="mainheader" onclick="handleHeaderClick()">MK8D Championship</h1>
     <div class="sub-header" id="subheader">Fundraiser for Children's Miracle Network</div>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-        <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard Interface</button>
-        <button class="nav-btn" id="tabLeaderboard" onclick="switchView('leaderboard')">Leaderboard Only</button>
+    <div class="nav-tabs hidden" id="adminTabs">
+        <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard</button>
+        <button class="nav-btn" id="tabLeaderboard" onclick="switchView('leaderboard')">Leaderboard</button>
+        <button class="lock-btn" onclick="lockConsole()">Lock 🔒</button>
     </div>
 
-    <!-- Live Event Counter -->
     <div class="countdown-container">
         <div id="countdown-label">Time Remaining Until Close:</div>
         <div id="countdown-display" class="countdown-time">Calculating...</div>
@@ -128,11 +148,9 @@
         <div class="donation-total" id="donation-total">$0</div>
     </div>
 
-    <!-- MAIN REGISTRATION FORM -->
-    <div class="card view-section" id="registrationSection">
+    <div class="card view-section hidden" id="registrationSection">
         <h3>New Run Registration</h3>
         <form id="entryForm">
-            <!-- Hidden payload inputs replaced the visual layout dropdown completely -->
             <input type="hidden" id="entryType" value="Initial">
             
             <div class="form-group">
@@ -179,19 +197,29 @@
         </form>
     </div>
 
-    <!-- LIVE LEADERBOARD -->
     <div class="card view-section" id="leaderboardSection">
         <div style="margin-bottom: 12px; flex-shrink: 0;">
-            <h3 id="board-title">Live Leaderboard & Log</h3>
+            <h3 id="board-title">Championship Leaderboard</h3>
         </div>
         
-        <input type="text" id="searchDriver" class="search-box" placeholder="🔍 Search driver name..." onkeyup="filterLeaderboard()">
+        <input type="text" id="searchDriver" class="search-box hidden" placeholder="🔍 Search driver name..." onkeyup="filterLeaderboard()">
         
         <div id="leaderboard-container"></div>
     </div>
 </div>
 
-<!-- COMPACT EDIT MODAL -->
+<div id="pinModal" class="modal-backdrop hidden">
+    <div class="html-popup">
+        <h3>Console Locked</h3>
+        <p>Enter administration credentials to manage tournament parameters.</p>
+        <input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••">
+        <div class="popup-actions">
+            <button class="btn-secondary" onclick="closePinModal()">Cancel</button>
+            <button onclick="verifyAdminPin()">Unlock</button>
+        </div>
+    </div>
+</div>
+
 <div id="editModal" class="card hidden" style="position: fixed; top: 5%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; z-index: 100; box-shadow: 0 0 30px rgba(0,0,0,0.9); border-color: var(--accent-color); max-height: 90vh; overflow-y: auto;">
     <h3>Quick Edit Entry</h3>
     <input type="hidden" id="editRowId">
@@ -240,9 +268,13 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyhgfGvVaVHY2B4kAH1I6gMMR92eadEaUQ_04wLJpnNRVM8uD-JPazcdxLkHesN0Xwoyw/exec"; 
     
     let deleteTimeouts = {};
-    let currentView = 'main';
+    let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
+    
+    let headerClickCount = 0;
+    let headerClickTimeout;
+    let isUnlocked = false;
 
     const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
 
@@ -276,7 +308,72 @@
         return false;
     }
 
+    function handleHeaderClick() {
+        headerClickCount++;
+        clearTimeout(headerClickTimeout);
+        
+        if (headerClickCount >= 5) {
+            headerClickCount = 0;
+            openPinModal();
+        } else {
+            headerClickTimeout = setTimeout(() => { headerClickCount = 0; }, 2000);
+        }
+    }
+
+    function openPinModal() {
+        const modal = document.getElementById('pinModal');
+        const input = document.getElementById('pinInput');
+        input.value = "";
+        modal.classList.remove('hidden');
+        input.focus();
+
+        input.onkeydown = function(e) {
+            if (e.key === "Enter") verifyAdminPin();
+        };
+    }
+
+    function closePinModal() {
+        document.getElementById('pinModal').classList.add('hidden');
+        document.getElementById('pinInput').value = "";
+    }
+
+    function verifyAdminPin() {
+        const inputField = document.getElementById('pinInput');
+        if (inputField.value === "0039") {
+            isUnlocked = true;
+            sessionStorage.setItem("admin_authed", "true");
+            document.getElementById('adminTabs').classList.remove('hidden');
+            closePinModal();
+            switchView('main');
+        } else {
+            alert("Incorrect access signature PIN.");
+            inputField.value = "";
+            inputField.focus();
+        }
+    }
+
+    function lockConsole() {
+        isUnlocked = false;
+        sessionStorage.removeItem("admin_authed");
+        document.getElementById('adminTabs').classList.add('hidden');
+        switchView('leaderboard');
+    }
+
+    function checkSavedAuth() {
+        if (sessionStorage.getItem("admin_authed") === "true") {
+            isUnlocked = true;
+            document.getElementById('adminTabs').classList.remove('hidden');
+            switchView('main');
+        } else {
+            switchView('leaderboard');
+        }
+    }
+
     function switchView(view) {
+        if (!isUnlocked) {
+            view = 'leaderboard';
+        }
+
         currentView = view;
         document.getElementById('tabMain').classList.toggle('active', view === 'main');
         document.getElementById('tabLeaderboard').classList.toggle('active', view === 'leaderboard');
@@ -305,6 +402,8 @@
         const sInput = document.getElementById(sId);
         const msInput = document.getElementById(msId);
 
+        if (!mInput || !sInput || !msInput) return;
+
         [mInput, sInput, msInput].forEach(input => {
             input.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
@@ -327,14 +426,13 @@
     setupInputFilters('e2m', 'e2s', 'e2ms');
     setupInputFilters('e3m', 'e3s', 'e3ms');
 
-    // Automatically assigns tier and changes button styling/text based on local cache matching
     function evaluatePlayerTier() {
         const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
         const tierLabel = document.getElementById('tierLabel');
         const submitBtn = document.getElementById('submitBtn');
 
-        if (isEventFinished) return;
+        if (isEventFinished || !tierLabel || !submitBtn) return;
 
         if (nameInput && registeredPlayersCache.has(nameInput)) {
             typeField.value = 'Retry';
@@ -399,7 +497,7 @@
             })
         }).then(() => {
             document.getElementById('entryForm').reset();
-            evaluatePlayerTier(); // Resets back to Initial view values safely
+            evaluatePlayerTier(); 
             btn.disabled = false;
             fetchData();
         }).catch(() => { alert("Error saving."); btn.disabled = false; });
@@ -436,7 +534,7 @@
             });
 
             registeredPlayersCache = newPlayersCache;
-            evaluatePlayerTier(); // Keep current text tier updated with incoming background data updates
+            evaluatePlayerTier(); 
             document.getElementById('donation-total').innerText = `$${total}`;
             
             let finalRenderList = [];
@@ -474,11 +572,11 @@
                     rank = "—";
                 }
 
-                let nameSubtitle = currentView === 'leaderboard' ? '' : ` <small style="color:var(--text-muted); font-size:0.8rem;">(${p.type})</small>`;
-                let actionRowDisplay = currentView === 'leaderboard' ? 'hidden' : '';
+                let nameSubtitle = (!isUnlocked || currentView === 'leaderboard') ? '' : ` <small style="color:var(--text-muted); font-size:0.8rem;">(${p.type})</small>`;
+                let actionRowDisplay = (!isUnlocked || currentView === 'leaderboard') ? 'hidden' : '';
                 
                 let metaRowContent = '';
-                if (currentView !== 'leaderboard') {
+                if (isUnlocked && currentView !== 'leaderboard') {
                     let attemptsBadge = p.attemptsLeft > 0 ? `<span class="retries-left">${p.attemptsLeft} left</span>` : ``;
                     metaRowContent = `
                         <div class="log-meta-row">
@@ -504,11 +602,12 @@
                     </div>`;
             });
 
-            filterLeaderboard();
+            if (isUnlocked) filterLeaderboard();
         });
     }
 
     function filterLeaderboard() {
+        if (!isUnlocked) return;
         const query = document.getElementById('searchDriver').value.toLowerCase().trim();
         const items = document.getElementsByClassName('leaderboard-item');
         
@@ -523,6 +622,7 @@
     }
 
     function openEditModal(rowId, name, t1, t2, t3) {
+        if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
         document.getElementById('editName').value = name;
         
@@ -536,6 +636,7 @@
     function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 
     function saveEdit() {
+        if (!isUnlocked) return;
         let t1 = parseTimeToMs(document.getElementById('e1m').value, document.getElementById('e1s').value, document.getElementById('e1ms').value);
         let t2 = parseTimeToMs(document.getElementById('e2m').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
         let t3 = parseTimeToMs(document.getElementById('e3m').value, document.getElementById('e3s').value, document.getElementById('e3ms').value);
@@ -554,6 +655,7 @@
     }
 
     function deleteEntry(btn, rowId, name) {
+        if (!isUnlocked) return;
         if (!btn.classList.contains('confirm-state')) {
             btn.classList.add('confirm-state');
             btn.innerText = "⚠️ Confirm?";
@@ -576,7 +678,7 @@
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    fetchData();
+    checkSavedAuth(); 
     setInterval(fetchData, 10000);
 </script>
 </body>
