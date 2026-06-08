@@ -132,12 +132,14 @@
     <h1 id="mainheader" onclick="handleHeaderClick()">MK8D Championship</h1>
     <div class="sub-header" id="subheader">Fundraiser for Children's Miracle Network</div>
 
+    <!-- Unified Width Navigation Tabs -->
     <div class="nav-tabs hidden" id="adminTabs">
         <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard</button>
         <button class="nav-btn" id="tabLeaderboard" onclick="switchView('leaderboard')">Leaderboard</button>
         <button class="lock-btn" onclick="lockConsole()">Lock 🔒</button>
     </div>
 
+    <!-- Live Event Counter -->
     <div class="countdown-container">
         <div id="countdown-label">Time Remaining Until Close:</div>
         <div id="countdown-display" class="countdown-time">Calculating...</div>
@@ -148,6 +150,7 @@
         <div class="donation-total" id="donation-total">$0</div>
     </div>
 
+    <!-- MAIN REGISTRATION FORM -->
     <div class="card view-section hidden" id="registrationSection">
         <h3>New Run Registration</h3>
         <form id="entryForm">
@@ -197,6 +200,7 @@
         </form>
     </div>
 
+    <!-- LIVE LEADERBOARD -->
     <div class="card view-section" id="leaderboardSection">
         <div style="margin-bottom: 12px; flex-shrink: 0;">
             <h3 id="board-title">Championship Leaderboard</h3>
@@ -208,6 +212,7 @@
     </div>
 </div>
 
+<!-- NATIVE HTML PIN ACCESS POPUP -->
 <div id="pinModal" class="modal-backdrop hidden">
     <div class="html-popup">
         <h3>Console Locked</h3>
@@ -220,6 +225,7 @@
     </div>
 </div>
 
+<!-- COMPACT EDIT MODAL -->
 <div id="editModal" class="card hidden" style="position: fixed; top: 5%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; z-index: 100; box-shadow: 0 0 30px rgba(0,0,0,0.9); border-color: var(--accent-color); max-height: 90vh; overflow-y: auto;">
     <h3>Quick Edit Entry</h3>
     <input type="hidden" id="editRowId">
@@ -271,6 +277,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
+    let rawEntriesDataset = []; // Global store for local dependency checks
     
     let headerClickCount = 0;
     let headerClickTimeout;
@@ -505,6 +512,7 @@
 
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
+            rawEntriesDataset = data; // Cache globally to handle structural constraint calculations
             let total = 0;
             let rawProcessedItems = [];
             let newPlayersCache = new Set();
@@ -597,7 +605,7 @@
                         ${metaRowContent}
                         <div class="inline-actions ${actionRowDisplay}">
                             <button class="btn-secondary" onclick="openEditModal(${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.time1}', '${p.time2}', '${p.time3}')">✏️ Edit</button>
-                            <button class="btn-danger" onclick="deleteEntry(this, ${p.rowId}, '${p.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                            <button class="btn-danger" onclick="deleteEntry(this, ${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.type}')">🗑️ Delete</button>
                         </div>
                     </div>`;
             });
@@ -654,8 +662,29 @@
         }).then(() => { closeEditModal(); fetchData(); });
     }
 
-    function deleteEntry(btn, rowId, name) {
+    function deleteEntry(btn, rowId, name, type) {
         if (!isUnlocked) return;
+
+        // Failsafe validation block
+        if (type === 'Initial') {
+            const normalizedTarget = name.trim().toLowerCase();
+            const hasDependentRetries = rawEntriesDataset.some(entry => 
+                entry.name && 
+                entry.name.trim().toLowerCase() === normalizedTarget && 
+                entry.type === 'Retry'
+            );
+
+            if (hasDependentRetries) {
+                alert(`Operation blocked! "${name}" has logged retry entries. You must remove all associated retries before deleting their Initial registration.`);
+                // Reset visual confirmation system state if active
+                if (btn.classList.contains('confirm-state')) {
+                    btn.classList.remove('confirm-state');
+                    btn.innerText = "🗑️ Delete";
+                }
+                return;
+            }
+        }
+
         if (!btn.classList.contains('confirm-state')) {
             btn.classList.add('confirm-state');
             btn.innerText = "⚠️ Confirm?";
