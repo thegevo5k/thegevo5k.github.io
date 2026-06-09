@@ -672,9 +672,15 @@
     function openEditModal(rowId, name, t1, t2, t3, type) {
         if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
-        document.getElementById('editName').value = name;
         
-        // Storing the original name and tier to make smart context checks on save
+        // Target the save button inside the modal and ensure it is reset
+        const saveBtn = document.querySelector('#editModal button[onclick="saveEdit()"]');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Save Changes";
+        }
+
+        document.getElementById('editName').value = name;
         document.getElementById('editOriginalType').value = type;
         document.getElementById('editName').setAttribute('data-orig-name', name.trim().toLowerCase());
         
@@ -691,6 +697,12 @@
     function saveEdit() {
         if (!isUnlocked) return;
         
+        const saveBtn = document.querySelector('#editModal button[onclick="saveEdit()"]');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = "Saving...";
+        }
+        
         const targetName = document.getElementById('editName').value.trim();
         const targetNameNormalized = targetName.toLowerCase();
         const originalNameNormalized = document.getElementById('editName').getAttribute('data-orig-name');
@@ -699,9 +711,6 @@
         let finalType = originalType;
         let finalAmount = null; 
 
-        // REFINED FAILSAFE CONDITIONS:
-        // Only trigger an automatic $2 Retry swap if the user CHANGED the name field to a new string 
-        // AND that brand new name string matches a person who already has an active Initial account profile.
         if (targetNameNormalized !== originalNameNormalized && registeredPlayersCache.has(targetNameNormalized)) {
             if (originalType === 'Initial') {
                 finalType = 'Retry';
@@ -730,7 +739,16 @@
         fetch(API_URL, {
             method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatePayload)
-        }).then(() => { closeEditModal(); fetchData(); });
+        }).then(() => { 
+            closeEditModal(); 
+            fetchData(); 
+        }).catch(() => {
+            showErrorModal("Network Error", "Failed to process database edit.");
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "Save Changes";
+            }
+        });
     }
 
     // Delete Log Record Validation Module
