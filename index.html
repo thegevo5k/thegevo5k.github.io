@@ -56,7 +56,7 @@
         .card h3 { font-size: 1.3rem; border-bottom: 2px solid #2a2a2a; padding-bottom: 8px; }
 
         #registrationSection { flex-shrink: 0; }
-        .form-group { margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.95rem; }
         input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
@@ -169,7 +169,8 @@
             
             <div class="form-group">
                 <label for="playerName">Player Name</label>
-                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()">
+                <input type="text" id="playerName" list="existingDrivers" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()">
+                <datalist id="existingDrivers"></datalist>
             </div>
 
             <div class="form-group">
@@ -297,6 +298,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
+    let originalCasePlayersMap = {};
     let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
@@ -482,12 +484,35 @@
             tierLabel.innerText = 'Retry ($2)';
             tierLabel.style.color = 'var(--warning)';
             submitBtn.innerText = 'Submit Retry ($2)';
+            
+            // Auto-correct spelling case to match the original layout style smoothly if found
+            if (originalCasePlayersMap[nameInput] && document.getElementById('playerName').value !== originalCasePlayersMap[nameInput]) {
+                const inputElement = document.getElementById('playerName');
+                const start = inputElement.selectionStart;
+                const end = inputElement.selectionEnd;
+                inputElement.value = originalCasePlayersMap[nameInput];
+                inputElement.setSelectionRange(start, end);
+            }
         } else {
             typeField.value = 'Initial';
             tierLabel.innerText = 'Initial Buy-In ($5)';
             tierLabel.style.color = 'var(--success)';
             submitBtn.innerText = 'Submit Buy-In ($5)';
         }
+    }
+
+    function updateDatalistOptions() {
+        const datalist = document.getElementById('existingDrivers');
+        if (!datalist) return;
+        
+        // Sort names alphabetically for clean dropdown organization
+        const sortedNames = Object.values(originalCasePlayersMap).sort((a, b) => a.localeCompare(b));
+        
+        let optionsHtml = "";
+        sortedNames.forEach(name => {
+            optionsHtml += `<option value="${name}"></option>`;
+        });
+        datalist.innerHTML = optionsHtml;
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -554,12 +579,16 @@
             let total = 0;
             let rawProcessedItems = [];
             let newPlayersCache = new Set();
+            let newCaseMap = {};
 
             data.forEach(entry => {
                 total += parseFloat(entry.amount || 0);
                 
                 if (entry.type === 'Initial' && entry.name) {
-                    newPlayersCache.add(entry.name.trim().toLowerCase());
+                    const trimmedName = entry.name.trim();
+                    const lowerName = trimmedName.toLowerCase();
+                    newPlayersCache.add(lowerName);
+                    newCaseMap[lowerName] = trimmedName;
                 }
 
                 let runCount = 0;
@@ -580,6 +609,8 @@
             });
 
             registeredPlayersCache = newPlayersCache;
+            originalCasePlayersMap = newCaseMap;
+            updateDatalistOptions();
             evaluatePlayerTier(); 
             document.getElementById('donation-total').innerText = `$${total}`;
             
