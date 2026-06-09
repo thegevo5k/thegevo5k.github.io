@@ -61,6 +61,27 @@
         input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
 
+        /* Integrated Panel Flow Design */
+        .embedded-selector-panel {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 160px;
+            overflow-y: auto;
+            margin-top: -2px;
+        }
+        .embedded-option-row {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #252525;
+            font-size: 0.95rem;
+            color: #ffffff;
+            transition: background 0.15s;
+        }
+        .embedded-option-row:last-child { border-bottom: none; }
+        .embedded-option-row:hover { background-color: #2a2a2a; color: var(--warning); }
+
         .tier-badge-container { display: flex; align-items: center; background-color: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; font-weight: bold; }
         .tier-label-value { margin-left: auto; color: var(--warning); font-size: 1.05rem; }
 
@@ -167,10 +188,10 @@
         <form id="entryForm">
             <input type="hidden" id="entryType" value="Initial">
             
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 10px;">
                 <label for="playerName">Player Name</label>
-                <input type="text" id="playerName" list="existingDrivers" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()">
-                <datalist id="existingDrivers"></datalist>
+                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()" style="border-radius: 6px 6px 0 0;">
+                <div id="embeddedDriversPanel" class="embedded-selector-panel hidden"></div>
             </div>
 
             <div class="form-group">
@@ -472,25 +493,27 @@
 
     // Dynamic live name matching registration calculator
     function evaluatePlayerTier() {
-        const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
+        const inputElement = document.getElementById('playerName');
+        const query = inputElement.value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
         const tierLabel = document.getElementById('tierLabel');
         const submitBtn = document.getElementById('submitBtn');
 
         if (isEventFinished || !tierLabel || !submitBtn) return;
 
-        if (nameInput && registeredPlayersCache.has(nameInput)) {
+        // Manage Embedded Selection Panel visibility based on user input queries
+        filterEmbeddedPanel(query);
+
+        if (query && registeredPlayersCache.has(query)) {
             typeField.value = 'Retry';
             tierLabel.innerText = 'Retry ($2)';
             tierLabel.style.color = 'var(--warning)';
             submitBtn.innerText = 'Submit Retry ($2)';
             
-            // Auto-correct spelling case to match the original layout style smoothly if found
-            if (originalCasePlayersMap[nameInput] && document.getElementById('playerName').value !== originalCasePlayersMap[nameInput]) {
-                const inputElement = document.getElementById('playerName');
+            if (originalCasePlayersMap[query] && inputElement.value !== originalCasePlayersMap[query]) {
                 const start = inputElement.selectionStart;
                 const end = inputElement.selectionEnd;
-                inputElement.value = originalCasePlayersMap[nameInput];
+                inputElement.value = originalCasePlayersMap[query];
                 inputElement.setSelectionRange(start, end);
             }
         } else {
@@ -501,18 +524,69 @@
         }
     }
 
-    function updateDatalistOptions() {
-        const datalist = document.getElementById('existingDrivers');
-        if (!datalist) return;
-        
-        // Sort names alphabetically for clean dropdown organization
+    // Refreshes options inside the structural embedded panel wrapper
+    function populateEmbeddedPanel() {
+        const panel = document.getElementById('embeddedDriversPanel');
+        if (!panel) return;
+
         const sortedNames = Object.values(originalCasePlayersMap).sort((a, b) => a.localeCompare(b));
         
-        let optionsHtml = "";
+        if (sortedNames.length === 0) {
+            panel.innerHTML = "";
+            panel.classList.add('hidden');
+            document.getElementById('playerName').style.borderRadius = "6px";
+            return;
+        }
+
+        let panelHtml = "";
         sortedNames.forEach(name => {
-            optionsHtml += `<option value="${name}"></option>`;
+            panelHtml += `<div class="embedded-option-row" data-search-value="${name.toLowerCase()}" onclick="selectEmbeddedDriver('${name.replace(/'/g, "\\'")}')">${name}</div>`;
         });
-        datalist.innerHTML = optionsHtml;
+        panel.innerHTML = panelHtml;
+    }
+
+    // Filters down structural entries matching the typed values inline
+    function filterEmbeddedPanel(query) {
+        const panel = document.getElementById('embeddedDriversPanel');
+        const rows = panel.getElementsByClassName('embedded-option-row');
+        const inputElement = document.getElementById('playerName');
+        
+        if (!query || rows.length === 0) {
+            panel.classList.add('hidden');
+            inputElement.style.borderRadius = "6px";
+            return;
+        }
+
+        let visibleRowsCount = 0;
+        for (let i = 0; i < rows.length; i++) {
+            let val = rows[i].getAttribute('data-search-value');
+            if (val && val.includes(query)) {
+                rows[i].classList.remove('hidden');
+                visibleRowsCount++;
+            } else {
+                rows[i].classList.add('hidden');
+            }
+        }
+
+        if (visibleRowsCount > 0) {
+            panel.classList.remove('hidden');
+            inputElement.style.borderRadius = "6px 6px 0 0";
+        } else {
+            panel.classList.add('hidden');
+            inputElement.style.borderRadius = "6px";
+        }
+    }
+
+    // Sets state when clicking an embedded driver name
+    function selectEmbeddedDriver(name) {
+        const inputElement = document.getElementById('playerName');
+        inputElement.value = name;
+        
+        // Hide panel immediately upon choice selection
+        document.getElementById('embeddedDriversPanel').classList.add('hidden');
+        inputElement.style.borderRadius = "6px";
+        
+        evaluatePlayerTier();
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -610,7 +684,7 @@
 
             registeredPlayersCache = newPlayersCache;
             originalCasePlayersMap = newCaseMap;
-            updateDatalistOptions();
+            populateEmbeddedPanel();
             evaluatePlayerTier(); 
             document.getElementById('donation-total').innerText = `$${total}`;
             
@@ -827,6 +901,16 @@
             body: JSON.stringify({ action: "delete", rowId: rowId })
         }).then(() => { fetchData(); }).catch(() => { showErrorModal("Deletion Error", "Could not complete data wipe command."); fetchData(); });
     }
+
+    // Close embedded selections instantly if user clicks outside the registration name field
+    document.addEventListener('click', function(e) {
+        const inputElement = document.getElementById('playerName');
+        const panel = document.getElementById('embeddedDriversPanel');
+        if (inputElement && panel && e.target !== inputElement && !panel.contains(e.target)) {
+            panel.classList.add('hidden');
+            inputElement.style.borderRadius = "6px";
+        }
+    });
 
     // Initialize Global Page Core Triggers
     updateCountdown();
