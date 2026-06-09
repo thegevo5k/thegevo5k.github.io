@@ -208,7 +208,7 @@
                 <span style="width: 60px;">Run 1:</span>
                 <div class="time-inputs">
                     <input type="text" id="e1m" maxlength="1"><div>:</div>
-                    <input type="text" id="e2m" class="hidden"><input type="text" id="e1s" maxlength="2"><div>.</div>
+                    <input type="text" id="e1s" maxlength="2"><div>.</div>
                     <input type="text" id="e1ms" maxlength="3">
                 </div>
             </div>
@@ -216,15 +216,7 @@
             <div class="time-row">
                 <span style="width: 60px;">Run 2:</span>
                 <div class="time-inputs">
-                    <input type="text" id="e2m_real" style="width: 100%; text-align: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: var(--text-main);" maxlength="1"><div>:</div>
-                    <script>
-                        // Intercept and pipe inputs safely due to element name overlaps
-                        document.addEventListener("DOMContentLoaded", function() {
-                            setupInputFilters('e1m', 'e1s', 'e1ms');
-                            setupInputFilters('e2m_real', 'e2s', 'e2ms');
-                            setupInputFilters('e3m', 'e3s', 'e3ms');
-                        });
-                    </script>
+                    <input type="text" id="e2m" maxlength="1"><div>:</div>
                     <input type="text" id="e2s" maxlength="2"><div>.</div>
                     <input type="text" id="e2ms" maxlength="3">
                 </div>
@@ -263,7 +255,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
-    let uniqueDisplayNames = []; // Caches true case casing matching dataset values
+    let uniqueDisplayNames = []; // Cache to hold exact casing of player names for autofill list
     let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
@@ -329,22 +321,26 @@
         };
     }
 
-    // Floating Custom Filter Dropdown Logic Panel UI Triggers
+    // Floating Custom Filter Dropdown Logic Panel
     function showDropdown() {
         if (isEventFinished) return;
         renderDropdownItems(uniqueDisplayNames);
     }
 
+    // Soft dismiss delay to handle clicking drop-down rows before focus collapse triggers
     function hideDropdown() {
         setTimeout(() => {
-            document.getElementById('customDropdown').classList.add('hidden');
+            const el = document.getElementById('customDropdown');
+            if(el) el.classList.add('hidden');
         }, 200);
     }
 
+    // Click outside handler to safely close floating selection matrix
     document.addEventListener('click', function(e) {
-        const container = document.getElementById('registrationSection');
-        if (container && !container.contains(e.target)) {
-            document.getElementById('customDropdown').classList.add('hidden');
+        const field = document.getElementById('playerName');
+        const drop = document.getElementById('customDropdown');
+        if (field && drop && !field.contains(e.target) && !drop.contains(e.target)) {
+            drop.classList.add('hidden');
         }
     });
 
@@ -462,7 +458,7 @@
         fetchData();
     }
 
-    // Numeric Constraints Engine
+    // Numeric Constraints Input Box Validation Engine
     function setupInputFilters(mId, sId, msId) {
         const mInput = document.getElementById(mId);
         const sInput = document.getElementById(sId);
@@ -484,6 +480,13 @@
             if (parseInt(this.value) > 59) this.value = "59";
         });
     }
+
+    setupInputFilters('t1m', 't1s', 't1ms');
+    setupInputFilters('t2m', 't2s', 't2ms');
+    setupInputFilters('t3m', 't3s', 't3ms');
+    setupInputFilters('e1m', 'e1s', 'e1ms');
+    setupInputFilters('e2m', 'e2s', 'e2ms');
+    setupInputFilters('e3m', 'e3s', 'e3ms');
 
     // Tier Verification Pricing Engine
     function evaluatePlayerTier() {
@@ -527,7 +530,7 @@
         document.getElementById(msId).value = parts[2] || "";
     }
 
-    // Submit Registration Data Array Action Form Handler
+    // Submit Action Form Handler
     document.getElementById('entryForm').addEventListener('submit', function(e) {
         e.preventDefault();
         if (isEventFinished) {
@@ -564,7 +567,7 @@
         }).catch(() => { showErrorModal("Network Error", "Failed to save registration."); btn.disabled = false; });
     });
 
-    // Cloud Database Refresh and View Rendering Synchronizer
+    // Core Spreadsheet Parser & Leaderboard Render Loop
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
             rawEntriesDataset = data; 
@@ -709,20 +712,9 @@
         document.getElementById('editName').setAttribute('data-orig-name', name.trim().toLowerCase());
         
         deconstructTimeString(t1, 'e1m', 'e1s', 'e1ms');
-        
-        const e2mInput = document.getElementById('e2m_real');
-        if (t2 && t2.includes(':')) {
-            const parts = t2.split(/[:.]/);
-            if (e2mInput) e2mInput.value = parts[0] || "";
-            document.getElementById('e2s').value = parts[1] || "";
-            document.getElementById('e2ms').value = parts[2] || "";
-        } else {
-            if (e2mInput) e2mInput.value = "";
-            document.getElementById('e2s').value = "";
-            document.getElementById('e2ms').value = "";
-        }
-
+        deconstructTimeString(t2, 'e2m', 'e2s', 'e2ms');
         deconstructTimeString(t3, 'e3m', 'e3s', 'e3ms');
+        
         document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -754,7 +746,7 @@
         }
 
         let t1 = parseTimeToMs(document.getElementById('e1m').value, document.getElementById('e1s').value, document.getElementById('e1ms').value);
-        let t2 = parseTimeToMs(document.getElementById('e2m_real').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
+        let t2 = parseTimeToMs(document.getElementById('e2m').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
         let t3 = parseTimeToMs(document.getElementById('e3m').value, document.getElementById('e3s').value, document.getElementById('e3ms').value);
 
         let updatePayload = {
