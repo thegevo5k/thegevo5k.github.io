@@ -661,7 +661,7 @@
         
         for (let i = 0; i < items.length; i++) {
             let driverName = items[i].getAttribute('data-name');
-            if (driverName.includes(query)) {
+            if (driverName && driverName.includes(query)) {
                 items[i].classList.remove('hidden');
             } else {
                 items[i].classList.add('hidden');
