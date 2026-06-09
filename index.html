@@ -61,23 +61,42 @@
         input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
 
-        /* Integrated Panel Flow Design */
+        /* Reconstructed Site Elements Dropdown Layout */
         .embedded-selector-panel {
             background-color: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            border: 1px solid #3a3a3a;
             border-top: none;
             border-radius: 0 0 6px 6px;
             max-height: 160px;
             overflow-y: auto;
-            margin-top: -2px;
+            margin-top: 0;
+            position: relative;
+            z-index: 10;
         }
+        
+        /* Custom Modern Scrollbar Design for Site Consistency */
+        .embedded-selector-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        .embedded-selector-panel::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        .embedded-selector-panel::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 3px;
+        }
+        .embedded-selector-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
         .embedded-option-row {
-            padding: 10px 12px;
+            padding: 12px;
             cursor: pointer;
             border-bottom: 1px solid #252525;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #ffffff;
-            transition: background 0.15s;
+            transition: background 0.15s, color 0.15s;
+            user-select: none;
         }
         .embedded-option-row:last-child { border-bottom: none; }
         .embedded-option-row:hover { background-color: #2a2a2a; color: var(--warning); }
@@ -188,9 +207,9 @@
         <form id="entryForm">
             <input type="hidden" id="entryType" value="Initial">
             
-            <div class="form-group" style="margin-bottom: 10px;">
+            <div class="form-group" style="margin-bottom: 15px;">
                 <label for="playerName">Player Name</label>
-                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()" style="border-radius: 6px 6px 0 0;">
+                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()" onfocus="handleNameFocus()">
                 <div id="embeddedDriversPanel" class="embedded-selector-panel hidden"></div>
             </div>
 
@@ -491,6 +510,12 @@
     setupInputFilters('e2m', 'e2s', 'e2ms');
     setupInputFilters('e3m', 'e3s', 'e3ms');
 
+    // Handle initial clicks/focus events on the driver input bar
+    function handleNameFocus() {
+        const query = document.getElementById('playerName').value.trim().toLowerCase();
+        filterEmbeddedPanel(query);
+    }
+
     // Dynamic live name matching registration calculator
     function evaluatePlayerTier() {
         const inputElement = document.getElementById('playerName');
@@ -501,7 +526,7 @@
 
         if (isEventFinished || !tierLabel || !submitBtn) return;
 
-        // Manage Embedded Selection Panel visibility based on user input queries
+        // Dynamic Filtering of our custom structural list element rows
         filterEmbeddedPanel(query);
 
         if (query && registeredPlayersCache.has(query)) {
@@ -524,7 +549,7 @@
         }
     }
 
-    // Refreshes options inside the structural embedded panel wrapper
+    // Refreshes structural options inside the embedded dropdown site container
     function populateEmbeddedPanel() {
         const panel = document.getElementById('embeddedDriversPanel');
         if (!panel) return;
@@ -545,13 +570,14 @@
         panel.innerHTML = panelHtml;
     }
 
-    // Filters down structural entries matching the typed values inline
+    // Inline structural element processing logic for user matching updates
     function filterEmbeddedPanel(query) {
         const panel = document.getElementById('embeddedDriversPanel');
         const rows = panel.getElementsByClassName('embedded-option-row');
         const inputElement = document.getElementById('playerName');
         
-        if (!query || rows.length === 0) {
+        // If there are rows and no search filter query, display all options by default
+        if (rows.length === 0) {
             panel.classList.add('hidden');
             inputElement.style.borderRadius = "6px";
             return;
@@ -560,7 +586,7 @@
         let visibleRowsCount = 0;
         for (let i = 0; i < rows.length; i++) {
             let val = rows[i].getAttribute('data-search-value');
-            if (val && val.includes(query)) {
+            if (!query || (val && val.includes(query))) {
                 rows[i].classList.remove('hidden');
                 visibleRowsCount++;
             } else {
@@ -577,12 +603,12 @@
         }
     }
 
-    // Sets state when clicking an embedded driver name
+    // Sets form value when a user selects a structural element choice row
     function selectEmbeddedDriver(name) {
         const inputElement = document.getElementById('playerName');
         inputElement.value = name;
         
-        // Hide panel immediately upon choice selection
+        // Instantly close the site dropdown wrapper component element
         document.getElementById('embeddedDriversPanel').classList.add('hidden');
         inputElement.style.borderRadius = "6px";
         
@@ -902,7 +928,7 @@
         }).then(() => { fetchData(); }).catch(() => { showErrorModal("Deletion Error", "Could not complete data wipe command."); fetchData(); });
     }
 
-    // Close embedded selections instantly if user clicks outside the registration name field
+    // Intercept global layout click configurations to dismiss custom panel cleanly when focus shifts away
     document.addEventListener('click', function(e) {
         const inputElement = document.getElementById('playerName');
         const panel = document.getElementById('embeddedDriversPanel');
