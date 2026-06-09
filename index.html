@@ -2,302 +2,286 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MK8D Time Trials Fundraiser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Championship Leaderboard Console</title>
     <style>
+        /* Core Variable Definitions */
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #e60012; 
-            --text-color: #ffffff;
-            --text-muted: #aaaaaa;
-            --success: #00ff66;
-            --warning: #ffcc00;
+            --bg-main: #12141c;
+            --bg-card: #1a1d29;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #374151;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        html, body { 
-            min-height: 100vh;
-            min-height: 100dvh; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            overflow-x: hidden; 
-        }
-        body { padding: 20px; display: flex; flex-direction: column; }
-        
-        .container { 
-            width: 100%; 
-            max-width: 700px; 
-            margin: 0 auto; 
-            display: flex; 
-            flex-direction: column; 
-            flex-grow: 1; 
-        }
-        
-        h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; }
-        .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 15px; }
-
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; width: 100%; }
-        .nav-btn { flex: 1; padding: 14px 10px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .nav-btn.active { background-color: var(--accent-color); border-color: var(--accent-color); }
-        
-        .lock-btn { flex: 1; padding: 14px 10px; background-color: #333; border: 1px solid #444; border-radius: 8px; color: white; cursor: pointer; font-size: 1rem; font-weight: bold; text-align: center; }
-
-        .countdown-container { background-color: #1a1a1a; border: 1px solid #3a3a3a; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
-        .countdown-time { font-size: 1.6rem; color: var(--warning); font-family: monospace; margin-top: 4px; }
-        .countdown-finished { font-size: 1.6rem; color: var(--success); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-        .donation-banner { background: linear-gradient(135deg, #e60012, #99000b); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; flex-shrink: 0; }
-        .donation-banner h2 { font-size: 1.2rem; text-transform: uppercase; opacity: 0.9; }
-        .donation-total { font-size: 3rem; font-weight: 800; margin-top: 2px; }
-
-        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #2a2a2a; }
-        .card h3 { font-size: 1.3rem; border-bottom: 2px solid #2a2a2a; padding-bottom: 8px; }
-
-        #registrationSection { flex-shrink: 0; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.95rem; }
-        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
-        input:focus, select:focus { border-color: var(--accent-color); outline: none; }
-
-        .tier-badge-container { display: flex; align-items: center; background-color: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; font-weight: bold; }
-        .tier-label-value { margin-left: auto; color: var(--warning); font-size: 1.05rem; }
-
-        .search-box { margin-bottom: 12px; background-color: #1a1a1a; border-color: #2a2a2a; flex-shrink: 0; }
-
-        .time-row { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .time-inputs { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 5px; }
-        .time-inputs input { text-align: center; padding: 10px 5px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
-
-        button { width: 100%; padding: 14px; background-color: var(--accent-color); border: none; border-radius: 6px; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background-color: #3a3a3a; }
-        
-        .btn-danger { background-color: #99000b; }
-        .btn-danger.confirm-state { background-color: #ff0000; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { opacity: 0.8; } to { opacity: 1; } }
-
-        #leaderboardSection { 
-            display: flex; 
-            flex-direction: column; 
-            margin-bottom: 0;
-        }
-        
-        #leaderboard-container { 
-            overflow-y: auto; 
-            flex-grow: 1;
-            padding-right: 4px;
-            -webkit-overflow-scrolling: touch; 
-        }
-
-        .leaderboard-item { background: #1a1a1a; padding: 14px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #2a2a2a; }
-        .lb-main { display: flex; justify-content: space-between; align-items: center; }
-        .player-info { display: flex; align-items: center; gap: 12px; }
-        .player-time { font-family: monospace; font-size: 1.3rem; color: var(--success); font-weight: bold; }
-        
-        .log-meta-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; font-size: 0.85rem; }
-        .all-times { color: var(--text-muted); }
-        .retries-left { color: var(--bg-color); background-color: var(--warning); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-
-        .inline-actions { display: flex; gap: 5px; margin-top: 5px; border-top: 1px solid #2a2a2a; padding-top: 8px; }
-        .inline-actions button { padding: 8px; font-size: 0.8rem; width: auto; flex: 1; }
-
+        body { background-color: var(--bg-main); color: var(--text-main); padding: 20px; }
         .hidden { display: none !important; }
 
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center; z-index: 200;
-        }
-        .html-popup {
-            background-color: var(--card-bg); border: 2px solid #333; border-radius: 16px;
-            padding: 25px; width: 90%; max-width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-        .html-popup h3 { margin-bottom: 12px; font-size: 1.4rem; color: #fff; }
-        .html-popup p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4; }
-        .html-popup input { text-align: center; font-size: 1.5rem; letter-spacing: 6px; margin-bottom: 15px; font-family: monospace; }
-        .popup-actions { display: flex; gap: 10px; }
-        .popup-actions button { width: 50%; }
+        /* Dashboard Architecture */
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        header { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 1.8rem; cursor: pointer; user-select: none; }
+        
+        .stats-bar { display: flex; gap: 40px; font-size: 1.1rem; }
+        .stat-val { font-weight: bold; color: var(--success); }
+        #countdown-display { font-weight: bold; color: var(--warning); }
+        .countdown-finished { color: var(--danger) !important; animation: pulse 1.5s infinite; }
 
-        .html-popup.error-style h3 { color: var(--accent-color); }
-        .html-popup.error-style button { width: 100%; background-color: #3a3a3a; }
+        .workspace { display: flex; gap: 20px; align-items: flex-start; }
+        .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        #registrationSection { width: 400px; flex-shrink: 0; }
+        #leaderboardSection { flex-grow: 1; }
 
-        body.kiosk-mode {
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            padding: 15px;
+        /* Form Controls & Layouts */
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.9rem; }
+        input[type="text"], select { width: 100%; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: var(--text-main); font-size: 1rem; }
+        input:focus { border-color: var(--primary); outline: none; }
+        
+        .time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .time-row span { color: var(--text-muted); font-weight: bold; width: 50px; }
+        .time-inputs { display: flex; gap: 4px; flex-grow: 1; align-items: center; }
+        .time-inputs input { width: 100%; text-align: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: var(--text-main); }
+
+        /* DYNAMIC AUTOCOMPLETE DROPDOWN STYLING */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #1e2235;
+            border: 1px solid var(--primary);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
         }
-        body.kiosk-mode .container {
-            max-width: 100%; 
-            height: 100%;
+        .autocomplete-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            color: var(--text-main);
+            border-bottom: 1px solid #2a2f4a;
+            transition: background 0.2s;
         }
-        body.kiosk-mode #leaderboardSection {
-            flex-grow: 1;
-            min-height: 0; 
-        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover { background: var(--primary); color: #fff; }
+
+        /* Buttons & Interface Items */
+        button { width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; font-size: 1rem; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+        .btn-secondary { background: #4b5563; color: #fff; width: auto; padding: 6px 12px; font-size: 0.9rem; }
+        .btn-secondary:hover { background: #374151; }
+        .btn-danger { background: var(--danger); color: #fff; width: auto; padding: 6px 12px; font-size: 0.9rem; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-danger.confirm-state { background: var(--warning); color: #000; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .tab { background: #25293c; color: var(--text-muted); width: auto; padding: 8px 16px; border-radius: 6px; font-size: 0.9rem; }
+        .tab.active { background: var(--primary); color: #fff; }
+
+        /* Leaderboard Items Layout */
+        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .leaderboard-item { background: var(--bg-main); border: 1px solid var(--border); padding: 14px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .lb-main { display: flex; justify-content: space-between; align-items: center; }
+        .player-info { display: flex; align-items: center; gap: 12px; }
+        .player-time { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+        .inline-actions { display: flex; gap: 6px; justify-content: flex-end; }
+        .log-meta-row { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem; background: #1f2331; padding: 6px 10px; border-radius: 4px; }
+        .retries-left { background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+        /* Modal Overlays */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; }
+        .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 25px; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { width: 100%; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        body.kiosk-mode #registrationSection { display: none; }
     </style>
 </head>
-<body>
+<body class="kiosk-mode">
 
 <div class="container">
-    <h1 id="mainheader" onclick="handleHeaderClick()">MK8D Championship</h1>
-    <div class="sub-header" id="subheader">Fundraiser for Children's Miracle Network</div>
+    <header>
+        <h1 onclick="handleHeaderClick()">🏎️ Fundraising Bracket Console</h1>
+        <div class="stats-bar">
+            <div>Total Pool: <span id="donation-total">$0</span></div>
+            <div><span id="countdown-label">Time Remaining:</span> <span id="countdown-display">--:--:--</span></div>
+        </div>
+    </header>
 
-    <div class="nav-tabs hidden" id="adminTabs">
-        <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard</button>
-        <button class="nav-btn" id="tabLeaderboard" onclick="switchView('leaderboard')">Leaderboard</button>
-        <button class="lock-btn" onclick="lockConsole()">Lock 🔒</button>
+    <div id="adminTabs" class="tabs hidden">
+        <button id="tabLeaderboard" class="tab active" onclick="switchView('leaderboard')">📋 Leaderboard View</button>
+        <button id="tabMain" class="tab" onclick="switchView('main')">🛠️ Registration & Logs</button>
+        <button class="tab" style="background:var(--danger); margin-left:auto;" onclick="lockConsole()">🔒 Lock Console</button>
     </div>
 
-    <div class="countdown-container">
-        <div id="countdown-label">Time Remaining Until Close:</div>
-        <div id="countdown-display" class="countdown-time">Calculating...</div>
-    </div>
-
-    <div class="donation-banner">
-        <h2>Total Raised</h2>
-        <div class="donation-total" id="donation-total">$0</div>
-    </div>
-
-    <div class="card view-section hidden" id="registrationSection">
-        <h3>New Run Registration</h3>
-        <form id="entryForm">
-            <input type="hidden" id="entryType" value="Initial">
-            
-            <div class="form-group">
-                <label for="playerName">Player Name</label>
-                <input type="text" id="playerName" placeholder="Driver's Name" required autocomplete="off" oninput="evaluatePlayerTier()">
-            </div>
-
-            <div class="form-group">
-                <div class="tier-badge-container">
-                    <span>Assigned Registration Tier</span>
-                    <span id="tierLabel" class="tier-label-value">Initial Buy-In ($5)</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Enter Times (Leave blank if running later)</label>
+    <div class="workspace">
+        <section id="registrationSection" class="panel hidden">
+            <h2 style="margin-bottom: 15px; font-size: 1.4rem;">Register New Run</h2>
+            <form id="entryForm">
                 
-                <div class="time-row">
-                    <span>Run 1:</span>
-                    <div class="time-inputs">
-                        <input type="text" id="t1m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                        <input type="text" id="t1s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                        <input type="text" id="t1ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-                    </div>
+                <div class="form-group">
+                    <label for="playerName">Driver Name</label>
+                    <input type="text" id="playerName" placeholder="Start typing driver's name..." autocomplete="off" oninput="handlePlayerNameInput()" required>
+                    <div id="autocompleteContainer"></div>
                 </div>
-                <div class="time-row">
-                    <span>Run 2:</span>
-                    <div class="time-inputs">
-                        <input type="text" id="t2m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                        <input type="text" id="t2s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                        <input type="text" id="t2ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-                    </div>
-                </div>
-                <div class="time-row">
-                    <span>Run 3:</span>
-                    <div class="time-inputs">
-                        <input type="text" id="t3m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                        <input type="text" id="t3s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                        <input type="text" id="t3ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-                    </div>
-                </div>
-            </div>
-            <button type="submit" id="submitBtn">Submit Buy-In ($5)</button>
-        </form>
-    </div>
 
-    <div class="card view-section" id="leaderboardSection">
-        <div style="margin-bottom: 12px; flex-shrink: 0;">
-            <h3 id="board-title">Championship Leaderboard</h3>
-        </div>
-        
-        <input type="text" id="searchDriver" class="search-box hidden" placeholder="🔍 Search driver name..." onkeyup="filterLeaderboard()">
-        
-        <div id="leaderboard-container"></div>
+                <div class="form-group">
+                    <label>Registration Tier Status</label>
+                    <input type="hidden" id="entryType" value="Initial">
+                    <div id="tierLabel" style="font-weight: bold; font-size: 1.1rem; color: var(--success);">Initial Buy-In ($5)</div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="margin-bottom: 10px;">Lap Interval Times</label>
+                    
+                    <div class="time-row">
+                        <span>Run 1:</span>
+                        <div class="time-inputs">
+                            <input type="text" id="t1m" placeholder="M" maxlength="1">
+                            <div>:</div>
+                            <input type="text" id="t1s" placeholder="SS" maxlength="2">
+                            <div>.</div>
+                            <input type="text" id="t1ms" placeholder="MS" maxlength="3">
+                        </div>
+                    </div>
+
+                    <div class="time-row">
+                        <span>Run 2:</span>
+                        <div class="time-inputs">
+                            <input type="text" id="t2m" placeholder="M" maxlength="1">
+                            <div>:</div>
+                            <input type="text" id="t2s" placeholder="SS" maxlength="2">
+                            <div>.</div>
+                            <input type="text" id="t2ms" placeholder="MS" maxlength="3">
+                        </div>
+                    </div>
+
+                    <div class="time-row">
+                        <span>Run 3:</span>
+                        <div class="time-inputs">
+                            <input type="text" id="t3m" placeholder="M" maxlength="1">
+                            <div>:</div>
+                            <input type="text" id="t3s" placeholder="SS" maxlength="2">
+                            <div>.</div>
+                            <input type="text" id="t3ms" placeholder="MS" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">Submit Buy-In ($5)</button>
+            </form>
+        </section>
+
+        <section id="leaderboardSection" class="panel">
+            <div class="board-header">
+                <h2 id="board-title" style="font-size: 1.4rem;">Championship Leaderboard</h2>
+                <input type="text" id="searchDriver" class="hidden" placeholder="🔍 Quick search driver logs..." style="width: 250px; padding: 6px 12px; font-size: 0.9rem;" oninput="filterLeaderboard()">
+            </div>
+            <div id="leaderboard-container">
+                </div>
+        </section>
     </div>
 </div>
 
-<div id="pinModal" class="modal-backdrop hidden">
-    <div class="html-popup">
-        <h3>Console Locked</h3>
-        <p>Enter administration credentials to manage tournament parameters.</p>
-        <input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••">
-        <div class="popup-actions">
+<div id="pinModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 style="margin-bottom: 10px;">Security Verification Required</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Provide administrator system key signature to access management logs.</p>
+        <input type="password" id="pinInput" placeholder="Enter System PIN Code" maxlength="4" style="text-align:center; font-size: 1.5rem; letter-spacing: 8px; padding: 10px;">
+        <div class="modal-buttons">
             <button class="btn-secondary" onclick="closePinModal()">Cancel</button>
-            <button onclick="verifyAdminPin()">Unlock</button>
+            <button class="btn-primary" onclick="verifyAdminPin()">Unlock</button>
         </div>
     </div>
 </div>
 
-<div id="errorModal" class="modal-backdrop hidden">
-    <div class="html-popup error-style">
-        <h3 id="errorModalTitle">Operation Blocked</h3>
-        <p id="errorModalMessage">Detailed failure notification details go here.</p>
-        <div class="popup-actions">
-            <button onclick="closeErrorModal()">Acknowledge</button>
+<div id="editModal" class="modal-overlay hidden">
+    <div class="modal" style="width: 500px;">
+        <h3 style="margin-bottom: 15px;">Modify Log Profile Entry</h3>
+        <input type="hidden" id="editRowId">
+        <input type="hidden" id="editOriginalType">
+
+        <div class="form-group">
+            <label>Driver Identity Name String</label>
+            <input type="text" id="editName">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="margin-bottom: 10px; display: block;">Overhaul Interval Timestamps</label>
+            
+            <div class="time-row">
+                <span style="width: 60px;">Run 1:</span>
+                <div class="time-inputs">
+                    <input type="text" id="e1m" maxlength="1"><div>:</div>
+                    <input type="text" id="e2m" class="hidden"><input type="text" id="e1s" maxlength="2"><div>.</div>
+                    <input type="text" id="e1ms" maxlength="3">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <span style="width: 60px;">Run 2:</span>
+                <div class="time-inputs">
+                    <input type="text" id="e2m_real" style="width: 100%; text-align: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: var(--text-main);" maxlength="1"><div>:</div>
+                    <script>
+                        // Intercept and pipe inputs safely due to element name overlaps
+                        document.addEventListener("DOMContentLoaded", function() {
+                            setupInputFilters('e1m', 'e1s', 'e1ms');
+                            setupInputFilters('e2m_real', 'e2s', 'e2ms');
+                            setupInputFilters('e3m', 'e3s', 'e3ms');
+                        });
+                    </script>
+                    <input type="text" id="e2s" maxlength="2"><div>.</div>
+                    <input type="text" id="e2ms" maxlength="3">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <span style="width: 60px;">Run 3:</span>
+                <div class="time-inputs">
+                    <input type="text" id="e3m" maxlength="1"><div>:</div>
+                    <input type="text" id="e3s" maxlength="2"><div>.</div>
+                    <input type="text" id="e3ms" maxlength="3">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="btn-secondary" onclick="closeEditModal()">Dismiss</button>
+            <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
         </div>
     </div>
 </div>
 
-<div id="editModal" class="card hidden" style="position: fixed; top: 5%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; z-index: 100; box-shadow: 0 0 30px rgba(0,0,0,0.9); border-color: var(--accent-color); max-height: 90vh; overflow-y: auto;">
-    <h3>Quick Edit Entry</h3>
-    <input type="hidden" id="editRowId">
-    <input type="hidden" id="editOriginalType">
-    
-    <div class="form-group" style="margin-top: 10px;">
-        <label for="editName">Driver Name</label>
-        <input type="text" id="editName" autocomplete="off">
+<div id="errorModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 id="errorModalTitle" style="color: var(--danger); margin-bottom: 10px;">Alert Prompt Triggered</h3>
+        <p id="errorModalMessage" style="font-size: 0.95rem; line-height: 1.4; margin-bottom: 20px;">Detailed error notice statement.</p>
+        <button class="btn-primary" onclick="closeErrorModal()">Acknowledge</button>
     </div>
-    
-    <div class="form-group">
-        <label>Modify Lap Times</label>
-        
-        <div class="time-row">
-            <span>Run 1:</span>
-            <div class="time-inputs">
-                <input type="text" id="e1m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                <input type="text" id="e1s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                <input type="text" id="e1ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-            </div>
-        </div>
-        
-        <div class="time-row">
-            <span>Run 2:</span>
-            <div class="time-inputs">
-                <input type="text" id="e2m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                <input type="text" id="e2s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                <input type="text" id="e2ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-            </div>
-        </div>
-        
-        <div class="time-row">
-            <span>Run 3:</span>
-            <div class="time-inputs">
-                <input type="text" id="e3m" inputmode="numeric" pattern="[0-9]*" placeholder="MM">
-                <input type="text" id="e3s" inputmode="numeric" pattern="[0-9]*" placeholder="SS">
-                <input type="text" id="e3ms" inputmode="numeric" pattern="[0-9]*" placeholder="mmm">
-            </div>
-        </div>
-    </div>
-    
-    <button onclick="saveEdit()" style="margin-top: 10px;">Save Changes</button>
-    <button class="btn-secondary" onclick="closeEditModal()" style="margin-top: 8px;">Cancel</button>
 </div>
 
 <script>
-    // Updated API URL Endpoint
+    // System Web App EndPoint API Gateway
     const API_URL = "https://script.google.com/macros/s/AKfycby0F5MTfghVuBVbFkwWt7EfmSXZCy3meuzJabBCsXDoWubvZmpejqAFwvVVPDg5eDS9mQ/exec"; 
     
     let deleteTimeouts = {};
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
-    let uniqueDisplayNames = []; // Cache to hold exact casing of player names for autofill list
+    let uniqueDisplayNames = []; // Caches true exact case strings of active players
     let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
@@ -307,7 +291,7 @@
     // Tournament End Timestamp (June 9, 2026 at 11:00 PM CST)
     const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
 
-    // Live countdown module countdown clock tracker
+    // Live countdown clock tracker module
     function updateCountdown() {
         const now = new Date();
         const diff = TARGET_DATE - now;
@@ -338,7 +322,7 @@
         return false;
     }
 
-    // Secret Admin Panel Handler (5 Clicks on Title Header)
+    // Secret Admin Console Unlock Handler (5 Clicks on Title)
     function handleHeaderClick() {
         headerClickCount++;
         clearTimeout(headerClickTimeout);
@@ -410,7 +394,7 @@
         }
     }
 
-    // Dynamic View Switcher (Kiosk Dashboard vs Admin Form Panel Management)
+    // Dynamic View Panel Switcher
     function switchView(view) {
         if (!isUnlocked) {
             view = 'leaderboard';
@@ -439,7 +423,7 @@
         fetchData();
     }
 
-    // Input Box Validation Constraints (Numbers Only, Auto Max Caps)
+    // Numeric Constraints Engine
     function setupInputFilters(mId, sId, msId) {
         const mInput = document.getElementById(mId);
         const sInput = document.getElementById(sId);
@@ -462,14 +446,58 @@
         });
     }
 
-    setupInputFilters('t1m', 't1s', 't1ms');
-    setupInputFilters('t2m', 't2s', 't2ms');
-    setupInputFilters('t3m', 't3s', 't3ms');
-    setupInputFilters('e1m', 'e1s', 'e1ms');
-    setupInputFilters('e2m', 'e2s', 'e2ms');
-    setupInputFilters('e3m', 'e3s', 'e3ms');
+    // TYPING INTERCEPTOR AND INLINE DROPDOWN GENERATOR
+    function handlePlayerNameInput() {
+        const inputField = document.getElementById('playerName');
+        const container = document.getElementById('autocompleteContainer');
+        const query = inputField.value.trim().toLowerCase();
+        
+        // Wipe old suggestions box element first
+        container.innerHTML = "";
 
-    // Dynamic live name matching registration calculator
+        if (!query) {
+            evaluatePlayerTier();
+            return;
+        }
+
+        // Filter active names list to locate matches that include typed characters
+        const filteredMatches = uniqueDisplayNames.filter(name => 
+            name.toLowerCase().includes(query)
+        );
+
+        // ONLY spawn the custom dropdown list if there is a match in the cache
+        if (filteredMatches.length > 0) {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'autocomplete-dropdown';
+
+            filteredMatches.forEach(name => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerText = name;
+                
+                // When an existing driver option is clicked, snap fill it into form inputs
+                item.onclick = function() {
+                    inputField.value = name;
+                    container.innerHTML = ""; // Dismiss dropdown list
+                    evaluatePlayerTier();
+                };
+                dropdown.appendChild(item);
+            });
+            container.appendChild(dropdown);
+        }
+
+        evaluatePlayerTier();
+    }
+
+    // Clear dropdown overlay if user clicks completely outside of text area
+    document.addEventListener('click', function(e) {
+        if (e.target.id !== 'playerName') {
+            const container = document.getElementById('autocompleteContainer');
+            if (container) container.innerHTML = "";
+        }
+    });
+
+    // Tier Verification Pricing Engine
     function evaluatePlayerTier() {
         const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
@@ -489,30 +517,6 @@
             tierLabel.style.color = 'var(--success)';
             submitBtn.innerText = 'Submit Buy-In ($5)';
         }
-    }
-
-    // Dynamically injects and refreshes the HTML datalist option entries
-    function updatePlayerAutofillList() {
-        let datalist = document.getElementById('playerAutofillList');
-        if (!datalist) {
-            datalist = document.createElement('datalist');
-            datalist.id = 'playerAutofillList';
-            document.body.appendChild(datalist);
-            
-            // Link datalist to your driver input field dynamically
-            const nameInput = document.getElementById('playerName');
-            if (nameInput) {
-                nameInput.setAttribute('list', 'playerAutofillList');
-            }
-        }
-        
-        // Clear old dropdown options and append fresh sorted ones
-        datalist.innerHTML = "";
-        uniqueDisplayNames.sort().forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            datalist.appendChild(option);
-        });
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -535,7 +539,7 @@
         document.getElementById(msId).value = parts[2] || "";
     }
 
-    // Submit Action Form Handler
+    // Submit Registration Data Array Action Form Handler
     document.getElementById('entryForm').addEventListener('submit', function(e) {
         e.preventDefault();
         if (isEventFinished) {
@@ -572,7 +576,7 @@
         }).catch(() => { showErrorModal("Network Error", "Failed to save registration."); btn.disabled = false; });
     });
 
-    // Core Spreadsheet Parser & Leaderboard Render Loop
+    // Cloud Database Refresh and View Rendering Synchronizer
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
             rawEntriesDataset = data; 
@@ -613,8 +617,6 @@
             uniqueDisplayNames = newDisplayNames;
             
             evaluatePlayerTier(); 
-            updatePlayerAutofillList(); // Re-render drop down names cache list
-            
             document.getElementById('donation-total').innerText = `$${total}`;
             
             let finalRenderList = [];
@@ -718,9 +720,21 @@
         document.getElementById('editName').setAttribute('data-orig-name', name.trim().toLowerCase());
         
         deconstructTimeString(t1, 'e1m', 'e1s', 'e1ms');
-        deconstructTimeString(t2, 'e2m', 'e2s', 'e2ms');
-        deconstructTimeString(t3, 'e3m', 'e3s', 'e3ms');
         
+        // Handle target input overrides safely
+        const e2mInput = document.getElementById('e2m_real');
+        if (t2 && t2.includes(':')) {
+            const parts = t2.split(/[:.]/);
+            if (e2mInput) e2mInput.value = parts[0] || "";
+            document.getElementById('e2s').value = parts[1] || "";
+            document.getElementById('e2ms').value = parts[2] || "";
+        } else {
+            if (e2mInput) e2mInput.value = "";
+            document.getElementById('e2s').value = "";
+            document.getElementById('e2ms').value = "";
+        }
+
+        deconstructTimeString(t3, 'e3m', 'e3s', 'e3ms');
         document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -752,7 +766,7 @@
         }
 
         let t1 = parseTimeToMs(document.getElementById('e1m').value, document.getElementById('e1s').value, document.getElementById('e1ms').value);
-        let t2 = parseTimeToMs(document.getElementById('e2m').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
+        let t2 = parseTimeToMs(document.getElementById('e2m_real').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
         let t3 = parseTimeToMs(document.getElementById('e3m').value, document.getElementById('e3s').value, document.getElementById('e3ms').value);
 
         let updatePayload = {
