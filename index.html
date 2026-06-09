@@ -42,13 +42,19 @@
         /* Form Controls & Layouts */
         .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.9rem; }
-        input[type="text"], select { width: 100%; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; padding: 12px; color: var(--text-main); font-size: 1rem; }
+        input[type="text"] { width: 100%; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; padding: 12px; color: var(--text-main); font-size: 1rem; }
         input:focus { border-color: var(--primary); outline: none; }
         
         .time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         .time-row span { color: var(--text-muted); font-weight: bold; width: 50px; }
         .time-inputs { display: flex; gap: 4px; flex-grow: 1; align-items: center; }
         .time-inputs input { width: 100%; text-align: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: var(--text-main); }
+
+        /* Custom Dropdown Styling */
+        .custom-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1f2331; border: 1px solid var(--border); border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-top: 4px; }
+        .dropdown-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: var(--primary); color: #fff; }
 
         /* Buttons & Interface Items */
         button { width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; font-size: 1rem; }
@@ -109,10 +115,9 @@
                 
                 <div class="form-group">
                     <label for="playerName">Driver Name</label>
-                    <input type="text" id="playerName" list="existingPlayers" placeholder="Search or type name..." autocomplete="off" oninput="evaluatePlayerTier()" required>
+                    <input type="text" id="playerName" placeholder="Search or enter driver name..." autocomplete="off" oninput="handlePlayerSearchInput()" onfocus="showDropdown()" required>
                     
-                    <datalist id="existingPlayers">
-                        </datalist>
+                    <div id="customDropdown" class="custom-dropdown hidden"></div>
                 </div>
 
                 <div class="form-group">
@@ -324,6 +329,63 @@
         };
     }
 
+    // Floating Custom Filter Dropdown Logic Panel UI Triggers
+    function showDropdown() {
+        if (isEventFinished) return;
+        renderDropdownItems(uniqueDisplayNames);
+    }
+
+    function hideDropdown() {
+        setTimeout(() => {
+            document.getElementById('customDropdown').classList.add('hidden');
+        }, 200);
+    }
+
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('registrationSection');
+        if (container && !container.contains(e.target)) {
+            document.getElementById('customDropdown').classList.add('hidden');
+        }
+    });
+
+    function handlePlayerSearchInput() {
+        const val = document.getElementById('playerName').value.toLowerCase().trim();
+        evaluatePlayerTier();
+
+        if (!val) {
+            renderDropdownItems(uniqueDisplayNames);
+            return;
+        }
+
+        const filtered = uniqueDisplayNames.filter(name => name.toLowerCase().includes(val));
+        renderDropdownItems(filtered);
+    }
+
+    function renderDropdownItems(list) {
+        const dropdown = document.getElementById('customDropdown');
+        if (!dropdown) return;
+
+        if (!list.length) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = "";
+        dropdown.classList.remove('hidden');
+
+        list.sort().forEach(name => {
+            const item = document.createElement('div');
+            item.className = "dropdown-item";
+            item.innerText = name;
+            item.onclick = function() {
+                document.getElementById('playerName').value = name;
+                dropdown.classList.add('hidden');
+                evaluatePlayerTier();
+            };
+            dropdown.appendChild(item);
+        });
+    }
+
     function closePinModal() {
         document.getElementById('pinModal').classList.add('hidden');
         document.getElementById('pinInput').value = "";
@@ -423,7 +485,7 @@
         });
     }
 
-    // Tier Verification Pricing Engine (Triggers live on text field edits)
+    // Tier Verification Pricing Engine
     function evaluatePlayerTier() {
         const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
@@ -432,35 +494,17 @@
 
         if (isEventFinished || !tierLabel || !submitBtn) return;
 
-        // If the typed text fully matches a registered profile name, default to Retry
         if (nameInput && registeredPlayersCache.has(nameInput)) {
             typeField.value = 'Retry';
             tierLabel.innerText = 'Retry ($2)';
             tierLabel.style.color = 'var(--warning)';
             submitBtn.innerText = 'Submit Retry ($2)';
         } else {
-            // Otherwise, implicitly treat it as an original new profile creation flow
             typeField.value = 'Initial';
             tierLabel.innerText = 'Initial Buy-In ($5)';
             tierLabel.style.color = 'var(--success)';
             submitBtn.innerText = 'Submit Buy-In ($5)';
         }
-    }
-
-    // Dynamic native browser datalist options update matrix
-    function updatePlayerDatalistOptions() {
-        const datalist = document.getElementById('existingPlayers');
-        if (!datalist) return;
-
-        // Wipe old options array cleanly
-        datalist.innerHTML = "";
-
-        // Push sorted names down into datalist tags for native UI detection
-        uniqueDisplayNames.sort().forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            datalist.appendChild(option);
-        });
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -561,7 +605,6 @@
             uniqueDisplayNames = newDisplayNames;
             
             evaluatePlayerTier(); 
-            updatePlayerDatalistOptions(); // Update background datalist hooks dynamically
             
             document.getElementById('donation-total').innerText = `$${total}`;
             
