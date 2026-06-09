@@ -42,38 +42,13 @@
         /* Form Controls & Layouts */
         .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.9rem; }
-        input[type="text"], select { width: 100%; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: var(--text-main); font-size: 1rem; }
+        input[type="text"], select { width: 100%; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; padding: 12px; color: var(--text-main); font-size: 1rem; }
         input:focus { border-color: var(--primary); outline: none; }
         
         .time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         .time-row span { color: var(--text-muted); font-weight: bold; width: 50px; }
         .time-inputs { display: flex; gap: 4px; flex-grow: 1; align-items: center; }
         .time-inputs input { width: 100%; text-align: center; background: var(--bg-main); border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: var(--text-main); }
-
-        /* DYNAMIC AUTOCOMPLETE DROPDOWN STYLING */
-        .autocomplete-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: #1e2235;
-            border: 1px solid var(--primary);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-        }
-        .autocomplete-item {
-            padding: 10px 14px;
-            cursor: pointer;
-            color: var(--text-main);
-            border-bottom: 1px solid #2a2f4a;
-            transition: background 0.2s;
-        }
-        .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover { background: var(--primary); color: #fff; }
 
         /* Buttons & Interface Items */
         button { width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; font-size: 1rem; }
@@ -134,8 +109,10 @@
                 
                 <div class="form-group">
                     <label for="playerName">Driver Name</label>
-                    <input type="text" id="playerName" placeholder="Start typing driver's name..." autocomplete="off" oninput="handlePlayerNameInput()" required>
-                    <div id="autocompleteContainer"></div>
+                    <input type="text" id="playerName" list="existingPlayers" placeholder="Search or type name..." autocomplete="off" oninput="evaluatePlayerTier()" required>
+                    
+                    <datalist id="existingPlayers">
+                        </datalist>
                 </div>
 
                 <div class="form-group">
@@ -281,7 +258,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
-    let uniqueDisplayNames = []; // Caches true exact case strings of active players
+    let uniqueDisplayNames = []; // Caches true case casing matching dataset values
     let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
@@ -446,58 +423,7 @@
         });
     }
 
-    // TYPING INTERCEPTOR AND INLINE DROPDOWN GENERATOR
-    function handlePlayerNameInput() {
-        const inputField = document.getElementById('playerName');
-        const container = document.getElementById('autocompleteContainer');
-        const query = inputField.value.trim().toLowerCase();
-        
-        // Wipe old suggestions box element first
-        container.innerHTML = "";
-
-        if (!query) {
-            evaluatePlayerTier();
-            return;
-        }
-
-        // Filter active names list to locate matches that include typed characters
-        const filteredMatches = uniqueDisplayNames.filter(name => 
-            name.toLowerCase().includes(query)
-        );
-
-        // ONLY spawn the custom dropdown list if there is a match in the cache
-        if (filteredMatches.length > 0) {
-            const dropdown = document.createElement('div');
-            dropdown.className = 'autocomplete-dropdown';
-
-            filteredMatches.forEach(name => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                item.innerText = name;
-                
-                // When an existing driver option is clicked, snap fill it into form inputs
-                item.onclick = function() {
-                    inputField.value = name;
-                    container.innerHTML = ""; // Dismiss dropdown list
-                    evaluatePlayerTier();
-                };
-                dropdown.appendChild(item);
-            });
-            container.appendChild(dropdown);
-        }
-
-        evaluatePlayerTier();
-    }
-
-    // Clear dropdown overlay if user clicks completely outside of text area
-    document.addEventListener('click', function(e) {
-        if (e.target.id !== 'playerName') {
-            const container = document.getElementById('autocompleteContainer');
-            if (container) container.innerHTML = "";
-        }
-    });
-
-    // Tier Verification Pricing Engine
+    // Tier Verification Pricing Engine (Triggers live on text field edits)
     function evaluatePlayerTier() {
         const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
@@ -506,17 +432,35 @@
 
         if (isEventFinished || !tierLabel || !submitBtn) return;
 
+        // If the typed text fully matches a registered profile name, default to Retry
         if (nameInput && registeredPlayersCache.has(nameInput)) {
             typeField.value = 'Retry';
             tierLabel.innerText = 'Retry ($2)';
             tierLabel.style.color = 'var(--warning)';
             submitBtn.innerText = 'Submit Retry ($2)';
         } else {
+            // Otherwise, implicitly treat it as an original new profile creation flow
             typeField.value = 'Initial';
             tierLabel.innerText = 'Initial Buy-In ($5)';
             tierLabel.style.color = 'var(--success)';
             submitBtn.innerText = 'Submit Buy-In ($5)';
         }
+    }
+
+    // Dynamic native browser datalist options update matrix
+    function updatePlayerDatalistOptions() {
+        const datalist = document.getElementById('existingPlayers');
+        if (!datalist) return;
+
+        // Wipe old options array cleanly
+        datalist.innerHTML = "";
+
+        // Push sorted names down into datalist tags for native UI detection
+        uniqueDisplayNames.sort().forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            datalist.appendChild(option);
+        });
     }
 
     function parseTimeToMs(m, s, ms) {
@@ -617,6 +561,8 @@
             uniqueDisplayNames = newDisplayNames;
             
             evaluatePlayerTier(); 
+            updatePlayerDatalistOptions(); // Update background datalist hooks dynamically
+            
             document.getElementById('donation-total').innerText = `$${total}`;
             
             let finalRenderList = [];
@@ -721,7 +667,6 @@
         
         deconstructTimeString(t1, 'e1m', 'e1s', 'e1ms');
         
-        // Handle target input overrides safely
         const e2mInput = document.getElementById('e2m_real');
         if (t2 && t2.includes(':')) {
             const parts = t2.split(/[:.]/);
