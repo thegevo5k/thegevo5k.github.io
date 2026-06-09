@@ -17,7 +17,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* Fix for iPhone/Safari grey bottom bar: Use dvh (Dynamic Viewport Height) instead of strict % or vh */
         html, body { 
             min-height: 100vh;
             min-height: 100dvh; 
@@ -39,12 +38,10 @@
         h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; }
         .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 15px; }
 
-        /* Unified Navigation Tab Layout */
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; width: 100%; }
         .nav-btn { flex: 1; padding: 14px 10px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .nav-btn.active { background-color: var(--accent-color); border-color: var(--accent-color); }
         
-        /* Fixed Lock Button scaling to match navigation width */
         .lock-btn { flex: 1; padding: 14px 10px; background-color: #333; border: 1px solid #444; border-radius: 8px; color: white; cursor: pointer; font-size: 1rem; font-weight: bold; text-align: center; }
 
         .countdown-container { background-color: #1a1a1a; border: 1px solid #3a3a3a; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; flex-shrink: 0; }
@@ -108,7 +105,6 @@
 
         .hidden { display: none !important; }
 
-        /* Custom Popup Backdrop Overlays */
         .modal-backdrop {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px);
@@ -125,7 +121,6 @@
         .popup-actions { display: flex; gap: 10px; }
         .popup-actions button { width: 50%; }
 
-        /* Error specific styling variations */
         .html-popup.error-style h3 { color: var(--accent-color); }
         .html-popup.error-style button { width: 100%; background-color: #3a3a3a; }
 
@@ -252,6 +247,7 @@
 <div id="editModal" class="card hidden" style="position: fixed; top: 5%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; z-index: 100; box-shadow: 0 0 30px rgba(0,0,0,0.9); border-color: var(--accent-color); max-height: 90vh; overflow-y: auto;">
     <h3>Quick Edit Entry</h3>
     <input type="hidden" id="editRowId">
+    <input type="hidden" id="editOriginalType">
     
     <div class="form-group" style="margin-top: 10px;">
         <label for="editName">Driver Name</label>
@@ -294,7 +290,7 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyhgfGvVaVHY2B4kAH1I6gMMR92eadEaUQ_04wLJpnNRVM8uD-JPazcdxLkHesN0Xwoyw/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycby0F5MTfghVuBVbFkwWt7EfmSXZCy3meuzJabBCsXDoWubvZmpejqAFwvVVPDg5eDS9mQ/exec"; 
     
     let deleteTimeouts = {};
     let currentView = 'leaderboard'; 
@@ -639,7 +635,7 @@
                         </div>
                         ${metaRowContent}
                         <div class="inline-actions ${actionRowDisplay}">
-                            <button class="btn-secondary" onclick="openEditModal(${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.time1}', '${p.time2}', '${p.time3}')">✏️ Edit</button>
+                            <button class="btn-secondary" onclick="openEditModal(${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.time1}', '${p.time2}', '${p.time3}', '${p.type}')">✏️ Edit</button>
                             <button class="btn-danger" onclick="deleteEntry(this, ${p.rowId}, '${p.name.replace(/'/g, "\\'")}', '${p.type}')">🗑️ Delete</button>
                         </div>
                     </div>`;
@@ -664,10 +660,11 @@
         }
     }
 
-    function openEditModal(rowId, name, t1, t2, t3) {
+    function openEditModal(rowId, name, t1, t2, t3, type) {
         if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
         document.getElementById('editName').value = name;
+        document.getElementById('editOriginalType').value = type;
         
         deconstructTimeString(t1, 'e1m', 'e1s', 'e1ms');
         deconstructTimeString(t2, 'e2m', 'e2s', 'e2ms');
@@ -680,20 +677,43 @@
 
     function saveEdit() {
         if (!isUnlocked) return;
+        
+        const targetName = document.getElementById('editName').value.trim();
+        const targetNameNormalized = targetName.toLowerCase();
+        let originalType = document.getElementById('editOriginalType').value;
+        
+        let finalType = originalType;
+        let finalAmount = null; // Leaving null tells backend not to alter previous amount unless swapped
+
+        // Failsafe: Check if changing a misspelled name to an already registered player
+        if (targetNameNormalized && registeredPlayersCache.has(targetNameNormalized)) {
+            if (originalType === 'Initial') {
+                finalType = 'Retry';
+                finalAmount = 2; // Auto-downgrade calculation to retry price threshold ($2)
+            }
+        }
+
         let t1 = parseTimeToMs(document.getElementById('e1m').value, document.getElementById('e1s').value, document.getElementById('e1ms').value);
         let t2 = parseTimeToMs(document.getElementById('e2m').value, document.getElementById('e2s').value, document.getElementById('e2ms').value);
         let t3 = parseTimeToMs(document.getElementById('e3m').value, document.getElementById('e3s').value, document.getElementById('e3ms').value);
 
+        let updatePayload = {
+            action: "edit", 
+            rowId: document.getElementById('editRowId').value,
+            name: targetName,
+            type: finalType,
+            time1: t1 ? t1.displayStr : "", 
+            time2: t2 ? t2.displayStr : "", 
+            time3: t3 ? t3.displayStr : ""
+        };
+
+        if (finalAmount !== null) {
+            updatePayload.amount = finalAmount;
+        }
+
         fetch(API_URL, {
             method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "edit", 
-                rowId: document.getElementById('editRowId').value,
-                name: document.getElementById('editName').value.trim(),
-                time1: t1 ? t1.displayStr : "", 
-                time2: t2 ? t2.displayStr : "", 
-                time3: t3 ? t3.displayStr : ""
-            })
+            body: JSON.stringify(updatePayload)
         }).then(() => { closeEditModal(); fetchData(); });
     }
 
