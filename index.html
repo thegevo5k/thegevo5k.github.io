@@ -36,7 +36,10 @@
         }
         
         h1 { text-align: center; color: var(--accent-color); margin-bottom: 5px; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; }
-        .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 15px; }
+        .sub-header { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 5px; }
+        
+        /* Unified Track Configuration Header Styling */
+        .track-banner { text-align: center; color: var(--warning); font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px; text-transform: uppercase; }
 
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; width: 100%; }
         .nav-btn { flex: 1; padding: 14px 10px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1rem; text-align: center; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -61,7 +64,7 @@
         input[type="text"], input[type="password"], select { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: white; font-size: 1rem; }
         input:focus, select:focus { border-color: var(--accent-color); outline: none; }
 
-        /* Reconstructed Site Elements Dropdown Layout */
+        /* Custom Dropdown Styling */
         .embedded-selector-panel {
             background-color: #1a1a1a;
             border: 1px solid #3a3a3a;
@@ -74,7 +77,6 @@
             z-index: 10;
         }
         
-        /* Custom Modern Scrollbar Design for Site Consistency */
         .embedded-selector-panel::-webkit-scrollbar {
             width: 6px;
         }
@@ -185,6 +187,8 @@
 <div class="container">
     <h1 id="mainheader" onclick="handleHeaderClick()">MK8D Championship</h1>
     <div class="sub-header" id="subheader">Fundraiser for Children's Miracle Network</div>
+    
+    <div class="track-banner">🏎️ 150cc — Mario Kart Stadium 🏎️</div>
 
     <div class="nav-tabs hidden" id="adminTabs">
         <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard</button>
@@ -331,7 +335,6 @@
 </div>
 
 <script>
-    // Updated API URL Endpoint
     const API_URL = "https://script.google.com/macros/s/AKfycby0F5MTfghVuBVbFkwWt7EfmSXZCy3meuzJabBCsXDoWubvZmpejqAFwvVVPDg5eDS9mQ/exec"; 
     
     let deleteTimeouts = {};
@@ -345,10 +348,8 @@
     let headerClickTimeout;
     let isUnlocked = false;
 
-    // Tournament End Timestamp (June 9, 2026 at 11:00 PM CST)
     const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
 
-    // Live countdown module countdown clock tracker
     function updateCountdown() {
         const now = new Date();
         const diff = TARGET_DATE - now;
@@ -379,7 +380,6 @@
         return false;
     }
 
-    // Secret Admin Panel Handler (5 Clicks on Title Header)
     function handleHeaderClick() {
         headerClickCount++;
         clearTimeout(headerClickTimeout);
@@ -451,7 +451,6 @@
         }
     }
 
-    // Dynamic View Switcher (Kiosk Dashboard vs Admin Form Panel Management)
     function switchView(view) {
         if (!isUnlocked) {
             view = 'leaderboard';
@@ -480,7 +479,6 @@
         fetchData();
     }
 
-    // Input Box Validation Constraints (Numbers Only, Auto Max Caps)
     function setupInputFilters(mId, sId, msId) {
         const mInput = document.getElementById(mId);
         const sInput = document.getElementById(sId);
@@ -510,13 +508,11 @@
     setupInputFilters('e2m', 'e2s', 'e2ms');
     setupInputFilters('e3m', 'e3s', 'e3ms');
 
-    // Handle initial clicks/focus events on the driver input bar
     function handleNameFocus() {
         const query = document.getElementById('playerName').value.trim().toLowerCase();
         filterEmbeddedPanel(query);
     }
 
-    // Dynamic live name matching registration calculator
     function evaluatePlayerTier() {
         const inputElement = document.getElementById('playerName');
         const query = inputElement.value.trim().toLowerCase();
@@ -526,7 +522,6 @@
 
         if (isEventFinished || !tierLabel || !submitBtn) return;
 
-        // Dynamic Filtering of our custom structural list element rows
         filterEmbeddedPanel(query);
 
         if (query && registeredPlayersCache.has(query)) {
@@ -549,7 +544,6 @@
         }
     }
 
-    // Refreshes structural options inside the embedded dropdown site container
     function populateEmbeddedPanel() {
         const panel = document.getElementById('embeddedDriversPanel');
         if (!panel) return;
@@ -570,13 +564,11 @@
         panel.innerHTML = panelHtml;
     }
 
-    // Inline structural element processing logic for user matching updates
     function filterEmbeddedPanel(query) {
         const panel = document.getElementById('embeddedDriversPanel');
         const rows = panel.getElementsByClassName('embedded-option-row');
         const inputElement = document.getElementById('playerName');
         
-        // If there are rows and no search filter query, display all options by default
         if (rows.length === 0) {
             panel.classList.add('hidden');
             inputElement.style.borderRadius = "6px";
@@ -603,12 +595,10 @@
         }
     }
 
-    // Sets form value when a user selects a structural element choice row
     function selectEmbeddedDriver(name) {
         const inputElement = document.getElementById('playerName');
         inputElement.value = name;
         
-        // Instantly close the site dropdown wrapper component element
         document.getElementById('embeddedDriversPanel').classList.add('hidden');
         inputElement.style.borderRadius = "6px";
         
@@ -635,7 +625,6 @@
         document.getElementById(msId).value = parts[2] || "";
     }
 
-    // Submit Action Form Handler
     document.getElementById('entryForm').addEventListener('submit', function(e) {
         e.preventDefault();
         if (isEventFinished) {
@@ -672,7 +661,6 @@
         }).catch(() => { showErrorModal("Network Error", "Failed to save registration."); btn.disabled = false; });
     });
 
-    // Core Spreadsheet Parser & Leaderboard Render Loop
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
             rawEntriesDataset = data; 
@@ -804,7 +792,6 @@
         if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
         
-        // Target the save button inside the modal and ensure it is reset
         const saveBtn = document.querySelector('#editModal button[onclick="saveEdit()"]');
         if (saveBtn) {
             saveBtn.disabled = false;
@@ -824,7 +811,6 @@
 
     function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 
-    // Save Edit Record Module + Smart Tier-Correction Failsafe
     function saveEdit() {
         if (!isUnlocked) return;
         
@@ -882,7 +868,6 @@
         });
     }
 
-    // Delete Log Record Validation Module
     function deleteEntry(btn, rowId, name, type) {
         if (!isUnlocked) return;
 
@@ -928,7 +913,6 @@
         }).then(() => { fetchData(); }).catch(() => { showErrorModal("Deletion Error", "Could not complete data wipe command."); fetchData(); });
     }
 
-    // Intercept global layout click configurations to dismiss custom panel cleanly when focus shifts away
     document.addEventListener('click', function(e) {
         const inputElement = document.getElementById('playerName');
         const panel = document.getElementById('embeddedDriversPanel');
@@ -938,7 +922,6 @@
         }
     });
 
-    // Initialize Global Page Core Triggers
     updateCountdown();
     setInterval(updateCountdown, 1000);
     checkSavedAuth(); 
