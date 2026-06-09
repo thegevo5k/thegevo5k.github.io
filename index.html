@@ -290,6 +290,7 @@
 </div>
 
 <script>
+    // Updated API URL Endpoint
     const API_URL = "https://script.google.com/macros/s/AKfycby0F5MTfghVuBVbFkwWt7EfmSXZCy3meuzJabBCsXDoWubvZmpejqAFwvVVPDg5eDS9mQ/exec"; 
     
     let deleteTimeouts = {};
@@ -302,8 +303,10 @@
     let headerClickTimeout;
     let isUnlocked = false;
 
+    // Tournament End Timestamp (June 9, 2026 at 11:00 PM CST)
     const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
 
+    // Live countdown module countdown clock tracker
     function updateCountdown() {
         const now = new Date();
         const diff = TARGET_DATE - now;
@@ -334,6 +337,7 @@
         return false;
     }
 
+    // Secret Admin Panel Handler (5 Clicks on Title Header)
     function handleHeaderClick() {
         headerClickCount++;
         clearTimeout(headerClickTimeout);
@@ -405,6 +409,7 @@
         }
     }
 
+    // Dynamic View Switcher (Kiosk Dashboard vs Admin Form Panel Management)
     function switchView(view) {
         if (!isUnlocked) {
             view = 'leaderboard';
@@ -433,6 +438,7 @@
         fetchData();
     }
 
+    // Input Box Validation Constraints (Numbers Only, Auto Max Caps)
     function setupInputFilters(mId, sId, msId) {
         const mInput = document.getElementById(mId);
         const sInput = document.getElementById(sId);
@@ -462,6 +468,7 @@
     setupInputFilters('e2m', 'e2s', 'e2ms');
     setupInputFilters('e3m', 'e3s', 'e3ms');
 
+    // Dynamic live name matching registration calculator
     function evaluatePlayerTier() {
         const nameInput = document.getElementById('playerName').value.trim().toLowerCase();
         const typeField = document.getElementById('entryType');
@@ -503,6 +510,7 @@
         document.getElementById(msId).value = parts[2] || "";
     }
 
+    // Submit Action Form Handler
     document.getElementById('entryForm').addEventListener('submit', function(e) {
         e.preventDefault();
         if (isEventFinished) {
@@ -539,6 +547,7 @@
         }).catch(() => { showErrorModal("Network Error", "Failed to save registration."); btn.disabled = false; });
     });
 
+    // Core Spreadsheet Parser & Leaderboard Render Loop
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
             rawEntriesDataset = data; 
@@ -664,7 +673,10 @@
         if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
         document.getElementById('editName').value = name;
+        
+        // Storing the original name and tier to make smart context checks on save
         document.getElementById('editOriginalType').value = type;
+        document.getElementById('editName').setAttribute('data-orig-name', name.trim().toLowerCase());
         
         deconstructTimeString(t1, 'e1m', 'e1s', 'e1ms');
         deconstructTimeString(t2, 'e2m', 'e2s', 'e2ms');
@@ -675,21 +687,25 @@
 
     function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 
+    // Save Edit Record Module + Smart Tier-Correction Failsafe
     function saveEdit() {
         if (!isUnlocked) return;
         
         const targetName = document.getElementById('editName').value.trim();
         const targetNameNormalized = targetName.toLowerCase();
+        const originalNameNormalized = document.getElementById('editName').getAttribute('data-orig-name');
         let originalType = document.getElementById('editOriginalType').value;
         
         let finalType = originalType;
-        let finalAmount = null; // Leaving null tells backend not to alter previous amount unless swapped
+        let finalAmount = null; 
 
-        // Failsafe: Check if changing a misspelled name to an already registered player
-        if (targetNameNormalized && registeredPlayersCache.has(targetNameNormalized)) {
+        // REFINED FAILSAFE CONDITIONS:
+        // Only trigger an automatic $2 Retry swap if the user CHANGED the name field to a new string 
+        // AND that brand new name string matches a person who already has an active Initial account profile.
+        if (targetNameNormalized !== originalNameNormalized && registeredPlayersCache.has(targetNameNormalized)) {
             if (originalType === 'Initial') {
                 finalType = 'Retry';
-                finalAmount = 2; // Auto-downgrade calculation to retry price threshold ($2)
+                finalAmount = 2; 
             }
         }
 
@@ -717,6 +733,7 @@
         }).then(() => { closeEditModal(); fetchData(); });
     }
 
+    // Delete Log Record Validation Module
     function deleteEntry(btn, rowId, name, type) {
         if (!isUnlocked) return;
 
@@ -762,10 +779,11 @@
         }).then(() => { fetchData(); }).catch(() => { showErrorModal("Deletion Error", "Could not complete data wipe command."); fetchData(); });
     }
 
+    // Initialize Global Page Core Triggers
     updateCountdown();
     setInterval(updateCountdown, 1000);
     checkSavedAuth(); 
-    setInterval(fetchData, 10000);
+    setInterval(fetchData, 10000); 
 </script>
 </body>
 </html>
