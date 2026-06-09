@@ -367,7 +367,6 @@
         }
     }
 
-    /* HTML Error Engine Methods */
     function showErrorModal(title, msg) {
         document.getElementById('errorModalTitle').innerText = title;
         document.getElementById('errorModalMessage').innerText = msg;
@@ -569,12 +568,15 @@
             if (currentView === 'leaderboard') {
                 let uniquePlayers = {};
                 rawProcessedItems.forEach(item => {
-                    let normalizedName = item.name.trim().toLowerCase();
-                    if (!uniquePlayers[normalizedName]) {
-                        uniquePlayers[normalizedName] = item;
-                    } else {
-                        if (item.bestMs < uniquePlayers[normalizedName].bestMs) {
-                            uniquePlayers[normalizedName] = item; 
+                    // Check: Only map player to public display dataset if they actually have a set time record
+                    if (item.bestMs !== Infinity) {
+                        let normalizedName = item.name.trim().toLowerCase();
+                        if (!uniquePlayers[normalizedName]) {
+                            uniquePlayers[normalizedName] = item;
+                        } else {
+                            if (item.bestMs < uniquePlayers[normalizedName].bestMs) {
+                                uniquePlayers[normalizedName] = item; 
+                            }
                         }
                     }
                 });
@@ -586,7 +588,7 @@
             finalRenderList.sort((a, b) => a.bestMs - b.bestMs);
 
             const container = document.getElementById('leaderboard-container');
-            container.innerHTML = finalRenderList.length ? "" : "<p style='color:var(--text-muted);text-align:center;'>No registrations yet.</p>";
+            container.innerHTML = finalRenderList.length ? "" : "<p style='color:var(--text-muted);text-align:center;'>No active times registered yet.</p>";
             
             finalRenderList.forEach((p, idx) => {
                 let rank = idx + 1;
@@ -684,7 +686,6 @@
     function deleteEntry(btn, rowId, name, type) {
         if (!isUnlocked) return;
 
-        // Failsafe validation block - Now routes to the custom HTML Modal
         if (type === 'Initial') {
             const normalizedTarget = name.trim().toLowerCase();
             const hasDependentRetries = rawEntriesDataset.some(entry => 
@@ -699,7 +700,6 @@
                     `"${name}" has logged retry entries. You must remove all associated retries before deleting their Initial registration.`
                 );
                 
-                // Revert confirm styling safely
                 if (btn.classList.contains('confirm-state')) {
                     btn.classList.remove('confirm-state');
                     btn.innerText = "🗑️ Delete";
