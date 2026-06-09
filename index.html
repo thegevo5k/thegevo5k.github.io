@@ -297,6 +297,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
+    let uniqueDisplayNames = []; // Cache to hold exact casing of player names for autofill list
     let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
@@ -490,6 +491,30 @@
         }
     }
 
+    // Dynamically injects and refreshes the HTML datalist option entries
+    function updatePlayerAutofillList() {
+        let datalist = document.getElementById('playerAutofillList');
+        if (!datalist) {
+            datalist = document.createElement('datalist');
+            datalist.id = 'playerAutofillList';
+            document.body.appendChild(datalist);
+            
+            // Link datalist to your driver input field dynamically
+            const nameInput = document.getElementById('playerName');
+            if (nameInput) {
+                nameInput.setAttribute('list', 'playerAutofillList');
+            }
+        }
+        
+        // Clear old dropdown options and append fresh sorted ones
+        datalist.innerHTML = "";
+        uniqueDisplayNames.sort().forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            datalist.appendChild(option);
+        });
+    }
+
     function parseTimeToMs(m, s, ms) {
         if (!m && !s && !ms) return null;
         let secVal = parseInt(s) || 0;
@@ -554,12 +579,17 @@
             let total = 0;
             let rawProcessedItems = [];
             let newPlayersCache = new Set();
+            let newDisplayNames = [];
 
             data.forEach(entry => {
                 total += parseFloat(entry.amount || 0);
                 
                 if (entry.type === 'Initial' && entry.name) {
-                    newPlayersCache.add(entry.name.trim().toLowerCase());
+                    const trimmedName = entry.name.trim();
+                    newPlayersCache.add(trimmedName.toLowerCase());
+                    if (!newDisplayNames.includes(trimmedName)) {
+                        newDisplayNames.push(trimmedName);
+                    }
                 }
 
                 let runCount = 0;
@@ -580,7 +610,11 @@
             });
 
             registeredPlayersCache = newPlayersCache;
+            uniqueDisplayNames = newDisplayNames;
+            
             evaluatePlayerTier(); 
+            updatePlayerAutofillList(); // Re-render drop down names cache list
+            
             document.getElementById('donation-total').innerText = `$${total}`;
             
             let finalRenderList = [];
@@ -673,7 +707,6 @@
         if (!isUnlocked) return;
         document.getElementById('editRowId').value = rowId;
         
-        // Target the save button inside the modal and ensure it is reset
         const saveBtn = document.querySelector('#editModal button[onclick="saveEdit()"]');
         if (saveBtn) {
             saveBtn.disabled = false;
