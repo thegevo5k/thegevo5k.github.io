@@ -106,10 +106,14 @@
             text-align: center;
         }
         .html-popup h3 { margin-bottom: 12px; font-size: 1.4rem; color: #fff; }
-        .html-popup p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px; }
+        .html-popup p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4; }
         .html-popup input { text-align: center; font-size: 1.5rem; letter-spacing: 6px; margin-bottom: 15px; font-family: monospace; }
         .popup-actions { display: flex; gap: 10px; }
         .popup-actions button { width: 50%; }
+
+        /* Error specific styling variations */
+        .html-popup.error-style h3 { color: var(--accent-color); }
+        .html-popup.error-style button { width: 100%; background-color: #3a3a3a; }
 
         body.kiosk-mode {
             height: 100vh;
@@ -132,14 +136,12 @@
     <h1 id="mainheader" onclick="handleHeaderClick()">MK8D Championship</h1>
     <div class="sub-header" id="subheader">Fundraiser for Children's Miracle Network</div>
 
-    <!-- Unified Width Navigation Tabs -->
     <div class="nav-tabs hidden" id="adminTabs">
         <button class="nav-btn active" id="tabMain" onclick="switchView('main')">Standard</button>
         <button class="nav-btn" id="tabLeaderboard" onclick="switchView('leaderboard')">Leaderboard</button>
         <button class="lock-btn" onclick="lockConsole()">Lock 🔒</button>
     </div>
 
-    <!-- Live Event Counter -->
     <div class="countdown-container">
         <div id="countdown-label">Time Remaining Until Close:</div>
         <div id="countdown-display" class="countdown-time">Calculating...</div>
@@ -150,7 +152,6 @@
         <div class="donation-total" id="donation-total">$0</div>
     </div>
 
-    <!-- MAIN REGISTRATION FORM -->
     <div class="card view-section hidden" id="registrationSection">
         <h3>New Run Registration</h3>
         <form id="entryForm">
@@ -200,7 +201,6 @@
         </form>
     </div>
 
-    <!-- LIVE LEADERBOARD -->
     <div class="card view-section" id="leaderboardSection">
         <div style="margin-bottom: 12px; flex-shrink: 0;">
             <h3 id="board-title">Championship Leaderboard</h3>
@@ -212,7 +212,6 @@
     </div>
 </div>
 
-<!-- NATIVE HTML PIN ACCESS POPUP -->
 <div id="pinModal" class="modal-backdrop hidden">
     <div class="html-popup">
         <h3>Console Locked</h3>
@@ -225,7 +224,16 @@
     </div>
 </div>
 
-<!-- COMPACT EDIT MODAL -->
+<div id="errorModal" class="modal-backdrop hidden">
+    <div class="html-popup error-style">
+        <h3 id="errorModalTitle">Operation Blocked</h3>
+        <p id="errorModalMessage">Detailed failure notification details go here.</p>
+        <div class="popup-actions">
+            <button onclick="closeErrorModal()">Acknowledge</button>
+        </div>
+    </div>
+</div>
+
 <div id="editModal" class="card hidden" style="position: fixed; top: 5%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; z-index: 100; box-shadow: 0 0 30px rgba(0,0,0,0.9); border-color: var(--accent-color); max-height: 90vh; overflow-y: auto;">
     <h3>Quick Edit Entry</h3>
     <input type="hidden" id="editRowId">
@@ -277,7 +285,7 @@
     let currentView = 'leaderboard'; 
     let isEventFinished = false;
     let registeredPlayersCache = new Set(); 
-    let rawEntriesDataset = []; // Global store for local dependency checks
+    let rawEntriesDataset = []; 
     
     let headerClickCount = 0;
     let headerClickTimeout;
@@ -353,10 +361,21 @@
             closePinModal();
             switchView('main');
         } else {
-            alert("Incorrect access signature PIN.");
+            showErrorModal("Access Denied", "Incorrect access signature PIN.");
             inputField.value = "";
             inputField.focus();
         }
+    }
+
+    /* HTML Error Engine Methods */
+    function showErrorModal(title, msg) {
+        document.getElementById('errorModalTitle').innerText = title;
+        document.getElementById('errorModalMessage').innerText = msg;
+        document.getElementById('errorModal').classList.remove('hidden');
+    }
+
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.add('hidden');
     }
 
     function lockConsole() {
@@ -477,7 +496,7 @@
     document.getElementById('entryForm').addEventListener('submit', function(e) {
         e.preventDefault();
         if (isEventFinished) {
-            alert("The registration period has ended!");
+            showErrorModal("Registration Closed", "The registration period has ended!");
             return;
         }
 
@@ -507,12 +526,12 @@
             evaluatePlayerTier(); 
             btn.disabled = false;
             fetchData();
-        }).catch(() => { alert("Error saving."); btn.disabled = false; });
+        }).catch(() => { showErrorModal("Network Error", "Failed to save registration."); btn.disabled = false; });
     });
 
     function fetchData() {
         fetch(API_URL).then(res => res.json()).then(data => {
-            rawEntriesDataset = data; // Cache globally to handle structural constraint calculations
+            rawEntriesDataset = data; 
             let total = 0;
             let rawProcessedItems = [];
             let newPlayersCache = new Set();
@@ -665,7 +684,7 @@
     function deleteEntry(btn, rowId, name, type) {
         if (!isUnlocked) return;
 
-        // Failsafe validation block
+        // Failsafe validation block - Now routes to the custom HTML Modal
         if (type === 'Initial') {
             const normalizedTarget = name.trim().toLowerCase();
             const hasDependentRetries = rawEntriesDataset.some(entry => 
@@ -675,8 +694,12 @@
             );
 
             if (hasDependentRetries) {
-                alert(`Operation blocked! "${name}" has logged retry entries. You must remove all associated retries before deleting their Initial registration.`);
-                // Reset visual confirmation system state if active
+                showErrorModal(
+                    "Operation Blocked", 
+                    `"${name}" has logged retry entries. You must remove all associated retries before deleting their Initial registration.`
+                );
+                
+                // Revert confirm styling safely
                 if (btn.classList.contains('confirm-state')) {
                     btn.classList.remove('confirm-state');
                     btn.innerText = "🗑️ Delete";
@@ -702,7 +725,7 @@
         fetch(API_URL, {
             method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "delete", rowId: rowId })
-        }).then(() => { fetchData(); }).catch(() => { alert("Delete failed."); fetchData(); });
+        }).then(() => { fetchData(); }).catch(() => { showErrorModal("Deletion Error", "Could not complete data wipe command."); fetchData(); });
     }
 
     updateCountdown();
