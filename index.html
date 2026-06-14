@@ -348,7 +348,7 @@
     let headerClickTimeout;
     let isUnlocked = false;
 
-    const TARGET_DATE = new Date("2026-06-09T23:00:00-05:00"); 
+    const TARGET_DATE = new Date("2026-06-19T17:00:00-05:00"); 
 
     function updateCountdown() {
         const now = new Date();
@@ -411,7 +411,7 @@
 
     function verifyAdminPin() {
         const inputField = document.getElementById('pinInput');
-        if (inputField.value === "0039") {
+        if (inputField.value === "0072") {
             isUnlocked = true;
             sessionStorage.setItem("admin_authed", "true");
             document.getElementById('adminTabs').classList.remove('hidden');
