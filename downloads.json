@@ -14,13 +14,5 @@
     "requirements": [
       {"sku": "WPS-DEP-01", "note": "Required base pack"}
     ]
-    "requirements": [
-    {
-      "name": "Amtrak SDP40F Loco Add-On on Steam",
-      "url": "https://store.steampowered.com/...",
-      "note": "Base locomotive required",
-      "image": "https://shared.akamai.steamstatic.com/...thumbnail.jpg"
-    }
-  ]
   }
 ]
