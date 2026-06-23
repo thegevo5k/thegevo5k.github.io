@@ -209,3 +209,31 @@ footer {
   color: #777;
   margin-top: 4rem;
 }
+
+/* ==================== ITEM DETAIL PAGE ==================== */
+
+.item-detail-page {
+  background: var(--dark);
+  min-height: 100vh;
+  padding-top: 20px;
+}
+
+#detail-content h2 {
+  color: var(--gold);
+  margin-top: 0;
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 20px 0;
+}
+
+/* Make sure images look good on detail page */
+#slideshow img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
