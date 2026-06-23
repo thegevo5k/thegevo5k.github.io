@@ -9,7 +9,6 @@ async function loadDownloads() {
 
     renderHomepage();
 
-    // Check if we should show a specific item
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
     if (itemSku) {
@@ -21,6 +20,10 @@ async function loadDownloads() {
   } catch (error) {
     console.error("Could not load downloads.json", error);
   }
+}
+
+function getImagePath(sku, number = 1) {
+  return `images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
 }
 
 function renderHomepage() {
@@ -55,7 +58,7 @@ function renderSection(containerId, items) {
   items.forEach(item => {
     const div = document.createElement('div');
     div.className = 'download-item';
-    const coverSrc = `images/${item.sku}/01.jpg`;
+    const coverSrc = getImagePath(item.sku, 1);
     
     div.innerHTML = `
       <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
@@ -77,7 +80,6 @@ function showItemDetail(sku) {
   mainContent.style.display = 'none';
   detailPage.style.display = 'block';
 
-  // Update URL
   window.history.pushState({}, '', `?item=${sku}`);
 
   let requirementsHTML = '';
@@ -105,10 +107,7 @@ function showItemDetail(sku) {
     </div>
   `;
 
-  // Render images
   renderItemImages(item);
-
-  // Render requirements if any
   if (item.requirements) renderRequirements(item.requirements);
 }
 
@@ -118,7 +117,7 @@ function renderItemImages(item) {
 
   let imagesHTML = '';
   for (let i = 1; i <= (item.imageCount || 1); i++) {
-    const src = `images/${item.sku}/${i.toString().padStart(2, '0')}.jpg`;
+    const src = getImagePath(item.sku, i);
     imagesHTML += `<img src="${src}" class="modal-main-image" style="margin: 10px 0; max-width: 100%; border-radius: 10px;" onerror="this.style.display='none'">`;
   }
 
@@ -138,33 +137,28 @@ function renderRequirements(requirements) {
     div.style.cursor = 'pointer';
 
     if (dep) {
-      // Internal site item
+      // Internal
       div.innerHTML = `
-        <img src="images/${dep.sku}/01.jpg" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
+        <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <h3>${dep.name}</h3>
         <p>${req.note || ''}</p>
       `;
       div.onclick = () => showItemDetail(dep.sku);
-    } 
-    else if (req.url) {
-      // External link
+    } else if (req.url) {
+      // External
       const imgSrc = req.image || 'https://via.placeholder.com/340x200/1a1a1a/888888?text=External+Link';
-      
       div.innerHTML = `
         <img src="${imgSrc}" alt="${req.name || 'External'}" class="item-image" onerror="this.style.display='none'">
         <h3>${req.name || 'External Requirement'}</h3>
         <p>${req.note || ''}</p>
         <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
       `;
-      
-      // Clean external link handler
       div.onclick = (e) => {
         e.stopPropagation();
         window.open(req.url, '_blank', 'noopener,noreferrer');
       };
-    } 
-    else {
-      return; // skip invalid
+    } else {
+      return;
     }
     
     grid.appendChild(div);
@@ -177,7 +171,6 @@ function goBackToHome() {
   window.history.pushState({}, '', window.location.pathname);
 }
 
-// Handle browser back/forward buttons
 window.onpopstate = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const itemSku = urlParams.get('item');
