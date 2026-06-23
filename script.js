@@ -77,8 +77,12 @@ function showItemDetail(sku) {
   const detailPage = document.getElementById('item-detail');
   const mainContent = document.getElementById('main-content');
 
+  // Smooth scroll to top so user isn't stuck at the bottom layout height
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
   mainContent.style.display = 'none';
   detailPage.style.display = 'block';
+  detailPage.style.animation = 'fadeInUp 0.4s ease-out';
 
   window.history.pushState({}, '', `?item=${sku}`);
 
@@ -107,11 +111,23 @@ function showItemDetail(sku) {
     </div>
   `;
 
-  // Render with small delay to ensure DOM is ready
   setTimeout(() => {
     renderItemImages(item);
     if (item.requirements) renderRequirements(item.requirements);
   }, 50);
+}
+
+function goBackToHome() {
+  const detailPage = document.getElementById('item-detail');
+  const mainContent = document.getElementById('main-content');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  detailPage.style.display = 'none';
+  mainContent.style.display = 'block';
+  mainContent.style.animation = 'fadeInUp 0.4s ease-out';
+  
+  window.history.pushState({}, '', window.location.pathname);
 }
 
 let currentImageIndex = 1;
@@ -151,14 +167,33 @@ function showCurrentDetailImage() {
 function nextImage() {
   if (!currentDetailItem) return;
   currentImageIndex = (currentImageIndex % (currentDetailItem.imageCount || 1)) + 1;
-  showCurrentDetailImage();
+  transitionSlide();
 }
 
 function prevImage() {
   if (!currentDetailItem) return;
   currentImageIndex--;
   if (currentImageIndex < 1) currentImageIndex = (currentDetailItem.imageCount || 1);
-  showCurrentDetailImage();
+  transitionSlide();
+}
+
+// Handles the fluid animation sequence between frame changes
+function transitionSlide() {
+  const img = document.getElementById('detail-main-image');
+  if (!img) return;
+
+  // Add the class that reduces opacity and scale
+  img.classList.add('slide-changing');
+
+  // Wait for the fade-out animation to finish before switching the asset src
+  setTimeout(() => {
+    showCurrentDetailImage();
+    
+    // Fade back in smoothly once asset begins showing
+    img.onload = () => {
+      img.classList.remove('slide-changing');
+    };
+  }, 200); 
 }
 
 function renderRequirements(requirements) {

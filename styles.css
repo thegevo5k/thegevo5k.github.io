@@ -246,3 +246,49 @@ footer {
   background: #E8B923;
   color: #111;
 }
+
+/* ==================== FLUID ANIMATIONS ==================== */
+
+/* Smooth fade-in for catalog cards when loading the site */
+.download-item {
+  animation: fadeInUp 0.5s ease forward;
+  opacity: 0;
+}
+
+/* Staggered load animation using index tracking if needed, or simple entry */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply animations to items instantly as they appear */
+#locomotives-grid .download-item { animation-delay: 0.1s; animation-fill-mode: forwards; }
+#quickdrives-grid .download-item { animation-delay: 0.2s; animation-fill-mode: forwards; }
+#dependencies-grid .download-item { animation-delay: 0.3s; animation-fill-mode: forwards; }
+
+/* Slideshow Fluidity */
+#detail-main-image {
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Class used by JavaScript to momentarily hide/shrink image during a slide swap */
+.slide-changing {
+  opacity: 0 !important;
+  transform: scale(0.98) !important;
+}
+
+/* Make arrow buttons feel responsive */
+.arrow-btn {
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.arrow-btn:active {
+  transform: translateY(-50%) scale(0.9);
+}
