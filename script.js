@@ -133,30 +133,38 @@ function renderRequirements(requirements) {
 
   requirements.forEach(req => {
     const dep = allDownloads.find(d => d.sku === req.sku);
-    
     const div = document.createElement('div');
     div.className = 'download-item';
     div.style.cursor = 'pointer';
 
     if (dep) {
-      // Internal item
+      // Internal site item
       div.innerHTML = `
         <img src="images/${dep.sku}/01.jpg" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <h3>${dep.name}</h3>
         <p>${req.note || ''}</p>
       `;
       div.onclick = () => showItemDetail(dep.sku);
-    } else if (req.url) {
+    } 
+    else if (req.url) {
       // External link
+      const imgSrc = req.image || 'https://via.placeholder.com/340x200/1a1a1a/888888?text=External+Link';
+      
       div.innerHTML = `
-        <img src="${req.image || 'https://via.placeholder.com/300x200?text=External'}" alt="${req.name}" class="item-image" onerror="this.style.display='none'">
+        <img src="${imgSrc}" alt="${req.name || 'External'}" class="item-image" onerror="this.style.display='none'">
         <h3>${req.name || 'External Requirement'}</h3>
         <p>${req.note || ''}</p>
-        <small style="color:var(--gold);">External Link ↗</small>
+        <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
       `;
-      div.onclick = () => window.open(req.url, '_blank');
-    } else {
-      return;
+      
+      // Clean external link handler
+      div.onclick = (e) => {
+        e.stopPropagation();
+        window.open(req.url, '_blank', 'noopener,noreferrer');
+      };
+    } 
+    else {
+      return; // skip invalid
     }
     
     grid.appendChild(div);
