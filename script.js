@@ -85,6 +85,7 @@ function showItemDetail(sku) {
   detailPage.style.animation = 'fadeInUp 0.4s ease-out';
 
   window.history.pushState({}, '', `?item=${sku}`);
+  document.title = `We Play Simulators | ${item.name}`;
 
   let requirementsHTML = '';
   if (item.requirements && item.requirements.length > 0) {
@@ -135,6 +136,7 @@ function goBackToHome() {
   mainContent.style.animation = 'fadeInUp 0.4s ease-out';
   
   window.history.pushState({}, '', window.location.pathname);
+  document.title = 'We Play Simulators';
 }
 
 let currentImageIndex = 1;
@@ -326,12 +328,6 @@ function renderLinkPreviewCard(grid, url, linkIcon) {
     });
 }
 
-function goBackToHome() {
-  document.getElementById('item-detail').style.display = 'none';
-  document.getElementById('main-content').style.display = 'block';
-  window.history.pushState({}, '', window.location.pathname);
-}
-
 window.onpopstate = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const itemSku = urlParams.get('item');
@@ -341,6 +337,7 @@ window.onpopstate = function() {
   } else {
     document.getElementById('item-detail').style.display = 'none';
     document.getElementById('main-content').style.display = 'block';
+    document.title = 'We Play Simulators';
   }
 };
 
@@ -362,5 +359,6 @@ window.addEventListener('hashchange', () => {
     // Clean up the URL query parameters so it doesn't still say ?item=WPS-ALC-01
     const targetHash = window.location.hash;
     window.history.pushState({}, '', window.location.pathname + targetHash);
+    document.title = 'We Play Simulators';
   }
 });
