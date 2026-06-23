@@ -259,7 +259,6 @@ function renderRequirements(requirements) {
       div.innerHTML = `
         <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <h3>${dep.name}</h3>
-        <p>${req.note || ''}</p>
       `;
       div.onclick = () => showItemDetail(dep.sku);
       grid.appendChild(div);
@@ -272,7 +271,6 @@ function renderRequirements(requirements) {
     div.innerHTML = `
       <div class="item-image link-preview-skeleton"></div>
       <h3 class="link-preview-title">Loading preview…</h3>
-      <p>${req.note || ''}</p>
       <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
     `;
     div.onclick = (e) => {
@@ -292,6 +290,12 @@ function renderRequirements(requirements) {
           imgEl.remove();
         }
         titleEl.textContent = data.title;
+
+        if (data.description) {
+          const descEl = document.createElement('p');
+          descEl.textContent = data.description;
+          titleEl.insertAdjacentElement('afterend', descEl);
+        }
       })
       .catch(() => {
         const titleEl = div.querySelector('.link-preview-title');
