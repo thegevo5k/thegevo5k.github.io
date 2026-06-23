@@ -118,25 +118,24 @@ function renderItemImages(item) {
   const container = document.getElementById('slideshow');
   if (!container) return;
 
-  container.innerHTML = ''; // Clear first
+  container.innerHTML = ''; // Clear out old contents
+  let loadedCount = 0;
 
   for (let i = 1; i <= (item.imageCount || 1); i++) {
     const img = document.createElement('img');
     img.src = getImagePath(item.sku, i);
-    // REMOVED: img.className = 'modal-main-image'; (This was hiding them with opacity: 0)
     
-    // Setting up styling for a clean vertical stacked gallery layout
-    img.style.display = 'block';
-    img.style.width = '100%';
-    img.style.height = 'auto';
-    img.style.margin = '0 auto 20px auto';
-    img.style.maxWidth = '100%';
-    img.style.borderRadius = '10px';
-    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
-    
+    img.onload = function() {
+      loadedCount++;
+      // Apply padding to the container only when the very first image successfully loads
+      if (loadedCount === 1) {
+        container.style.padding = '20px';
+      }
+    };
+
     img.onerror = function() {
       this.style.display = 'none';
-      console.log('Image failed to load:', this.src);
+      console.warn('Image failed to load:', this.src);
     };
     
     container.appendChild(img);

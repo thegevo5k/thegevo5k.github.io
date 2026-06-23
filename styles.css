@@ -149,7 +149,6 @@ h2 {
 
 .close:hover { color: #fff; }
 
-/* Find this section around line 133 in styles.css and update it */
 .slideshow-container {
   position: relative;
   width: 100%;
@@ -157,9 +156,22 @@ h2 {
   background: #111;
   border-radius: 10px;
   overflow: hidden;
-  display: block; /* Changed from flex to block so multiple images stack vertically */
-  padding: 15px;  /* Adds a nice internal padding around the stacked images */
-  box-sizing: border-box;
+  
+  /* Flex layout keeps it collapsed and centered if empty */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 0; /* Remove padding so it doesn't stay huge when empty */
+}
+
+.slideshow-container img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  display: block;
 }
 
 .modal-main-image {
@@ -228,14 +240,6 @@ footer {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin: 20px 0;
-}
-
-/* Make sure images look good on detail page */
-#slideshow img {
-  max-width: 100%;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
 .btn-small[onclick*="goBackToHome"] {
