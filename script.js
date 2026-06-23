@@ -107,8 +107,11 @@ function showItemDetail(sku) {
     </div>
   `;
 
-  renderItemImages(item);
-  if (item.requirements) renderRequirements(item.requirements);
+  // Render with small delay to ensure DOM is ready
+  setTimeout(() => {
+    renderItemImages(item);
+    if (item.requirements) renderRequirements(item.requirements);
+  }, 50);
 }
 
 function renderItemImages(item) {
