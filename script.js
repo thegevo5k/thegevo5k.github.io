@@ -252,12 +252,11 @@ function renderRequirements(requirements) {
 
   requirements.forEach(req => {
     const dep = allDownloads.find(d => d.sku === req.sku);
-    const div = document.createElement('div');
-    div.className = 'link-preview-item';
-    div.style.cursor = 'pointer';
 
     if (dep) {
-      // Internal dependency: link to the in-site detail page, no external fetch needed
+      const div = document.createElement('div');
+      div.className = 'link-preview-item';
+      div.style.cursor = 'pointer';
       div.innerHTML = `
         <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <div class="link-preview-text">
@@ -270,46 +269,54 @@ function renderRequirements(requirements) {
       return;
     }
 
-    if (!req.url) return;
-
-    let hostname = req.url;
-    try { hostname = new URL(req.url).hostname.replace('www.', ''); } catch (e) {}
-
-    // External requirement: show a loading skeleton, then fill in the auto-generated preview
-    div.innerHTML = `
-      <div class="link-preview-skeleton"></div>
-      <div class="link-preview-text">
-        <h3 class="link-preview-title">Loading preview… ${linkIcon}</h3>
-        <p class="link-preview-subtitle">${hostname}</p>
-      </div>
-    `;
-    div.onclick = (e) => {
-      e.stopPropagation();
-      window.open(req.url, '_blank', 'noopener,noreferrer');
-    };
-    grid.appendChild(div);
-
-    fetchLinkPreview(req.url)
-      .then(data => {
-        const imgEl = div.querySelector('.link-preview-skeleton');
-        const titleEl = div.querySelector('.link-preview-title');
-        const subtitleEl = div.querySelector('.link-preview-subtitle');
-
-        if (data.image) {
-          imgEl.outerHTML = `<img src="${data.image}" alt="${data.title}" class="item-image" onerror="this.style.display='none'">`;
-        } else {
-          imgEl.remove();
-        }
-        titleEl.innerHTML = `${data.title} ${linkIcon}`;
-        subtitleEl.textContent = data.description || hostname;
-      })
-      .catch(() => {
-        const titleEl = div.querySelector('.link-preview-title');
-        if (titleEl) titleEl.innerHTML = `${req.url} ${linkIcon}`;
-        const imgEl = div.querySelector('.link-preview-skeleton');
-        if (imgEl) imgEl.remove();
-      });
+    // Support either a single "url" string or a "urls" array on the same requirement entry
+    const urls = req.urls || (req.url ? [req.url] : []);
+    urls.forEach(url => renderLinkPreviewCard(grid, url, linkIcon));
   });
+}
+
+function renderLinkPreviewCard(grid, url, linkIcon) {
+  const div = document.createElement('div');
+  div.className = 'link-preview-item';
+  div.style.cursor = 'pointer';
+
+  let hostname = url;
+  try { hostname = new URL(url).hostname.replace('www.', ''); } catch (e) {}
+
+  // Show a loading skeleton, then fill in the auto-generated preview
+  div.innerHTML = `
+    <div class="link-preview-skeleton"></div>
+    <div class="link-preview-text">
+      <h3 class="link-preview-title">Loading preview… ${linkIcon}</h3>
+      <p class="link-preview-subtitle">${hostname}</p>
+    </div>
+  `;
+  div.onclick = (e) => {
+    e.stopPropagation();
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  grid.appendChild(div);
+
+  fetchLinkPreview(url)
+    .then(data => {
+      const imgEl = div.querySelector('.link-preview-skeleton');
+      const titleEl = div.querySelector('.link-preview-title');
+      const subtitleEl = div.querySelector('.link-preview-subtitle');
+
+      if (data.image) {
+        imgEl.outerHTML = `<img src="${data.image}" alt="${data.title}" class="item-image" onerror="this.style.display='none'">`;
+      } else {
+        imgEl.remove();
+      }
+      titleEl.innerHTML = `${data.title} ${linkIcon}`;
+      subtitleEl.textContent = data.description || hostname;
+    })
+    .catch(() => {
+      const titleEl = div.querySelector('.link-preview-title');
+      if (titleEl) titleEl.innerHTML = `${url} ${linkIcon}`;
+      const imgEl = div.querySelector('.link-preview-skeleton');
+      if (imgEl) imgEl.remove();
+    });
 }
 
 function goBackToHome() {
