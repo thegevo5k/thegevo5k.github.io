@@ -248,17 +248,22 @@ function renderRequirements(requirements) {
 
   grid.innerHTML = '';
 
+  const linkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`;
+
   requirements.forEach(req => {
     const dep = allDownloads.find(d => d.sku === req.sku);
     const div = document.createElement('div');
-    div.className = 'download-item link-preview-item';
+    div.className = 'link-preview-item';
     div.style.cursor = 'pointer';
 
     if (dep) {
       // Internal dependency: link to the in-site detail page, no external fetch needed
       div.innerHTML = `
         <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
-        <h3>${dep.name}</h3>
+        <div class="link-preview-text">
+          <h3 class="link-preview-title">${dep.name}</h3>
+          <p class="link-preview-subtitle">${dep.category || ''}</p>
+        </div>
       `;
       div.onclick = () => showItemDetail(dep.sku);
       grid.appendChild(div);
@@ -267,11 +272,16 @@ function renderRequirements(requirements) {
 
     if (!req.url) return;
 
+    let hostname = req.url;
+    try { hostname = new URL(req.url).hostname.replace('www.', ''); } catch (e) {}
+
     // External requirement: show a loading skeleton, then fill in the auto-generated preview
     div.innerHTML = `
-      <div class="item-image link-preview-skeleton"></div>
-      <h3 class="link-preview-title">Loading preview…</h3>
-      <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
+      <div class="link-preview-skeleton"></div>
+      <div class="link-preview-text">
+        <h3 class="link-preview-title">Loading preview… ${linkIcon}</h3>
+        <p class="link-preview-subtitle">${hostname}</p>
+      </div>
     `;
     div.onclick = (e) => {
       e.stopPropagation();
@@ -283,23 +293,19 @@ function renderRequirements(requirements) {
       .then(data => {
         const imgEl = div.querySelector('.link-preview-skeleton');
         const titleEl = div.querySelector('.link-preview-title');
+        const subtitleEl = div.querySelector('.link-preview-subtitle');
 
         if (data.image) {
           imgEl.outerHTML = `<img src="${data.image}" alt="${data.title}" class="item-image" onerror="this.style.display='none'">`;
         } else {
           imgEl.remove();
         }
-        titleEl.textContent = data.title;
-
-        if (data.description) {
-          const descEl = document.createElement('p');
-          descEl.textContent = data.description;
-          titleEl.insertAdjacentElement('afterend', descEl);
-        }
+        titleEl.innerHTML = `${data.title} ${linkIcon}`;
+        subtitleEl.textContent = data.description || hostname;
       })
       .catch(() => {
         const titleEl = div.querySelector('.link-preview-title');
-        if (titleEl) titleEl.textContent = req.url;
+        if (titleEl) titleEl.innerHTML = `${req.url} ${linkIcon}`;
         const imgEl = div.querySelector('.link-preview-skeleton');
         if (imgEl) imgEl.remove();
       });
