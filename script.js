@@ -124,10 +124,11 @@ function renderItemImages(item) {
   currentDetailItem = item;
   currentImageIndex = 1;
 
+  // Render the slider structure
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
-    <img id="detail-main-image" class="modal-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px;">
+    <img id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;">
   `;
 
   showCurrentDetailImage();
@@ -137,7 +138,9 @@ function showCurrentDetailImage() {
   const img = document.getElementById('detail-main-image');
   if (!img || !currentDetailItem) return;
 
+  // Set the source path
   img.src = getImagePath(currentDetailItem.sku, currentImageIndex);
+  img.style.display = 'block'; // Ensure it stays visible
   
   img.onerror = function() {
     console.warn('Image failed to load:', this.src);
