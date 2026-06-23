@@ -13,10 +13,8 @@
     "download_url": "#",
     "requirements": [
       {
-        "name": "Amtrak SDP40F on Steam",
         "url": "https://store.steampowered.com/app/XXXXX/",
-        "note": "Base locomotive required",
-        "image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/XXXXX/header.jpg"
+        "note": "Base locomotive required"
       }
     ]
   }

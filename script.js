@@ -196,6 +196,52 @@ function transitionSlide() {
   }, 200); 
 }
 
+// Simple persistent cache so we don't re-fetch the same preview every page load
+function getPreviewCache() {
+  try {
+    return JSON.parse(localStorage.getItem('linkPreviewCache') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function setPreviewCache(cache) {
+  try {
+    localStorage.setItem('linkPreviewCache', JSON.stringify(cache));
+  } catch (e) {
+    // localStorage full or unavailable; fail silently, just means no caching
+  }
+}
+
+async function fetchLinkPreview(url) {
+  const cache = getPreviewCache();
+  const cached = cache[url];
+
+  // Cache for 7 days
+  if (cached && (Date.now() - cached.fetchedAt) < 7 * 24 * 60 * 60 * 1000) {
+    return cached.data;
+  }
+
+  const apiUrl = `https://api.microlink.io/?url=${encodeURIComponent(url)}`;
+  const response = await fetch(apiUrl);
+  const json = await response.json();
+
+  if (json.status !== 'success') {
+    throw new Error('Preview fetch failed');
+  }
+
+  const data = {
+    title: json.data.title || url,
+    description: json.data.description || '',
+    image: (json.data.image && json.data.image.url) || (json.data.logo && json.data.logo.url) || null
+  };
+
+  cache[url] = { fetchedAt: Date.now(), data };
+  setPreviewCache(cache);
+
+  return data;
+}
+
 function renderRequirements(requirements) {
   const grid = document.getElementById('req-grid');
   if (!grid) return;
@@ -205,33 +251,54 @@ function renderRequirements(requirements) {
   requirements.forEach(req => {
     const dep = allDownloads.find(d => d.sku === req.sku);
     const div = document.createElement('div');
-    div.className = 'download-item';
+    div.className = 'download-item link-preview-item';
     div.style.cursor = 'pointer';
 
     if (dep) {
+      // Internal dependency: link to the in-site detail page, no external fetch needed
       div.innerHTML = `
         <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <h3>${dep.name}</h3>
         <p>${req.note || ''}</p>
       `;
       div.onclick = () => showItemDetail(dep.sku);
-    } else if (req.url) {
-      const imgSrc = req.image || 'https://via.placeholder.com/340x200/1a1a1a/888888?text=External+Link';
-      div.innerHTML = `
-        <img src="${imgSrc}" alt="${req.name || 'External'}" class="item-image" onerror="this.style.display='none'">
-        <h3>${req.name || 'External Requirement'}</h3>
-        <p>${req.note || ''}</p>
-        <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
-      `;
-      div.onclick = (e) => {
-        e.stopPropagation();
-        window.open(req.url, '_blank', 'noopener,noreferrer');
-      };
-    } else {
+      grid.appendChild(div);
       return;
     }
-    
+
+    if (!req.url) return;
+
+    // External requirement: show a loading skeleton, then fill in the auto-generated preview
+    div.innerHTML = `
+      <div class="item-image link-preview-skeleton"></div>
+      <h3 class="link-preview-title">Loading preview…</h3>
+      <p>${req.note || ''}</p>
+      <small style="color: var(--gold); display: block; margin-top: 8px;">↗ External Link</small>
+    `;
+    div.onclick = (e) => {
+      e.stopPropagation();
+      window.open(req.url, '_blank', 'noopener,noreferrer');
+    };
     grid.appendChild(div);
+
+    fetchLinkPreview(req.url)
+      .then(data => {
+        const imgEl = div.querySelector('.link-preview-skeleton');
+        const titleEl = div.querySelector('.link-preview-title');
+
+        if (data.image) {
+          imgEl.outerHTML = `<img src="${data.image}" alt="${data.title}" class="item-image" onerror="this.style.display='none'">`;
+        } else {
+          imgEl.remove();
+        }
+        titleEl.textContent = data.title;
+      })
+      .catch(() => {
+        const titleEl = div.querySelector('.link-preview-title');
+        if (titleEl) titleEl.textContent = req.url;
+        const imgEl = div.querySelector('.link-preview-skeleton');
+        if (imgEl) imgEl.remove();
+      });
   });
 }
 
