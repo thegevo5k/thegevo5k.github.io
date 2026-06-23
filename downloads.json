@@ -12,7 +12,12 @@
     "compatibility": "TSC 64-bit",
     "download_url": "#",
     "requirements": [
-      {"sku": "WPS-DEP-01", "note": "Required base pack"}
+      {
+        "name": "Amtrak SDP40F on Steam",
+        "url": "https://store.steampowered.com/app/XXXXX/",
+        "note": "Base locomotive required",
+        "image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/XXXXX/header.jpg"
+      }
     ]
   }
 ]
