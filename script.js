@@ -254,3 +254,22 @@ window.onpopstate = function() {
 };
 
 window.onload = loadDownloads;
+
+// Automatically return to the catalog if a nav bar shortcut link is clicked while viewing a product
+window.addEventListener('hashchange', () => {
+  const detailPage = document.getElementById('item-detail');
+  const mainContent = document.getElementById('main-content');
+  
+  // Only intercept if the user is actively viewing a product detail page
+  if (detailPage && detailPage.style.display === 'block') {
+    detailPage.style.display = 'none';
+    mainContent.style.display = 'block';
+    
+    // Smoothly apply our slide/fade entry animation to the catalog home grid
+    mainContent.style.animation = 'fadeInUp 0.4s ease-out';
+    
+    // Clean up the URL query parameters so it doesn't still say ?item=WPS-ALC-01
+    const targetHash = window.location.hash;
+    window.history.pushState({}, '', window.location.pathname + targetHash);
+  }
+});
