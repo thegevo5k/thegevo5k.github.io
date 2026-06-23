@@ -115,13 +115,24 @@ function renderItemImages(item) {
   const container = document.getElementById('slideshow');
   if (!container) return;
 
-  let imagesHTML = '';
-  for (let i = 1; i <= (item.imageCount || 1); i++) {
-    const src = getImagePath(item.sku, i);
-    imagesHTML += `<img src="${src}" class="modal-main-image" style="margin: 10px 0; max-width: 100%; border-radius: 10px;" onerror="this.style.display='none'">`;
-  }
+  container.innerHTML = ''; // Clear first
 
-  container.innerHTML = imagesHTML;
+  for (let i = 1; i <= (item.imageCount || 1); i++) {
+    const img = document.createElement('img');
+    img.src = getImagePath(item.sku, i);
+    img.className = 'modal-main-image';
+    img.style.margin = '10px 0';
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '10px';
+    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
+    
+    img.onerror = function() {
+      this.style.display = 'none';
+      console.log('Image failed to load:', this.src);
+    };
+    
+    container.appendChild(img);
+  }
 }
 
 function renderRequirements(requirements) {
@@ -137,7 +148,6 @@ function renderRequirements(requirements) {
     div.style.cursor = 'pointer';
 
     if (dep) {
-      // Internal
       div.innerHTML = `
         <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
         <h3>${dep.name}</h3>
@@ -145,7 +155,6 @@ function renderRequirements(requirements) {
       `;
       div.onclick = () => showItemDetail(dep.sku);
     } else if (req.url) {
-      // External
       const imgSrc = req.image || 'https://via.placeholder.com/340x200/1a1a1a/888888?text=External+Link';
       div.innerHTML = `
         <img src="${imgSrc}" alt="${req.name || 'External'}" class="item-image" onerror="this.style.display='none'">
