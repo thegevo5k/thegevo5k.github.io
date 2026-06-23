@@ -118,28 +118,51 @@ function renderItemImages(item) {
   const container = document.getElementById('slideshow');
   if (!container) return;
 
-  container.innerHTML = ''; // Clear out old contents
-  let loadedCount = 0;
+  container.innerHTML = `
+    <button onclick="prevImage()" class="arrow-btn left">←</button>
+    <button onclick="nextImage()" class="arrow-btn right">→</button>
+  `;
 
-  for (let i = 1; i <= (item.imageCount || 1); i++) {
-    const img = document.createElement('img');
-    img.src = getImagePath(item.sku, i);
-    
-    img.onload = function() {
-      loadedCount++;
-      // Apply padding to the container only when the very first image successfully loads
-      if (loadedCount === 1) {
-        container.style.padding = '20px';
-      }
-    };
+  // Create image element
+  const img = document.createElement('img');
+  img.id = 'detail-main-image';
+  img.className = 'modal-main-image';
+  img.style.maxHeight = '70vh';
+  container.appendChild(img);
 
-    img.onerror = function() {
-      this.style.display = 'none';
-      console.warn('Image failed to load:', this.src);
-    };
-    
-    container.appendChild(img);
+  window.currentImageIndex = 1;
+  window.currentItem = item;
+  showCurrentDetailImage();
+}
+
+function showCurrentDetailImage() {
+  const img = document.getElementById('detail-main-image');
+  if (!img || !window.currentItem) return;
+
+  img.src = getImagePath(window.currentItem.sku, window.currentImageIndex);
+  
+  img.onerror = function() {
+    this.style.display = 'none';
+    console.warn('Image failed to load:', this.src);
+  };
+}
+
+function nextImage() {
+  if (!window.currentItem) return;
+  window.currentImageIndex++;
+  if (window.currentImageIndex > (window.currentItem.imageCount || 1)) {
+    window.currentImageIndex = 1;
   }
+  showCurrentDetailImage();
+}
+
+function prevImage() {
+  if (!window.currentItem) return;
+  window.currentImageIndex--;
+  if (window.currentImageIndex < 1) {
+    window.currentImageIndex = (window.currentItem.imageCount || 1);
+  }
+  showCurrentDetailImage();
 }
 
 function renderRequirements(requirements) {

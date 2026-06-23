@@ -152,17 +152,14 @@ h2 {
 .slideshow-container {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   background: #111;
   border-radius: 10px;
   overflow: hidden;
-  
-  /* Flex layout keeps it collapsed and centered if empty */
+  min-height: 400px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 0; /* Remove padding so it doesn't stay huge when empty */
+  justify-content: center;
 }
 
 .slideshow-container img {
