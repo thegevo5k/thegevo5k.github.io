@@ -5,9 +5,10 @@ async function loadDownloads() {
     const response = await fetch(`downloads.json?t=${timestamp}`);
     const downloads = await response.json();
 
-    renderSection('routes-grid', downloads.filter(d => d.category === "Routes"));
+    // Updated categories - Locomotives first
     renderSection('locomotives-grid', downloads.filter(d => d.category === "Locomotives"));
-    renderSection('rollingstock-grid', downloads.filter(d => d.category === "Rolling Stock"));
+    renderSection('quickdrives-grid', downloads.filter(d => d.category === "Quick Drives"));
+    renderSection('dependencies-grid', downloads.filter(d => d.category === "Dependencies"));
 
     const lastUpdatedEl = document.getElementById('last-updated');
     if (lastUpdatedEl) lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
