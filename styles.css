@@ -149,17 +149,17 @@ h2 {
 
 .close:hover { color: #fff; }
 
+/* Find this section around line 133 in styles.css and update it */
 .slideshow-container {
   position: relative;
   width: 100%;
-  min-height: auto; /* Changed from 340px to auto */
   margin-bottom: 20px;
   background: #111;
   border-radius: 10px;
   overflow: hidden;
-  display: flex; /* Helps center and contain the image */
-  align-items: center;
-  justify-content: center;
+  display: block; /* Changed from flex to block so multiple images stack vertically */
+  padding: 15px;  /* Adds a nice internal padding around the stacked images */
+  box-sizing: border-box;
 }
 
 .modal-main-image {

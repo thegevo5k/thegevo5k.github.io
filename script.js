@@ -123,8 +123,13 @@ function renderItemImages(item) {
   for (let i = 1; i <= (item.imageCount || 1); i++) {
     const img = document.createElement('img');
     img.src = getImagePath(item.sku, i);
-    img.className = 'modal-main-image';
-    img.style.margin = '10px 0';
+    // REMOVED: img.className = 'modal-main-image'; (This was hiding them with opacity: 0)
+    
+    // Setting up styling for a clean vertical stacked gallery layout
+    img.style.display = 'block';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.margin = '0 auto 20px auto';
     img.style.maxWidth = '100%';
     img.style.borderRadius = '10px';
     img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
