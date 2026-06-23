@@ -88,7 +88,10 @@ function showItemDetail(sku) {
 
   let requirementsHTML = '';
   if (item.requirements && item.requirements.length > 0) {
-    requirementsHTML = `<h3>Requirements</h3><div class="requirements-grid" id="req-grid"></div>`;
+    requirementsHTML = `
+      <h3 class="detail-section-title">Requirements</h3>
+      <div class="requirements-grid" id="req-grid"></div>
+    `;
   }
 
   document.getElementById('detail-content').innerHTML = `
@@ -98,9 +101,13 @@ function showItemDetail(sku) {
 
     <div class="slideshow-container" id="slideshow" style="margin-bottom: 30px;"></div>
 
-    <p><strong>Version:</strong> ${item.version} | <strong>Size:</strong> ${item.size}</p>
-    <p><strong>Compatibility:</strong> ${item.compatibility}</p>
-    <p>${item.description}</p>
+    <div class="detail-meta">
+      <span class="meta-badge"><span class="meta-label">Version</span>${item.version}</span>
+      <span class="meta-badge"><span class="meta-label">Size</span>${item.size}</span>
+      <span class="meta-badge"><span class="meta-label">Compatibility</span>${item.compatibility}</span>
+    </div>
+
+    <p class="detail-description">${item.description}</p>
 
     ${requirementsHTML}
 

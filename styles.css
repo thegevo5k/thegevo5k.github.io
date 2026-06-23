@@ -239,6 +239,50 @@ footer {
   100% { background-position: -200% 0; }
 }
 
+/* ==================== DETAIL META / DESCRIPTION ==================== */
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+}
+
+.meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+.meta-label {
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detail-description {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  color: #ccc;
+  margin-bottom: 1.8rem;
+}
+
+.detail-section-title {
+  color: var(--gold);
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 10px;
+  margin-bottom: 0;
+}
+
 /* ==================== ITEM DETAIL PAGE ==================== */
 
 .item-detail-page {
