@@ -114,54 +114,47 @@ function showItemDetail(sku) {
   }, 50);
 }
 
+let currentImageIndex = 1;
+let currentDetailItem = null;
+
 function renderItemImages(item) {
   const container = document.getElementById('slideshow');
   if (!container) return;
 
+  currentDetailItem = item;
+  currentImageIndex = 1;
+
   container.innerHTML = `
     <button onclick="prevImage()" class="arrow-btn left">←</button>
     <button onclick="nextImage()" class="arrow-btn right">→</button>
+    <img id="detail-main-image" class="modal-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px;">
   `;
 
-  // Create image element
-  const img = document.createElement('img');
-  img.id = 'detail-main-image';
-  img.className = 'modal-main-image';
-  img.style.maxHeight = '70vh';
-  container.appendChild(img);
-
-  window.currentImageIndex = 1;
-  window.currentItem = item;
   showCurrentDetailImage();
 }
 
 function showCurrentDetailImage() {
   const img = document.getElementById('detail-main-image');
-  if (!img || !window.currentItem) return;
+  if (!img || !currentDetailItem) return;
 
-  img.src = getImagePath(window.currentItem.sku, window.currentImageIndex);
+  img.src = getImagePath(currentDetailItem.sku, currentImageIndex);
   
   img.onerror = function() {
-    this.style.display = 'none';
     console.warn('Image failed to load:', this.src);
+    this.style.display = 'none';
   };
 }
 
 function nextImage() {
-  if (!window.currentItem) return;
-  window.currentImageIndex++;
-  if (window.currentImageIndex > (window.currentItem.imageCount || 1)) {
-    window.currentImageIndex = 1;
-  }
+  if (!currentDetailItem) return;
+  currentImageIndex = (currentImageIndex % (currentDetailItem.imageCount || 1)) + 1;
   showCurrentDetailImage();
 }
 
 function prevImage() {
-  if (!window.currentItem) return;
-  window.currentImageIndex--;
-  if (window.currentImageIndex < 1) {
-    window.currentImageIndex = (window.currentItem.imageCount || 1);
-  }
+  if (!currentDetailItem) return;
+  currentImageIndex--;
+  if (currentImageIndex < 1) currentImageIndex = (currentDetailItem.imageCount || 1);
   showCurrentDetailImage();
 }
 
