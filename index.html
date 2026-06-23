@@ -20,29 +20,15 @@
     <a href="#dependencies">Dependencies</a>
   </nav>
 
-  <div class="container">
-
-    <section id="locomotives">
-      <h2>Locomotives</h2>
-      <div id="locomotives-grid" class="download-grid"></div>
-    </section>
-
-    <section id="quickdrives">
-      <h2>Quick Drives</h2>
-      <div id="quickdrives-grid" class="download-grid"></div>
-    </section>
-
-    <section id="dependencies">
-      <h2>Dependencies</h2>
-      <div id="dependencies-grid" class="download-grid"></div>
-    </section>
-
+  <div class="container" id="main-content">
+    <!-- Grid content loaded by JS -->
   </div>
 
-  <!-- Modal -->
-  <div id="itemModal" class="modal">
-    <div class="modal-content">
-      <div id="modal-content"></div>
+  <!-- Item Detail Page (hidden by default) -->
+  <div id="item-detail" class="item-detail-page" style="display: none;">
+    <div class="container">
+      <button onclick="goBackToHome()" class="btn-small" style="margin-bottom: 20px;">← Back to Catalog</button>
+      <div id="detail-content"></div>
     </div>
   </div>
 
