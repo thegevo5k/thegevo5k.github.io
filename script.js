@@ -89,9 +89,15 @@ function renderSection(containerId, items) {
     const div = document.createElement('div');
     div.className = 'download-item';
     const coverSrc = getImagePath(item.sku, 1);
-    
+    const categoryClass = item.category === "Locomotives" ? "locomotives"
+      : item.category === "Quick Drives" ? "quickdrives"
+      : "dependencies";
+
     div.innerHTML = `
-      <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
+      <div class="image-wrap">
+        <span class="category-badge ${categoryClass}">${item.category}</span>
+        <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
+      </div>
       <h3>${item.name}</h3>
       <p>${item.short}</p>
       <button onclick="showItemDetail('${item.sku}')" class="btn-small">View & Download</button>
