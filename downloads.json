@@ -41,5 +41,34 @@
         ]
       }
     ]
+  },
+  {
+    "id": 2,
+    "sku": "WPS-ALC-01-QD",
+    "category": "Quick Drives",
+    "name": "Amtrak ALC-42 Quick Drives",
+    "imageCount": 1,
+    "short": "A collection of 212 quick drive consists for the Amtrak ALC-42 Pack",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": [
+      {
+        "skus": [
+          "WPS-CHARGER-DEP",
+          "WPS-ALC-01"
+        ],
+        "urls": [
+          "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/",
+          "https://store.steampowered.com/app/2202020/Train_Simulator_E60_Electric_Locomotive_AddOn/",
+          "https://store.steampowered.com/app/222627/Train_Simulator_Amtrak_P42_DC_Empire_Builder_Loco_AddOn/",
+          "https://www.trainsimcommunity.com/mods/c1-train-sim-classic/c87-models/i1529-amtrak-viewliner-ii-baggages",
+          "https://www.trainsimcommunity.com/mods/c1-train-sim-classic/c77-enhancement-packs/i3499-amfleet-i-enhancement-pack",
+          "https://www.trainsimarchive.org/trurail-simulations/amtk-p42dc-ep"
+        ]
+      }
+    ]
   }
 ]
