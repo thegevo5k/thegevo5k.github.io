@@ -2,6 +2,44 @@
 let allDownloads = [];
 let searchTerm = '';
 
+// July 4, 2026, 12:00 AM EDT (UTC-4)
+const UNLOCK_TIME = new Date('2026-07-04T00:00:00-04:00').getTime();
+
+function initCountdown() {
+  const overlay = document.getElementById('countdown-overlay');
+  if (!overlay) return;
+
+  function tick() {
+    const now = Date.now();
+    const diff = UNLOCK_TIME - now;
+
+    if (diff <= 0) {
+      clearInterval(timerId);
+      overlay.style.transition = 'opacity 0.6s ease';
+      overlay.style.opacity = '0';
+      document.body.style.overflow = '';
+      setTimeout(() => overlay.remove(), 600);
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+  }
+
+  // Lock scrolling on the rest of the site while the overlay is showing
+  document.body.style.overflow = 'hidden';
+
+  let timerId = setInterval(tick, 1000);
+  tick();
+}
+
 async function loadDownloads() {
   try {
     const timestamp = new Date().getTime();
@@ -381,7 +419,10 @@ window.onpopstate = function() {
   }
 };
 
-window.onload = loadDownloads;
+window.onload = () => {
+  initCountdown();
+  loadDownloads();
+};
 
 // Automatically return to the catalog if a nav bar shortcut link is clicked while viewing a product
 window.addEventListener('hashchange', () => {
