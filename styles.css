@@ -118,9 +118,10 @@ h2 {
 
 .item-image {
   width: 100%;
+  aspect-ratio: 16 / 9;
   height: auto;
-  max-height: 160px;
-  object-fit: contain;
+  max-height: none;
+  object-fit: cover;
   background: #111;
   border-radius: 8px;
   margin-bottom: 0.8rem;
