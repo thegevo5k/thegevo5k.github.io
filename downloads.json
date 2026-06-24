@@ -5,7 +5,30 @@
     "category": "Locomotives",
     "name": "Amtrak ALC-42 Pack",
     "imageCount": 6,
-    "short": "The newest Amtrak locomotive to-date...",
+    "short": "Amtrak's newest locomotive makes its way into TSC!",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": [
+      {
+        "skus": [
+          "WPS-CHARGER-DEP"
+        ],
+        "urls": [
+          "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/"
+        ]
+      }
+    ]
+  }
+  {
+    "id": 2,
+    "sku": "WPS-CHARGER-DEP",
+    "category": "Quick Drives",
+    "name": "Charger Dependencies",
+    "imageCount": 1,
+    "short": "Dependencies for the Charger locomotive series",
     "description": "Full description here...",
     "version": "1.0",
     "size": "Unavailable",

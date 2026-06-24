@@ -260,28 +260,32 @@ function renderRequirements(requirements) {
   const linkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`;
 
   requirements.forEach(req => {
-    const dep = allDownloads.find(d => d.sku === req.sku);
-
-    if (dep) {
-      const div = document.createElement('div');
-      div.className = 'link-preview-item';
-      div.style.cursor = 'pointer';
-      div.innerHTML = `
-        <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
-        <div class="link-preview-text">
-          <h3 class="link-preview-title">${dep.name}</h3>
-          <p class="link-preview-subtitle">${dep.category || ''}</p>
-        </div>
-      `;
-      div.onclick = () => showItemDetail(dep.sku);
-      grid.appendChild(div);
-      return;
-    }
+    // Support either a single "sku" string or a "skus" array on the same requirement entry
+    const skus = req.skus || (req.sku ? [req.sku] : []);
+    skus.forEach(sku => renderInternalPreviewCard(grid, sku));
 
     // Support either a single "url" string or a "urls" array on the same requirement entry
     const urls = req.urls || (req.url ? [req.url] : []);
     urls.forEach(url => renderLinkPreviewCard(grid, url, linkIcon));
   });
+}
+
+function renderInternalPreviewCard(grid, sku) {
+  const dep = allDownloads.find(d => d.sku === sku);
+  if (!dep) return;
+
+  const div = document.createElement('div');
+  div.className = 'link-preview-item';
+  div.style.cursor = 'pointer';
+  div.innerHTML = `
+    <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
+    <div class="link-preview-text">
+      <h3 class="link-preview-title">${dep.name}</h3>
+      <p class="link-preview-subtitle">${dep.category || ''}</p>
+    </div>
+  `;
+  div.onclick = () => showItemDetail(dep.sku);
+  grid.appendChild(div);
 }
 
 function renderLinkPreviewCard(grid, url, linkIcon) {
