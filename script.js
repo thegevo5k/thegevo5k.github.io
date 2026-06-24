@@ -46,6 +46,9 @@ function setupLightbox() {
     // Skip requirement-card thumbnails — they already navigate/open links on click
     if (img.closest('.link-preview-item')) return;
 
+    // Skip homepage catalog thumbnails
+    if (img.closest('.download-grid')) return;
+
     // Skip the lightbox's own image/close button
     if (img.closest('#lightbox')) return;
 
