@@ -17,6 +17,9 @@ async function loadDownloads() {
     const itemSku = urlParams.get('item');
     if (itemSku) {
       showItemDetail(itemSku);
+    } else if (urlParams.get('tab') === 'downloads') {
+      applyTab('downloads');
+      document.title = tabTitle('downloads');
     }
 
     const lastUpdatedEl = document.getElementById('last-updated');
@@ -44,13 +47,25 @@ function setupTabs() {
   });
 }
 
-function switchTab(tab) {
+function applyTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
   document.querySelectorAll('.tab-panel').forEach(panel => {
     panel.classList.toggle('active', panel.id === `${tab}-tab`);
   });
+}
+
+function tabTitle(tab) {
+  return tab === 'downloads' ? 'We Play Simulators | Downloads' : 'We Play Simulators';
+}
+
+// Used for user-initiated tab clicks: updates the DOM AND pushes a new URL/title
+function switchTab(tab) {
+  applyTab(tab);
+  document.title = tabTitle(tab);
+  const url = tab === 'downloads' ? '?tab=downloads' : window.location.pathname;
+  window.history.pushState({}, '', url);
 }
 
 function setupLightbox() {
@@ -178,7 +193,7 @@ function showItemDetail(sku) {
   // Smooth scroll to top so user isn't stuck at the bottom layout height
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  switchTab('downloads');
+  applyTab('downloads');
   catalogView.style.display = 'none';
   detailPage.style.display = 'block';
   detailPage.style.animation = 'fadeInUp 0.4s ease-out';
@@ -234,8 +249,9 @@ function goBackToHome() {
   catalogView.style.display = 'block';
   catalogView.style.animation = 'fadeInUp 0.4s ease-out';
   
-  window.history.pushState({}, '', window.location.pathname);
-  document.title = 'We Play Simulators';
+  applyTab('downloads');
+  window.history.pushState({}, '', '?tab=downloads');
+  document.title = tabTitle('downloads');
 }
 
 let currentImageIndex = 1;
@@ -440,7 +456,10 @@ window.onpopstate = function() {
   } else {
     document.getElementById('item-detail').style.display = 'none';
     document.getElementById('catalog-view').style.display = 'block';
-    document.title = 'We Play Simulators';
+
+    const tab = urlParams.get('tab') === 'downloads' ? 'downloads' : 'home';
+    applyTab(tab);
+    document.title = tabTitle(tab);
   }
 };
 
@@ -461,14 +480,17 @@ window.addEventListener('hashchange', () => {
     // Smoothly apply our slide/fade entry animation to the catalog home grid
     catalogView.style.animation = 'fadeInUp 0.4s ease-out';
     
-    // Clean up the URL query parameters so it doesn't still say ?item=WPS-ALC-01
-    window.history.pushState({}, '', window.location.pathname + targetHash);
-    document.title = 'We Play Simulators';
+    applyTab('downloads');
+    document.title = tabTitle('downloads');
+    window.history.pushState({}, '', `?tab=downloads${targetHash}`);
   }
 
   // Footer category links live inside the Downloads tab — jump there too
   if (categoryHashes.includes(targetHash)) {
-    switchTab('downloads');
+    applyTab('downloads');
+    document.title = tabTitle('downloads');
+    window.history.pushState({}, '', `?tab=downloads${targetHash}`);
+
     const section = document.querySelector(targetHash);
     if (section) section.scrollIntoView({ behavior: 'smooth' });
   }
