@@ -90,11 +90,15 @@ function getImagePath(sku, number = 1) {
 }
 
 function renderHomepage() {
-  document.getElementById('main-content').innerHTML = `
+  const promoHTML = searchTerm ? '' : `
     <div class="promo-banner">
       <h2 class="promo-title">Coming Soon</h2>
       <img src="images/Promo.jpg" alt="Coming Soon" class="promo-image" onerror="this.style.display='none'">
     </div>
+  `;
+
+  document.getElementById('main-content').innerHTML = `
+    ${promoHTML}
 
     <section id="locomotives">
       <h2>Locomotives</h2>
