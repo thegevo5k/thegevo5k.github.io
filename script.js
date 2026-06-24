@@ -47,6 +47,13 @@ function getImagePath(sku, number = 1) {
 
 function renderHomepage() {
   document.getElementById('main-content').innerHTML = `
+    <div class="promo-banner">
+      <img src="images/Promo.jpg" alt="Coming Soon" class="promo-image" onerror="this.style.display='none'">
+      <div class="promo-overlay">
+        <span class="promo-title">Coming Soon</span>
+      </div>
+    </div>
+
     <section id="locomotives">
       <h2>Locomotives</h2>
       <div id="locomotives-grid" class="download-grid"></div>

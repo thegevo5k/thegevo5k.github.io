@@ -385,6 +385,49 @@ footer {
   margin-bottom: 0;
 }
 
+/* ==================== PROMO BANNER ==================== */
+
+.promo-banner {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  border: 1px solid #2a2a2a;
+}
+
+.promo-image {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 6;
+  object-fit: cover;
+}
+
+.promo-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.5) 100%);
+}
+
+.promo-title {
+  color: var(--gold);
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+  border: 2px solid var(--gold);
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.3);
+}
+
+@media (max-width: 600px) {
+  .promo-title { font-size: 1.4rem; padding: 0.4rem 1rem; }
+}
+
 /* ==================== ITEM DETAIL PAGE ==================== */
 
 .item-detail-page {
