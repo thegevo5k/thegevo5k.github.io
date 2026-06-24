@@ -25,7 +25,7 @@
   {
     "id": 2,
     "sku": "WPS-CHARGER-DEP",
-    "category": "Quick Drives",
+    "category": "Dependencies",
     "name": "Charger Dependencies",
     "imageCount": 1,
     "short": "Dependencies for the Charger locomotive series",
