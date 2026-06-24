@@ -11,6 +11,7 @@ async function loadDownloads() {
     renderHomepage();
     setupSearch();
     setupLightbox();
+    setupTabs();
 
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
@@ -32,6 +33,23 @@ function setupSearch() {
   input.addEventListener('input', () => {
     searchTerm = input.value.trim().toLowerCase();
     renderHomepage();
+  });
+}
+
+function setupTabs() {
+  const buttons = document.querySelectorAll('.tab-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === `${tab}-tab`);
   });
 }
 
@@ -90,16 +108,7 @@ function getImagePath(sku, number = 1) {
 }
 
 function renderHomepage() {
-  const promoHTML = searchTerm ? '' : `
-    <div class="promo-banner">
-      <h2 class="promo-title">Coming Soon</h2>
-      <img src="images/Promo.jpg" alt="Coming Soon" class="promo-image" onerror="this.style.display='none'">
-    </div>
-  `;
-
   document.getElementById('main-content').innerHTML = `
-    ${promoHTML}
-
     <section id="locomotives">
       <h2>Locomotives</h2>
       <div id="locomotives-grid" class="download-grid"></div>
@@ -164,12 +173,13 @@ function showItemDetail(sku) {
   if (!item) return;
 
   const detailPage = document.getElementById('item-detail');
-  const mainContent = document.getElementById('main-content');
+  const catalogView = document.getElementById('catalog-view');
 
   // Smooth scroll to top so user isn't stuck at the bottom layout height
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  mainContent.style.display = 'none';
+  switchTab('downloads');
+  catalogView.style.display = 'none';
   detailPage.style.display = 'block';
   detailPage.style.animation = 'fadeInUp 0.4s ease-out';
 
@@ -216,13 +226,13 @@ function showItemDetail(sku) {
 
 function goBackToHome() {
   const detailPage = document.getElementById('item-detail');
-  const mainContent = document.getElementById('main-content');
+  const catalogView = document.getElementById('catalog-view');
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
   
   detailPage.style.display = 'none';
-  mainContent.style.display = 'block';
-  mainContent.style.animation = 'fadeInUp 0.4s ease-out';
+  catalogView.style.display = 'block';
+  catalogView.style.animation = 'fadeInUp 0.4s ease-out';
   
   window.history.pushState({}, '', window.location.pathname);
   document.title = 'We Play Simulators';
@@ -429,7 +439,7 @@ window.onpopstate = function() {
     showItemDetail(itemSku);
   } else {
     document.getElementById('item-detail').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('catalog-view').style.display = 'block';
     document.title = 'We Play Simulators';
   }
 };
@@ -439,19 +449,27 @@ window.onload = loadDownloads;
 // Automatically return to the catalog if a nav bar shortcut link is clicked while viewing a product
 window.addEventListener('hashchange', () => {
   const detailPage = document.getElementById('item-detail');
-  const mainContent = document.getElementById('main-content');
-  
+  const catalogView = document.getElementById('catalog-view');
+  const targetHash = window.location.hash;
+  const categoryHashes = ['#locomotives', '#quickdrives', '#dependencies'];
+
   // Only intercept if the user is actively viewing a product detail page
   if (detailPage && detailPage.style.display === 'block') {
     detailPage.style.display = 'none';
-    mainContent.style.display = 'block';
+    catalogView.style.display = 'block';
     
     // Smoothly apply our slide/fade entry animation to the catalog home grid
-    mainContent.style.animation = 'fadeInUp 0.4s ease-out';
+    catalogView.style.animation = 'fadeInUp 0.4s ease-out';
     
     // Clean up the URL query parameters so it doesn't still say ?item=WPS-ALC-01
-    const targetHash = window.location.hash;
     window.history.pushState({}, '', window.location.pathname + targetHash);
     document.title = 'We Play Simulators';
+  }
+
+  // Footer category links live inside the Downloads tab — jump there too
+  if (categoryHashes.includes(targetHash)) {
+    switchTab('downloads');
+    const section = document.querySelector(targetHash);
+    if (section) section.scrollIntoView({ behavior: 'smooth' });
   }
 });

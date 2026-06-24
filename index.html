@@ -14,12 +14,30 @@
     <p>Home of the ALC-42 for Train Simulator Classic</p>
   </header>
 
-  <div class="search-bar">
-    <input type="text" id="search-input" placeholder="Search downloads…" autocomplete="off">
-  </div>
+  <div id="catalog-view">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="home">Home</button>
+      <button class="tab-btn" data-tab="downloads">Downloads</button>
+    </div>
 
-  <div class="container" id="main-content">
-    <!-- Grid content loaded by JS -->
+    <div id="home-tab" class="tab-panel active">
+      <div class="container">
+        <div class="promo-banner">
+          <h2 class="promo-title">Coming Soon</h2>
+          <img src="images/Promo.jpg" alt="Coming Soon" class="promo-image" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <div id="downloads-tab" class="tab-panel">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search downloads…" autocomplete="off">
+      </div>
+
+      <div class="container" id="main-content">
+        <!-- Grid content loaded by JS -->
+      </div>
+    </div>
   </div>
 
   <!-- Item Detail Page (hidden by default) -->
