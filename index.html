@@ -48,5 +48,11 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Image lightbox -->
+  <div id="lightbox" class="lightbox-overlay" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" class="lightbox-img" onclick="event.stopPropagation()">
+  </div>
 </body>
 </html>

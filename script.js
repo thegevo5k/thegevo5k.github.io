@@ -10,6 +10,7 @@ async function loadDownloads() {
 
     renderHomepage();
     setupSearch();
+    setupLightbox();
 
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
@@ -34,6 +35,46 @@ function setupSearch() {
   });
 }
 
+function setupLightbox() {
+  document.addEventListener('click', (e) => {
+    const img = e.target.closest('img');
+    if (!img) return;
+
+    // Never expand the site logo
+    if (img.classList.contains('logo')) return;
+
+    // Skip requirement-card thumbnails — they already navigate/open links on click
+    if (img.closest('.link-preview-item')) return;
+
+    // Skip the lightbox's own image/close button
+    if (img.closest('#lightbox')) return;
+
+    openLightbox(img.src);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+}
+
+function openLightbox(src) {
+  const overlay = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  if (!overlay || !img) return;
+
+  img.src = src;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const overlay = document.getElementById('lightbox');
+  if (!overlay) return;
+
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 function matchesSearch(item) {
   if (!searchTerm) return true;
   return (item.name || '').toLowerCase().includes(searchTerm)
@@ -48,10 +89,8 @@ function getImagePath(sku, number = 1) {
 function renderHomepage() {
   document.getElementById('main-content').innerHTML = `
     <div class="promo-banner">
+      <h2 class="promo-title">Coming Soon</h2>
       <img src="images/Promo.jpg" alt="Coming Soon" class="promo-image" onerror="this.style.display='none'">
-      <div class="promo-overlay">
-        <span class="promo-title">Coming Soon</span>
-      </div>
     </div>
 
     <section id="locomotives">

@@ -388,44 +388,68 @@ footer {
 /* ==================== PROMO BANNER ==================== */
 
 .promo-banner {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
   margin-bottom: 2.5rem;
-  border: 1px solid #2a2a2a;
+}
+
+.promo-title {
+  color: var(--gold);
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 10px;
+  margin: 0 0 1rem;
 }
 
 .promo-image {
   width: 100%;
   display: block;
-  aspect-ratio: 16 / 6;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid #2a2a2a;
 }
 
-.promo-overlay {
-  position: absolute;
+/* ==================== IMAGE LIGHTBOX ==================== */
+
+.lightbox-overlay {
+  display: none;
+  position: fixed;
   inset: 0;
-  display: flex;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.92);
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.5) 100%);
 }
 
-.promo-title {
-  color: var(--gold);
-  font-size: 2.2rem;
-  font-weight: bold;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
-  border: 2px solid var(--gold);
-  padding: 0.5rem 1.5rem;
+.lightbox-overlay.open {
+  display: flex;
+}
+
+.lightbox-img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
   border-radius: 8px;
-  background: rgba(0,0,0,0.3);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  cursor: default;
 }
 
-@media (max-width: 600px) {
-  .promo-title { font-size: 1.4rem; padding: 0.4rem 1rem; }
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 42px;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.lightbox-close:hover {
+  color: #fff;
+}
+
+.download-item .item-image,
+.promo-image,
+#detail-main-image {
+  cursor: zoom-in;
 }
 
 /* ==================== ITEM DETAIL PAGE ==================== */
