@@ -3,11 +3,17 @@ let allDownloads = [];
 let searchTerm = '';
 
 // July 4, 2026, 12:00 AM EDT (UTC-4)
-const UNLOCK_TIME = new Date('2026-06-24T05:55:00-04:00').getTime();
+const UNLOCK_TIME = new Date('2026-06-24T06:01:00-04:00').getTime();
 
 function initCountdown() {
   const overlay = document.getElementById('countdown-overlay');
   if (!overlay) return;
+
+  // Already past the unlock time — leave the overlay hidden, no flash
+  if (Date.now() >= UNLOCK_TIME) return;
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 
   function tick() {
     const now = Date.now();
@@ -32,9 +38,6 @@ function initCountdown() {
     document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
     document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
   }
-
-  // Lock scrolling on the rest of the site while the overlay is showing
-  document.body.style.overflow = 'hidden';
 
   let timerId = setInterval(tick, 1000);
   tick();

@@ -393,7 +393,7 @@ footer {
   z-index: 9999;
   background: rgba(10, 10, 10, 0.97);
   backdrop-filter: blur(8px);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -448,11 +448,6 @@ footer {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.countdown-note {
-  color: #777;
-  font-size: 0.9rem;
 }
 
 /* ==================== ITEM DETAIL PAGE ==================== */
