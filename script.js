@@ -1,5 +1,6 @@
 // script.js
 let allDownloads = [];
+let searchTerm = '';
 
 async function loadDownloads() {
   try {
@@ -8,6 +9,7 @@ async function loadDownloads() {
     allDownloads = await response.json();
 
     renderHomepage();
+    setupSearch();
 
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
@@ -20,6 +22,23 @@ async function loadDownloads() {
   } catch (error) {
     console.error("Could not load downloads.json", error);
   }
+}
+
+function setupSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    searchTerm = input.value.trim().toLowerCase();
+    renderHomepage();
+  });
+}
+
+function matchesSearch(item) {
+  if (!searchTerm) return true;
+  return (item.name || '').toLowerCase().includes(searchTerm)
+      || (item.short || '').toLowerCase().includes(searchTerm)
+      || (item.category || '').toLowerCase().includes(searchTerm);
 }
 
 function getImagePath(sku, number = 1) {
@@ -44,9 +63,20 @@ function renderHomepage() {
     </section>
   `;
 
-  renderSection('locomotives-grid', allDownloads.filter(d => d.category === "Locomotives"));
-  renderSection('quickdrives-grid', allDownloads.filter(d => d.category === "Quick Drives"));
-  renderSection('dependencies-grid', allDownloads.filter(d => d.category === "Dependencies"));
+  const filtered = allDownloads.filter(matchesSearch);
+
+  renderSection('locomotives-grid', filtered.filter(d => d.category === "Locomotives"));
+  renderSection('quickdrives-grid', filtered.filter(d => d.category === "Quick Drives"));
+  renderSection('dependencies-grid', filtered.filter(d => d.category === "Dependencies"));
+
+  // Hide a section entirely if search leaves it with no results
+  ['locomotives', 'quickdrives', 'dependencies'].forEach(id => {
+    const section = document.getElementById(id);
+    const grid = document.getElementById(`${id}-grid`);
+    if (section && grid) {
+      section.style.display = grid.children.length === 0 ? 'none' : '';
+    }
+  });
 }
 
 function renderSection(containerId, items) {
