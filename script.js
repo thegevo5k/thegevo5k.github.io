@@ -3,7 +3,7 @@ let allDownloads = [];
 let searchTerm = '';
 
 // July 4, 2026, 12:00 AM EDT (UTC-4)
-const UNLOCK_TIME = new Date('2026-06-24T00:05:50-04:00').getTime();
+const UNLOCK_TIME = new Date('2026-06-24T05:55:00-04:00').getTime();
 
 function initCountdown() {
   const overlay = document.getElementById('countdown-overlay');
