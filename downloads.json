@@ -71,19 +71,5 @@
         ]
       }
     ]
-  },
-  {
-    "id": 4,
-    "sku": "WPS-SC44-01",
-    "category": "Locomotives",
-    "name": "SC-44 Sample",
-    "short": "Test",
-    "description": "Full test of the WPS json editor",
-    "version": "1.0",
-    "size": "Unavailable",
-    "compatibility": "TSC 64-bit",
-    "download_url": "#",
-    "releaseDate": "2026-06-25",
-    "requirements": []
   }
 ]
