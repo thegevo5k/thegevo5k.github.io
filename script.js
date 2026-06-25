@@ -8,7 +8,7 @@ async function loadDownloads() {
     const response = await fetch(`downloads.json?t=${timestamp}`);
     allDownloads = await response.json();
 
-    setupCategorySelect();
+    setupDownloadsDropdownMenu();
     setupFooterLinks();
     renderDownloadsGrid();
     setupSearch();
@@ -42,10 +42,57 @@ function setupSearch() {
 }
 
 function setupTabs() {
-  const buttons = document.querySelectorAll('.tab-btn');
+  const homeBtn = document.querySelector('.tab-btn[data-tab="home"]');
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      switchTab('home');
+      closeDownloadsDropdown();
+    });
+  }
 
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  const downloadsBtn = document.getElementById('downloads-tab-btn');
+  if (downloadsBtn) {
+    downloadsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDownloadsDropdown();
+    });
+  }
+
+  // Click anywhere outside the dropdown closes it
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#downloads-dropdown-wrapper')) {
+      closeDownloadsDropdown();
+    }
+  });
+}
+
+function toggleDownloadsDropdown() {
+  const menu = document.getElementById('downloads-dropdown-menu');
+  if (menu) menu.classList.toggle('open');
+}
+
+function closeDownloadsDropdown() {
+  const menu = document.getElementById('downloads-dropdown-menu');
+  if (menu) menu.classList.remove('open');
+}
+
+function setupDownloadsDropdownMenu() {
+  const menu = document.getElementById('downloads-dropdown-menu');
+  if (!menu) return;
+
+  menu.innerHTML = `
+    <a href="#" data-category="latest">Latest Releases</a>
+    ${CATEGORIES.map(cat => `<a href="#" data-category="${cat.id}">${cat.label}</a>`).join('')}
+  `;
+
+  menu.querySelectorAll('a[data-category]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      selectedCategory = link.dataset.category;
+      switchTab('downloads');
+      renderDownloadsGrid();
+      closeDownloadsDropdown();
+    });
   });
 }
 
@@ -197,21 +244,6 @@ const CATEGORIES = [
 
 let selectedCategory = 'latest';
 
-function setupCategorySelect() {
-  const select = document.getElementById('category-select');
-  if (!select) return;
-
-  select.innerHTML = `
-    <option value="latest">Latest Releases</option>
-    ${CATEGORIES.map(cat => `<option value="${cat.id}">${cat.label}</option>`).join('')}
-  `;
-
-  select.addEventListener('change', () => {
-    selectedCategory = select.value;
-    renderDownloadsGrid();
-  });
-}
-
 function setupFooterLinks() {
   const col = document.getElementById('footer-browse-col');
   if (!col) return;
@@ -226,10 +258,7 @@ function setupFooterLinks() {
       e.preventDefault();
       switchTab('downloads');
 
-      const category = link.dataset.category;
-      const select = document.getElementById('category-select');
-      if (select) select.value = category;
-      selectedCategory = category;
+      selectedCategory = link.dataset.category;
       renderDownloadsGrid();
 
       document.getElementById('downloads-grid').scrollIntoView({ behavior: 'smooth' });
@@ -258,6 +287,13 @@ function renderDownloadsGrid() {
 
   if (pool.length === 0) {
     grid.innerHTML = `<p class="empty-state">No matching downloads found.</p>`;
+  }
+
+  const menu = document.getElementById('downloads-dropdown-menu');
+  if (menu) {
+    menu.querySelectorAll('a[data-category]').forEach(link => {
+      link.classList.toggle('active', link.dataset.category === selectedCategory);
+    });
   }
 }
 

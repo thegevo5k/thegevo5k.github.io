@@ -17,7 +17,10 @@
   <div id="catalog-view">
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="home">Home</button>
-      <button class="tab-btn" data-tab="downloads">Downloads</button>
+      <div class="tab-dropdown" id="downloads-dropdown-wrapper">
+        <button class="tab-btn" data-tab="downloads" id="downloads-tab-btn">Downloads ▾</button>
+        <div class="tab-dropdown-menu" id="downloads-dropdown-menu"></div>
+      </div>
     </div>
 
     <div id="home-tab" class="tab-panel active">
@@ -35,11 +38,6 @@
       </div>
 
       <div class="container">
-        <div class="downloads-toolbar">
-          <label for="category-select" class="category-select-label">Category</label>
-          <select id="category-select"></select>
-        </div>
-
         <h2 id="downloads-heading">Latest Releases</h2>
         <div id="downloads-grid" class="download-grid">
           <!-- Grid content loaded by JS -->
