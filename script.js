@@ -220,6 +220,15 @@ function getImagePath(sku, number = 1) {
   return `images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
 }
 
+function formatReleaseDate(dateStr) {
+  const parts = String(dateStr).split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
+
+  const [year, month, day] = parts;
+  const d = new Date(year, month - 1, day);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 // Auto-detects how many sequential numbered images exist for a SKU (01.jpg, 02.jpg, ...)
 // by probing each in order until one fails to load. Cached per SKU for the session.
 const imageCountCache = {};
@@ -297,7 +306,7 @@ function renderDownloadsGrid() {
 
   if (selectedCategory === 'latest') {
     heading.textContent = searchTerm ? 'Search Results' : 'Latest Releases';
-    pool = pool.slice().sort((a, b) => (b.id || 0) - (a.id || 0));
+    pool = pool.slice().sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
     if (!searchTerm) pool = pool.slice(0, 6);
   } else {
     const cat = CATEGORIES.find(c => c.id === selectedCategory);
@@ -381,6 +390,7 @@ function showItemDetail(sku) {
       <span class="meta-badge"><span class="meta-label">Version</span>${item.version}</span>
       <span class="meta-badge"><span class="meta-label">Size</span>${item.size}</span>
       <span class="meta-badge"><span class="meta-label">Compatibility</span>${item.compatibility}</span>
+      ${item.releaseDate ? `<span class="meta-badge"><span class="meta-label">Released</span>${formatReleaseDate(item.releaseDate)}</span>` : ''}
     </div>
 
     <p class="detail-description">${item.description}</p>
