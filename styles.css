@@ -116,6 +116,10 @@ h2 {
 .category-badge.locomotives { background: var(--gold); }
 .category-badge.quickdrives { background: #5AD1C9; }
 .category-badge.dependencies { background: #C97AE8; }
+.category-badge.routes { background: #7AA6E8; }
+.category-badge.rollingstock { background: #E89A5A; }
+.category-badge.scenery { background: #8FD17A; }
+.category-badge.sounds { background: #E85A8C; }
 
 .image-wrap {
   position: relative;
@@ -622,6 +626,10 @@ footer {
 #locomotives-grid .download-item { animation-delay: 0.1s; animation-fill-mode: forwards; }
 #quickdrives-grid .download-item { animation-delay: 0.2s; animation-fill-mode: forwards; }
 #dependencies-grid .download-item { animation-delay: 0.3s; animation-fill-mode: forwards; }
+#routes-grid .download-item { animation-delay: 0.4s; animation-fill-mode: forwards; }
+#rollingstock-grid .download-item { animation-delay: 0.5s; animation-fill-mode: forwards; }
+#scenery-grid .download-item { animation-delay: 0.6s; animation-fill-mode: forwards; }
+#sounds-grid .download-item { animation-delay: 0.7s; animation-fill-mode: forwards; }
 
 /* Slideshow Fluidity */
 #detail-main-image {

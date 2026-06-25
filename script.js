@@ -180,34 +180,37 @@ function detectImageCount(sku, maxCheck = 30) {
   });
 }
 
+// Single source of truth for all catalog categories: id (used for element IDs/slugs),
+// label (shown to users), category (matches the "category" field in downloads.json),
+// and a CSS class suffix for the colored badge.
+const CATEGORIES = [
+  { id: 'locomotives',  label: 'Locomotives',  category: 'Locomotives',  badgeClass: 'locomotives' },
+  { id: 'quickdrives',  label: 'Quick Drives',  category: 'Quick Drives',  badgeClass: 'quickdrives' },
+  { id: 'dependencies', label: 'Dependencies',  category: 'Dependencies',  badgeClass: 'dependencies' },
+  { id: 'routes',       label: 'Routes',        category: 'Routes',        badgeClass: 'routes' },
+  { id: 'rollingstock', label: 'Rolling Stock', category: 'Rolling Stock', badgeClass: 'rollingstock' },
+  { id: 'scenery',      label: 'Scenery',       category: 'Scenery',       badgeClass: 'scenery' },
+  { id: 'sounds',       label: 'Sounds',        category: 'Sounds',        badgeClass: 'sounds' }
+];
+
 function renderHomepage() {
-  document.getElementById('main-content').innerHTML = `
-    <section id="locomotives">
-      <h2>Locomotives</h2>
-      <div id="locomotives-grid" class="download-grid"></div>
+  document.getElementById('main-content').innerHTML = CATEGORIES.map(cat => `
+    <section id="${cat.id}">
+      <h2>${cat.label}</h2>
+      <div id="${cat.id}-grid" class="download-grid"></div>
     </section>
-
-    <section id="quickdrives">
-      <h2>Quick Drives</h2>
-      <div id="quickdrives-grid" class="download-grid"></div>
-    </section>
-
-    <section id="dependencies">
-      <h2>Dependencies</h2>
-      <div id="dependencies-grid" class="download-grid"></div>
-    </section>
-  `;
+  `).join('');
 
   const filtered = allDownloads.filter(matchesSearch);
 
-  renderSection('locomotives-grid', filtered.filter(d => d.category === "Locomotives"));
-  renderSection('quickdrives-grid', filtered.filter(d => d.category === "Quick Drives"));
-  renderSection('dependencies-grid', filtered.filter(d => d.category === "Dependencies"));
+  CATEGORIES.forEach(cat => {
+    renderSection(`${cat.id}-grid`, filtered.filter(d => d.category === cat.category));
+  });
 
   // Hide a section entirely if search leaves it with no results
-  ['locomotives', 'quickdrives', 'dependencies'].forEach(id => {
-    const section = document.getElementById(id);
-    const grid = document.getElementById(`${id}-grid`);
+  CATEGORIES.forEach(cat => {
+    const section = document.getElementById(cat.id);
+    const grid = document.getElementById(`${cat.id}-grid`);
     if (section && grid) {
       section.style.display = grid.children.length === 0 ? 'none' : '';
     }
@@ -224,9 +227,7 @@ function renderSection(containerId, items) {
     const div = document.createElement('div');
     div.className = 'download-item';
     const coverSrc = getImagePath(item.sku, 1);
-    const categoryClass = item.category === "Locomotives" ? "locomotives"
-      : item.category === "Quick Drives" ? "quickdrives"
-      : "dependencies";
+    const categoryClass = (CATEGORIES.find(c => c.category === item.category) || {}).badgeClass || 'dependencies';
 
     div.innerHTML = `
       <div class="image-wrap">
@@ -553,7 +554,7 @@ window.addEventListener('hashchange', () => {
   const detailPage = document.getElementById('item-detail');
   const catalogView = document.getElementById('catalog-view');
   const targetHash = window.location.hash;
-  const categoryHashes = ['#locomotives', '#quickdrives', '#dependencies'];
+  const categoryHashes = CATEGORIES.map(cat => `#${cat.id}`);
 
   // Only intercept if the user is actively viewing a product detail page
   if (detailPage && detailPage.style.display === 'block') {

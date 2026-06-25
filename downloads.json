@@ -70,5 +70,57 @@
         ]
       }
     ]
+  },
+  {
+    "id": 4,
+    "sku": "WPS-ROUTE-PLACEHOLDER",
+    "category": "Routes",
+    "name": "Coming Soon Route",
+    "short": "Placeholder entry — swap in your first route pack.",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": []
+  },
+  {
+    "id": 5,
+    "sku": "WPS-STOCK-PLACEHOLDER",
+    "category": "Rolling Stock",
+    "name": "Coming Soon Rolling Stock",
+    "short": "Placeholder entry — swap in your first rolling stock pack.",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": []
+  },
+  {
+    "id": 6,
+    "sku": "WPS-SCENERY-PLACEHOLDER",
+    "category": "Scenery",
+    "name": "Coming Soon Scenery",
+    "short": "Placeholder entry — swap in your first scenery pack.",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": []
+  },
+  {
+    "id": 7,
+    "sku": "WPS-SOUNDS-PLACEHOLDER",
+    "category": "Sounds",
+    "name": "Coming Soon Sounds",
+    "short": "Placeholder entry — swap in your first sound pack.",
+    "description": "Full description here...",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "requirements": []
   }
 ]
