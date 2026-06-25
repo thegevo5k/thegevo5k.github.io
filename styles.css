@@ -562,6 +562,58 @@ footer {
   padding: 2rem 0;
 }
 
+/* ==================== TERMS OF USE ==================== */
+
+.terms-container {
+  max-width: 760px;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+.terms-container h3 {
+  color: var(--gold);
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+}
+
+.terms-container p {
+  color: #ccc;
+  margin: 0.6rem 0;
+}
+
+.terms-effective-date {
+  color: #999;
+  font-style: italic;
+}
+
+.terms-container ul {
+  color: #ccc;
+  margin: 0.6rem 0 0.6rem 1.2rem;
+  padding: 0;
+}
+
+.terms-container li {
+  margin-bottom: 0.4rem;
+}
+
+.terms-container a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.terms-container a:hover {
+  text-decoration: underline;
+}
+
+.terms-copyright {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #2a2a2a;
+  color: #777;
+  font-size: 0.85rem;
+}
+
 /* ==================== ITEM DETAIL PAGE ==================== */
 
 .item-detail-page {

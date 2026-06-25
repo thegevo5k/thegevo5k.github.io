@@ -21,11 +21,15 @@ async function loadDownloads() {
     if (itemSku) {
       showItemDetail(itemSku);
     } else {
-      if (urlParams.get('tab') === 'downloads') {
+      const tabParam = urlParams.get('tab');
+      if (tabParam === 'downloads') {
         const catParam = urlParams.get('category');
         selectedCategory = isValidCategoryId(catParam) ? catParam : 'latest';
         applyTab('downloads');
         document.title = categoryTitle(selectedCategory);
+      } else if (tabParam === 'terms') {
+        applyTab('terms');
+        document.title = tabTitle('terms');
       }
       renderDownloadsGrid();
     }
@@ -62,6 +66,14 @@ function setupTabs() {
     downloadsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleDownloadsDropdown();
+    });
+  }
+
+  const termsBtn = document.querySelector('.tab-btn[data-tab="terms"]');
+  if (termsBtn) {
+    termsBtn.addEventListener('click', () => {
+      switchTab('terms');
+      closeDownloadsDropdown();
     });
   }
 
@@ -111,7 +123,9 @@ function applyTab(tab) {
 }
 
 function tabTitle(tab) {
-  return tab === 'downloads' ? 'We Play Simulators | Downloads' : 'We Play Simulators';
+  if (tab === 'downloads') return 'We Play Simulators | Downloads';
+  if (tab === 'terms') return 'We Play Simulators | Terms of Use';
+  return 'We Play Simulators';
 }
 
 function categoryTitle(catId) {
@@ -141,7 +155,7 @@ function navigateToCategory(catId) {
 function switchTab(tab) {
   applyTab(tab);
   document.title = tabTitle(tab);
-  const url = tab === 'downloads' ? '?tab=downloads' : window.location.pathname;
+  const url = tab === 'home' ? window.location.pathname : `?tab=${tab}`;
   window.history.pushState({}, '', url);
 }
 
@@ -671,7 +685,8 @@ window.onpopstate = function() {
     document.getElementById('item-detail').style.display = 'none';
     document.getElementById('catalog-view').style.display = 'block';
 
-    const tab = urlParams.get('tab') === 'downloads' ? 'downloads' : 'home';
+    const tabParam = urlParams.get('tab');
+    const tab = (tabParam === 'downloads' || tabParam === 'terms') ? tabParam : 'home';
     applyTab(tab);
 
     if (tab === 'downloads') {
@@ -680,7 +695,7 @@ window.onpopstate = function() {
       document.title = categoryTitle(selectedCategory);
       renderDownloadsGrid();
     } else {
-      document.title = tabTitle('home');
+      document.title = tabTitle(tab);
     }
   }
 };
