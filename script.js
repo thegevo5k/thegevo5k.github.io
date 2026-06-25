@@ -1,6 +1,7 @@
 // script.js
 let allDownloads = [];
 let searchTerm = '';
+let rawSearchTerm = '';
 
 async function loadDownloads() {
   try {
@@ -41,7 +42,8 @@ function setupSearch() {
   if (!input) return;
 
   input.addEventListener('input', () => {
-    searchTerm = input.value.trim().toLowerCase();
+    rawSearchTerm = input.value.trim();
+    searchTerm = rawSearchTerm.toLowerCase();
     renderDownloadsGrid();
   });
 }
@@ -212,8 +214,7 @@ function closeLightbox() {
 function matchesSearch(item) {
   if (!searchTerm) return true;
   return (item.name || '').toLowerCase().includes(searchTerm)
-      || (item.short || '').toLowerCase().includes(searchTerm)
-      || (item.category || '').toLowerCase().includes(searchTerm);
+      || (item.description || '').toLowerCase().includes(searchTerm);
 }
 
 function getImagePath(sku, number = 1) {
@@ -297,21 +298,34 @@ function setupFooterLinks() {
   });
 }
 
+function sortByReleaseDate(items) {
+  return items.slice().sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
+}
+
 function renderDownloadsGrid() {
   const grid = document.getElementById('downloads-grid');
   const heading = document.getElementById('downloads-heading');
   if (!grid || !heading) return;
 
-  let pool = allDownloads.filter(matchesSearch);
+  const menu = document.getElementById('downloads-dropdown-menu');
+  let pool;
 
-  if (selectedCategory === 'latest') {
-    heading.textContent = searchTerm ? 'Search Results' : 'Latest Releases';
-    pool = pool.slice().sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
-    if (!searchTerm) pool = pool.slice(0, 6);
+  if (searchTerm) {
+    // Search is its own view: searches the whole catalog (title + full description),
+    // independent of whatever category is currently selected.
+    heading.textContent = `Search Results for "${rawSearchTerm}"`;
+    pool = sortByReleaseDate(allDownloads.filter(matchesSearch));
+
+    if (menu) {
+      menu.querySelectorAll('a[data-category]').forEach(link => link.classList.remove('active'));
+    }
+  } else if (selectedCategory === 'latest') {
+    heading.textContent = 'Latest Releases';
+    pool = sortByReleaseDate(allDownloads).slice(0, 6);
   } else {
     const cat = CATEGORIES.find(c => c.id === selectedCategory);
     heading.textContent = cat ? cat.label : 'Downloads';
-    pool = pool.filter(d => cat && d.category === cat.category);
+    pool = sortByReleaseDate(allDownloads.filter(d => cat && d.category === cat.category));
   }
 
   renderSection('downloads-grid', pool);
@@ -320,8 +334,7 @@ function renderDownloadsGrid() {
     grid.innerHTML = `<p class="empty-state">No matching downloads found.</p>`;
   }
 
-  const menu = document.getElementById('downloads-dropdown-menu');
-  if (menu) {
+  if (menu && !searchTerm) {
     menu.querySelectorAll('a[data-category]').forEach(link => {
       link.classList.toggle('active', link.dataset.category === selectedCategory);
     });
