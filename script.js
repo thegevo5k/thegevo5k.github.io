@@ -85,11 +85,23 @@ function setupLightbox() {
     // Skip the lightbox's own image/close button
     if (img.closest('#lightbox')) return;
 
+    // The product detail slideshow gets a synced, navigable lightbox
+    if (img.id === 'detail-main-image' && currentDetailItem && (currentDetailItem.detectedImageCount || 1) > 1) {
+      openLightboxSlideshow();
+      return;
+    }
+
     openLightbox(img.src);
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLightbox();
+
+    const overlay = document.getElementById('lightbox');
+    if (overlay && overlay.classList.contains('open') && overlay.classList.contains('slideshow-mode')) {
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
+    }
   });
 }
 
@@ -98,8 +110,19 @@ function openLightbox(src) {
   const img = document.getElementById('lightbox-img');
   if (!overlay || !img) return;
 
+  overlay.classList.remove('slideshow-mode');
   img.src = src;
   overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openLightboxSlideshow() {
+  const overlay = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  if (!overlay || !img || !currentDetailItem) return;
+
+  img.src = getImagePath(currentDetailItem.sku, currentImageIndex);
+  overlay.classList.add('open', 'slideshow-mode');
   document.body.style.overflow = 'hidden';
 }
 
@@ -107,7 +130,7 @@ function closeLightbox() {
   const overlay = document.getElementById('lightbox');
   if (!overlay) return;
 
-  overlay.classList.remove('open');
+  overlay.classList.remove('open', 'slideshow-mode');
   document.body.style.overflow = '';
 }
 
@@ -120,6 +143,41 @@ function matchesSearch(item) {
 
 function getImagePath(sku, number = 1) {
   return `images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
+}
+
+// Auto-detects how many sequential numbered images exist for a SKU (01.jpg, 02.jpg, ...)
+// by probing each in order until one fails to load. Cached per SKU for the session.
+const imageCountCache = {};
+
+function detectImageCount(sku, maxCheck = 30) {
+  if (imageCountCache[sku] !== undefined) {
+    return Promise.resolve(imageCountCache[sku]);
+  }
+
+  return new Promise(resolve => {
+    let found = 0;
+
+    function probe(n) {
+      if (n > maxCheck) {
+        imageCountCache[sku] = found;
+        resolve(found);
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        found = n;
+        probe(n + 1);
+      };
+      img.onerror = () => {
+        imageCountCache[sku] = found;
+        resolve(found);
+      };
+      img.src = getImagePath(sku, n);
+    }
+
+    probe(1);
+  });
 }
 
 function renderHomepage() {
@@ -257,47 +315,64 @@ function goBackToHome() {
 let currentImageIndex = 1;
 let currentDetailItem = null;
 
-function renderItemImages(item) {
+async function renderItemImages(item) {
   const container = document.getElementById('slideshow');
   if (!container) return;
 
   currentDetailItem = item;
   currentImageIndex = 1;
 
-  // Render the slider structure
-  container.innerHTML = `
-    <button onclick="prevImage()" class="arrow-btn left">←</button>
-    <button onclick="nextImage()" class="arrow-btn right">→</button>
-    <img id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;">
-  `;
-
+  // Show a single frame immediately while we probe for the real count
+  container.innerHTML = `<img id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;">`;
   showCurrentDetailImage();
+
+  const count = await detectImageCount(item.sku);
+  item.detectedImageCount = Math.max(count, 1);
+
+  // Only render arrows once we know there's more than one image
+  if (item.detectedImageCount > 1 && currentDetailItem === item) {
+    container.innerHTML = `
+      <button onclick="prevImage()" class="arrow-btn left">←</button>
+      <button onclick="nextImage()" class="arrow-btn right">→</button>
+      <img id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;">
+    `;
+    showCurrentDetailImage();
+  }
 }
 
 function showCurrentDetailImage() {
   const img = document.getElementById('detail-main-image');
   if (!img || !currentDetailItem) return;
 
+  const src = getImagePath(currentDetailItem.sku, currentImageIndex);
+
   // Set the source path
-  img.src = getImagePath(currentDetailItem.sku, currentImageIndex);
+  img.src = src;
   img.style.display = 'block'; // Ensure it stays visible
   
   img.onerror = function() {
     console.warn('Image failed to load:', this.src);
     this.style.display = 'none';
   };
+
+  // Keep the lightbox in sync if it's currently showing this item's slideshow
+  const overlay = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  if (overlay && overlay.classList.contains('open') && overlay.classList.contains('slideshow-mode') && lightboxImg) {
+    lightboxImg.src = src;
+  }
 }
 
 function nextImage() {
   if (!currentDetailItem) return;
-  currentImageIndex = (currentImageIndex % (currentDetailItem.imageCount || 1)) + 1;
+  currentImageIndex = (currentImageIndex % (currentDetailItem.detectedImageCount || 1)) + 1;
   transitionSlide();
 }
 
 function prevImage() {
   if (!currentDetailItem) return;
   currentImageIndex--;
-  if (currentImageIndex < 1) currentImageIndex = (currentDetailItem.imageCount || 1);
+  if (currentImageIndex < 1) currentImageIndex = (currentDetailItem.detectedImageCount || 1);
   transitionSlide();
 }
 
@@ -306,8 +381,13 @@ function transitionSlide() {
   const img = document.getElementById('detail-main-image');
   if (!img) return;
 
+  const overlay = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const syncingLightbox = overlay && overlay.classList.contains('open') && overlay.classList.contains('slideshow-mode');
+
   // Add the class that reduces opacity and scale
   img.classList.add('slide-changing');
+  if (syncingLightbox && lightboxImg) lightboxImg.classList.add('slide-changing');
 
   // Wait for the fade-out animation to finish before switching the asset src
   setTimeout(() => {
@@ -317,6 +397,9 @@ function transitionSlide() {
     img.onload = () => {
       img.classList.remove('slide-changing');
     };
+    if (syncingLightbox && lightboxImg) {
+      lightboxImg.onload = () => lightboxImg.classList.remove('slide-changing');
+    }
   }, 200); 
 }
 

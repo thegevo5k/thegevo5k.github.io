@@ -488,6 +488,14 @@ footer {
   color: #fff;
 }
 
+.lightbox-arrow {
+  display: none;
+}
+
+.lightbox-overlay.slideshow-mode .lightbox-arrow {
+  display: flex;
+}
+
 .promo-image,
 #detail-main-image {
   cursor: zoom-in;

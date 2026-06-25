@@ -70,7 +70,9 @@
   <!-- Image lightbox -->
   <div id="lightbox" class="lightbox-overlay" onclick="closeLightbox()">
     <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <button class="arrow-btn left lightbox-arrow" onclick="event.stopPropagation(); prevImage()">←</button>
     <img id="lightbox-img" class="lightbox-img" onclick="event.stopPropagation()">
+    <button class="arrow-btn right lightbox-arrow" onclick="event.stopPropagation(); nextImage()">→</button>
   </div>
 </body>
 </html>
