@@ -10,18 +10,23 @@ async function loadDownloads() {
 
     setupDownloadsDropdownMenu();
     setupFooterLinks();
-    renderDownloadsGrid();
     setupSearch();
     setupLightbox();
     setupTabs();
 
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
+
     if (itemSku) {
       showItemDetail(itemSku);
-    } else if (urlParams.get('tab') === 'downloads') {
-      applyTab('downloads');
-      document.title = tabTitle('downloads');
+    } else {
+      if (urlParams.get('tab') === 'downloads') {
+        const catParam = urlParams.get('category');
+        selectedCategory = isValidCategoryId(catParam) ? catParam : 'latest';
+        applyTab('downloads');
+        document.title = categoryTitle(selectedCategory);
+      }
+      renderDownloadsGrid();
     }
 
     const lastUpdatedEl = document.getElementById('last-updated');
@@ -88,9 +93,7 @@ function setupDownloadsDropdownMenu() {
   menu.querySelectorAll('a[data-category]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      selectedCategory = link.dataset.category;
-      switchTab('downloads');
-      renderDownloadsGrid();
+      navigateToCategory(link.dataset.category);
       closeDownloadsDropdown();
     });
   });
@@ -107,6 +110,29 @@ function applyTab(tab) {
 
 function tabTitle(tab) {
   return tab === 'downloads' ? 'We Play Simulators | Downloads' : 'We Play Simulators';
+}
+
+function categoryTitle(catId) {
+  if (catId === 'latest') return tabTitle('downloads');
+  const cat = CATEGORIES.find(c => c.id === catId);
+  return cat ? `We Play Simulators | ${cat.label}` : tabTitle('downloads');
+}
+
+function categoryUrl(catId) {
+  return catId === 'latest' ? '?tab=downloads' : `?tab=downloads&category=${catId}`;
+}
+
+function isValidCategoryId(catId) {
+  return catId === 'latest' || CATEGORIES.some(c => c.id === catId);
+}
+
+// Used for dropdown menu / footer link clicks: updates the DOM, URL, and title together
+function navigateToCategory(catId) {
+  selectedCategory = isValidCategoryId(catId) ? catId : 'latest';
+  applyTab('downloads');
+  document.title = categoryTitle(selectedCategory);
+  window.history.pushState({}, '', categoryUrl(selectedCategory));
+  renderDownloadsGrid();
 }
 
 // Used for user-initiated tab clicks: updates the DOM AND pushes a new URL/title
@@ -256,11 +282,7 @@ function setupFooterLinks() {
   col.querySelectorAll('a[data-category]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      switchTab('downloads');
-
-      selectedCategory = link.dataset.category;
-      renderDownloadsGrid();
-
+      navigateToCategory(link.dataset.category);
       document.getElementById('downloads-grid').scrollIntoView({ behavior: 'smooth' });
     });
   });
@@ -389,8 +411,8 @@ function goBackToHome() {
   catalogView.style.animation = 'fadeInUp 0.4s ease-out';
   
   applyTab('downloads');
-  window.history.pushState({}, '', '?tab=downloads');
-  document.title = tabTitle('downloads');
+  window.history.pushState({}, '', categoryUrl(selectedCategory));
+  document.title = categoryTitle(selectedCategory);
 }
 
 let currentImageIndex = 1;
@@ -628,7 +650,15 @@ window.onpopstate = function() {
 
     const tab = urlParams.get('tab') === 'downloads' ? 'downloads' : 'home';
     applyTab(tab);
-    document.title = tabTitle(tab);
+
+    if (tab === 'downloads') {
+      const catParam = urlParams.get('category');
+      selectedCategory = isValidCategoryId(catParam) ? catParam : 'latest';
+      document.title = categoryTitle(selectedCategory);
+      renderDownloadsGrid();
+    } else {
+      document.title = tabTitle('home');
+    }
   }
 };
 
@@ -649,7 +679,7 @@ window.addEventListener('hashchange', () => {
     catalogView.style.animation = 'fadeInUp 0.4s ease-out';
     
     applyTab('downloads');
-    document.title = tabTitle('downloads');
-    window.history.pushState({}, '', `?tab=downloads${targetHash}`);
+    document.title = categoryTitle(selectedCategory);
+    window.history.pushState({}, '', `${categoryUrl(selectedCategory)}${targetHash}`);
   }
 });
