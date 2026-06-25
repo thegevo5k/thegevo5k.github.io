@@ -38,7 +38,8 @@
       {
         "urls": [
           "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/"
-        ]
+        ],
+        "skus": []
       }
     ]
   },
@@ -53,7 +54,7 @@
     "version": "1.0",
     "size": "Unavailable",
     "compatibility": "TSC 64-bit",
-    "download_url": "#",
+    "download_url": "https://www.youtube.com/watch?v=XdsxVsUFOH8",
     "requirements": [
       {
         "skus": [
