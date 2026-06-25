@@ -232,7 +232,7 @@ function renderSection(containerId, items) {
     div.innerHTML = `
       <div class="image-wrap">
         <span class="category-badge ${categoryClass}">${item.category}</span>
-        <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.style.display='none'">
+        <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
       </div>
       <h3>${item.name}</h3>
       <p>${item.short}</p>
@@ -352,8 +352,9 @@ function showCurrentDetailImage() {
   img.style.display = 'block'; // Ensure it stays visible
   
   img.onerror = function() {
-    console.warn('Image failed to load:', this.src);
-    this.style.display = 'none';
+    console.warn('Image failed to load, using generic fallback:', this.src);
+    this.onerror = null;
+    this.src = 'images/generic.jpg';
   };
 
   // Keep the lightbox in sync if it's currently showing this item's slideshow
@@ -361,6 +362,10 @@ function showCurrentDetailImage() {
   const lightboxImg = document.getElementById('lightbox-img');
   if (overlay && overlay.classList.contains('open') && overlay.classList.contains('slideshow-mode') && lightboxImg) {
     lightboxImg.src = src;
+    lightboxImg.onerror = function() {
+      this.onerror = null;
+      this.src = 'images/generic.jpg';
+    };
   }
 }
 
@@ -477,7 +482,7 @@ function renderInternalPreviewCard(grid, sku) {
   div.className = 'link-preview-item';
   div.style.cursor = 'pointer';
   div.innerHTML = `
-    <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.style.display='none'">
+    <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
     <div class="link-preview-text">
       <h3 class="link-preview-title">${dep.name}</h3>
       <p class="link-preview-subtitle">${dep.category || ''}</p>
