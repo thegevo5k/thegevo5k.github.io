@@ -505,6 +505,45 @@ footer {
   cursor: zoom-in;
 }
 
+/* ==================== DOWNLOADS TOOLBAR ==================== */
+
+.downloads-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.category-select-label {
+  font-size: 0.85rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#category-select {
+  background: #1f1f1f;
+  color: #ddd;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+}
+
+#category-select:focus {
+  border-color: var(--gold);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #777;
+  padding: 2rem 0;
+}
+
 /* ==================== ITEM DETAIL PAGE ==================== */
 
 .item-detail-page {
@@ -622,14 +661,8 @@ footer {
   }
 }
 
-/* Apply animations to items instantly as they appear */
-#locomotives-grid .download-item { animation-delay: 0.1s; animation-fill-mode: forwards; }
-#quickdrives-grid .download-item { animation-delay: 0.2s; animation-fill-mode: forwards; }
-#dependencies-grid .download-item { animation-delay: 0.3s; animation-fill-mode: forwards; }
-#routes-grid .download-item { animation-delay: 0.4s; animation-fill-mode: forwards; }
-#rollingstock-grid .download-item { animation-delay: 0.5s; animation-fill-mode: forwards; }
-#scenery-grid .download-item { animation-delay: 0.6s; animation-fill-mode: forwards; }
-#sounds-grid .download-item { animation-delay: 0.7s; animation-fill-mode: forwards; }
+/* Apply animation as items load into the downloads grid */
+#downloads-grid .download-item { animation-fill-mode: forwards; }
 
 /* Slideshow Fluidity */
 #detail-main-image {

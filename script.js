@@ -8,7 +8,9 @@ async function loadDownloads() {
     const response = await fetch(`downloads.json?t=${timestamp}`);
     allDownloads = await response.json();
 
-    renderHomepage();
+    setupCategorySelect();
+    setupFooterLinks();
+    renderDownloadsGrid();
     setupSearch();
     setupLightbox();
     setupTabs();
@@ -35,7 +37,7 @@ function setupSearch() {
 
   input.addEventListener('input', () => {
     searchTerm = input.value.trim().toLowerCase();
-    renderHomepage();
+    renderDownloadsGrid();
   });
 }
 
@@ -180,7 +182,7 @@ function detectImageCount(sku, maxCheck = 30) {
   });
 }
 
-// Single source of truth for all catalog categories: id (used for element IDs/slugs),
+// Single source of truth for all catalog categories: id (used for dropdown/footer values),
 // label (shown to users), category (matches the "category" field in downloads.json),
 // and a CSS class suffix for the colored badge.
 const CATEGORIES = [
@@ -193,28 +195,70 @@ const CATEGORIES = [
   { id: 'sounds',       label: 'Sounds',        category: 'Sounds',        badgeClass: 'sounds' }
 ];
 
-function renderHomepage() {
-  document.getElementById('main-content').innerHTML = CATEGORIES.map(cat => `
-    <section id="${cat.id}">
-      <h2>${cat.label}</h2>
-      <div id="${cat.id}-grid" class="download-grid"></div>
-    </section>
-  `).join('');
+let selectedCategory = 'latest';
 
-  const filtered = allDownloads.filter(matchesSearch);
+function setupCategorySelect() {
+  const select = document.getElementById('category-select');
+  if (!select) return;
 
-  CATEGORIES.forEach(cat => {
-    renderSection(`${cat.id}-grid`, filtered.filter(d => d.category === cat.category));
+  select.innerHTML = `
+    <option value="latest">Latest Releases</option>
+    ${CATEGORIES.map(cat => `<option value="${cat.id}">${cat.label}</option>`).join('')}
+  `;
+
+  select.addEventListener('change', () => {
+    selectedCategory = select.value;
+    renderDownloadsGrid();
   });
+}
 
-  // Hide a section entirely if search leaves it with no results
-  CATEGORIES.forEach(cat => {
-    const section = document.getElementById(cat.id);
-    const grid = document.getElementById(`${cat.id}-grid`);
-    if (section && grid) {
-      section.style.display = grid.children.length === 0 ? 'none' : '';
-    }
+function setupFooterLinks() {
+  const col = document.getElementById('footer-browse-col');
+  if (!col) return;
+
+  const linksHTML = CATEGORIES.map(cat =>
+    `<a href="#" data-category="${cat.id}">${cat.label}</a>`
+  ).join('');
+  col.insertAdjacentHTML('beforeend', linksHTML);
+
+  col.querySelectorAll('a[data-category]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab('downloads');
+
+      const category = link.dataset.category;
+      const select = document.getElementById('category-select');
+      if (select) select.value = category;
+      selectedCategory = category;
+      renderDownloadsGrid();
+
+      document.getElementById('downloads-grid').scrollIntoView({ behavior: 'smooth' });
+    });
   });
+}
+
+function renderDownloadsGrid() {
+  const grid = document.getElementById('downloads-grid');
+  const heading = document.getElementById('downloads-heading');
+  if (!grid || !heading) return;
+
+  let pool = allDownloads.filter(matchesSearch);
+
+  if (selectedCategory === 'latest') {
+    heading.textContent = searchTerm ? 'Search Results' : 'Latest Releases';
+    pool = pool.slice().sort((a, b) => (b.id || 0) - (a.id || 0));
+    if (!searchTerm) pool = pool.slice(0, 6);
+  } else {
+    const cat = CATEGORIES.find(c => c.id === selectedCategory);
+    heading.textContent = cat ? cat.label : 'Downloads';
+    pool = pool.filter(d => cat && d.category === cat.category);
+  }
+
+  renderSection('downloads-grid', pool);
+
+  if (pool.length === 0) {
+    grid.innerHTML = `<p class="empty-state">No matching downloads found.</p>`;
+  }
 }
 
 function renderSection(containerId, items) {
@@ -559,7 +603,6 @@ window.addEventListener('hashchange', () => {
   const detailPage = document.getElementById('item-detail');
   const catalogView = document.getElementById('catalog-view');
   const targetHash = window.location.hash;
-  const categoryHashes = CATEGORIES.map(cat => `#${cat.id}`);
 
   // Only intercept if the user is actively viewing a product detail page
   if (detailPage && detailPage.style.display === 'block') {
@@ -572,15 +615,5 @@ window.addEventListener('hashchange', () => {
     applyTab('downloads');
     document.title = tabTitle('downloads');
     window.history.pushState({}, '', `?tab=downloads${targetHash}`);
-  }
-
-  // Footer category links live inside the Downloads tab — jump there too
-  if (categoryHashes.includes(targetHash)) {
-    applyTab('downloads');
-    document.title = tabTitle('downloads');
-    window.history.pushState({}, '', `?tab=downloads${targetHash}`);
-
-    const section = document.querySelector(targetHash);
-    if (section) section.scrollIntoView({ behavior: 'smooth' });
   }
 });

@@ -34,8 +34,16 @@
         <input type="text" id="search-input" placeholder="Search downloads…" autocomplete="off">
       </div>
 
-      <div class="container" id="main-content">
-        <!-- Grid content loaded by JS -->
+      <div class="container">
+        <div class="downloads-toolbar">
+          <label for="category-select" class="category-select-label">Category</label>
+          <select id="category-select"></select>
+        </div>
+
+        <h2 id="downloads-heading">Latest Releases</h2>
+        <div id="downloads-grid" class="download-grid">
+          <!-- Grid content loaded by JS -->
+        </div>
       </div>
     </div>
   </div>
@@ -54,15 +62,8 @@
         <h4>We Play Simulators</h4>
         <p>Home of the ALC-42 and more for Train Simulator Classic.</p>
       </div>
-      <div class="footer-col">
+      <div class="footer-col" id="footer-browse-col">
         <h4>Browse</h4>
-        <a href="#locomotives">Locomotives</a>
-        <a href="#quickdrives">Quick Drives</a>
-        <a href="#dependencies">Dependencies</a>
-        <a href="#routes">Routes</a>
-        <a href="#rollingstock">Rolling Stock</a>
-        <a href="#scenery">Scenery</a>
-        <a href="#sounds">Sounds</a>
       </div>
     </div>
     <p>&copy; 2026 We Play Simulators</p>
