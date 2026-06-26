@@ -369,8 +369,8 @@ function renderPromoEntry(entry) {
   return `
     <div class="promo-banner">
       ${header ? `<h2 class="promo-title">${escapeHtml(header)}</h2>` : ''}
-      ${mediaHtml}
       ${description ? `<p class="promo-description">${escapeHtml(description)}</p>` : ''}
+      ${mediaHtml}
     </div>
   `;
 }
