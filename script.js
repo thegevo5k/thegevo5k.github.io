@@ -239,7 +239,7 @@ function getImagePath(sku, number = 1) {
 // Static /downloads/<sku>.html pages live one directory deeper than the homepage,
 // so image paths need a "../" prefix there.
 function assetPrefix() {
-  return window.STATIC_ITEM ? '../' : '';
+  return window.STATIC_ITEM ? '../../' : '';
 }
 
 function genericImagePath() {
@@ -250,7 +250,7 @@ function genericImagePath() {
 // needs to descend into /downloads/ first.
 function itemPageHref(sku) {
   const slug = String(sku).toLowerCase();
-  return window.STATIC_ITEM ? `${slug}.html` : `downloads/${slug}.html`;
+  return window.STATIC_ITEM ? `../${slug}/` : `downloads/${slug}/`;
 }
 
 function formatReleaseDate(dateStr) {
@@ -793,10 +793,10 @@ window.onload = function() {
 function goBackToCatalog(event) {
   event.preventDefault();
 
-  let target = '../index.html?tab=downloads';
+  let target = '../../index.html?tab=downloads';
   try {
     const lastUrl = sessionStorage.getItem('wps_last_downloads_url');
-    if (lastUrl) target = `../index.html${lastUrl}`;
+    if (lastUrl) target = `../../index.html${lastUrl}`;
   } catch (e) {
     // sessionStorage unavailable — fall back to the default Latest Releases view
   }
@@ -812,7 +812,7 @@ async function initStaticItemPage(item) {
   renderItemImages(item);
 
   try {
-    const response = await fetch('../downloads.json');
+    const response = await fetch('../../downloads.json');
     allDownloads = await response.json();
   } catch (e) {
     allDownloads = [item];

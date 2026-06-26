@@ -51,7 +51,7 @@ function renderStaticRequirements(requirements, allItems) {
   requirements.forEach(req => {
     (req.skus || (req.sku ? [req.sku] : [])).forEach(sku => {
       const dep = allItems.find(d => d.sku === sku);
-      if (dep) rows.push(`<li><a href="${slugify(dep.sku)}.html">${escapeHtml(dep.name)}</a></li>`);
+      if (dep) rows.push(`<li><a href="../${slugify(dep.sku)}/">${escapeHtml(dep.name)}</a></li>`);
     });
     (req.urls || (req.url ? [req.url] : [])).forEach(url => {
       let host = url;
@@ -78,7 +78,7 @@ function renderPage(item, allItems) {
   const slug = slugify(item.sku);
   const cover = getCoverImage(item.sku);
   const description = (item.short || item.description || '').slice(0, 160);
-  const pageUrl = `${SITE_URL}/downloads/${slug}.html`;
+  const pageUrl = `${SITE_URL}/downloads/${slug}/`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -103,8 +103,8 @@ function renderPage(item, allItems) {
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${SITE_URL}/${cover}">
 
-  <link rel="stylesheet" href="../styles.css">
-  <link rel="icon" href="../logo.png">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="icon" href="../../logo.png">
 
   <script type="application/ld+json">
   ${JSON.stringify({
@@ -122,25 +122,25 @@ function renderPage(item, allItems) {
 </head>
 <body>
   <header>
-    <a href="../index.html"><img src="../logo.png" alt="We Play Simulators Logo" class="logo"></a>
+    <a href="../../index.html"><img src="../../logo.png" alt="We Play Simulators Logo" class="logo"></a>
     <h1>We Play Simulators</h1>
   </header>
 
   <div class="tab-nav">
-    <a class="tab-btn" href="../index.html">Home</a>
+    <a class="tab-btn" href="../../index.html">Home</a>
     <div class="tab-dropdown" id="downloads-dropdown-wrapper">
       <button class="tab-btn" id="downloads-tab-btn">Downloads ▾</button>
       <div class="tab-dropdown-menu" id="downloads-dropdown-menu">
-        <a href="../index.html?tab=downloads">Latest Releases</a>
-        ${CATEGORIES.map(cat => `<a href="../index.html?tab=downloads&category=${cat.id}">${cat.label}</a>`).join('')}
+        <a href="../../index.html?tab=downloads">Latest Releases</a>
+        ${CATEGORIES.map(cat => `<a href="../../index.html?tab=downloads&category=${cat.id}">${cat.label}</a>`).join('')}
       </div>
     </div>
-    <a class="tab-btn" href="../index.html?tab=terms">Terms of Use</a>
+    <a class="tab-btn" href="../../index.html?tab=terms">Terms of Use</a>
   </div>
 
   <div class="item-detail-page page-fade-in" style="display:block;">
     <div class="container">
-      <a href="../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
+      <a href="../../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
 
       <div id="detail-content">
         <div class="modal-header" style="margin-bottom: 20px;">
@@ -148,7 +148,7 @@ function renderPage(item, allItems) {
         </div>
 
         <div class="slideshow-container" id="slideshow" style="margin-bottom: 30px;">
-          <img src="../${cover}" id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;" alt="${escapeHtml(item.name)}">
+          <img src="../../${cover}" id="detail-main-image" style="max-height:70vh; width:100%; object-fit:contain; border-radius:10px; display:block;" alt="${escapeHtml(item.name)}">
         </div>
 
         <div class="detail-meta">
@@ -180,7 +180,7 @@ function renderPage(item, allItems) {
     // so it can skip catalog/search/tab setup and just enhance this one item.
     window.STATIC_ITEM = ${JSON.stringify(item).replace(/</g, '\\u003c')};
   </script>
-  <script src="../script.js"></script>
+  <script src="../../script.js"></script>
 </body>
 </html>
 `;
@@ -190,7 +190,7 @@ function generateSitemap(items) {
   const urls = [
     { loc: `${SITE_URL}/`, priority: '1.0' },
     ...items.map(item => ({
-      loc: `${SITE_URL}/downloads/${slugify(item.sku)}.html`,
+      loc: `${SITE_URL}/downloads/${slugify(item.sku)}/`,
       priority: '0.8',
       lastmod: item.releaseDate || undefined
     }))
@@ -211,7 +211,9 @@ function main() {
   downloads.forEach(item => {
     if (!item.sku) return;
     const html = renderPage(item, downloads);
-    fs.writeFileSync(path.join(outDir, `${slugify(item.sku)}.html`), html);
+    const slugDir = path.join(outDir, slugify(item.sku));
+    fs.mkdirSync(slugDir, { recursive: true });
+    fs.writeFileSync(path.join(slugDir, 'index.html'), html);
   });
 
   fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), generateSitemap(downloads));
