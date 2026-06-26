@@ -122,25 +122,25 @@ function renderPage(item, allItems) {
 </head>
 <body>
   <header>
-    <a href="../../index.html"><img src="../../logo.png" alt="We Play Simulators Logo" class="logo"></a>
+    <a href="../../"><img src="../../logo.png" alt="We Play Simulators Logo" class="logo"></a>
     <h1>We Play Simulators</h1>
   </header>
 
   <div class="tab-nav">
-    <a class="tab-btn" href="../../index.html">Home</a>
+    <a class="tab-btn" href="../../">Home</a>
     <div class="tab-dropdown" id="downloads-dropdown-wrapper">
       <button class="tab-btn" id="downloads-tab-btn">Downloads ▾</button>
       <div class="tab-dropdown-menu" id="downloads-dropdown-menu">
-        <a href="../../index.html?tab=downloads">Latest Releases</a>
-        ${CATEGORIES.map(cat => `<a href="../../index.html?tab=downloads&category=${cat.id}">${cat.label}</a>`).join('')}
+        <a href="../../?tab=downloads">Latest Releases</a>
+        ${CATEGORIES.map(cat => `<a href="../../?tab=downloads&category=${cat.id}">${cat.label}</a>`).join('')}
       </div>
     </div>
-    <a class="tab-btn" href="../../index.html?tab=terms">Terms of Use</a>
+    <a class="tab-btn" href="../../?tab=terms">Terms of Use</a>
   </div>
 
   <div class="item-detail-page page-fade-in" style="display:block;">
     <div class="container">
-      <a href="../../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
+      <a href="../../" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
 
       <div id="detail-content">
         <div class="modal-header" style="margin-bottom: 20px;">

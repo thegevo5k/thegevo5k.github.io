@@ -793,10 +793,10 @@ window.onload = function() {
 function goBackToCatalog(event) {
   event.preventDefault();
 
-  let target = '../../index.html?tab=downloads';
+  let target = '../../?tab=downloads';
   try {
     const lastUrl = sessionStorage.getItem('wps_last_downloads_url');
-    if (lastUrl) target = `../../index.html${lastUrl}`;
+    if (lastUrl) target = `../../${lastUrl}`;
   } catch (e) {
     // sessionStorage unavailable — fall back to the default Latest Releases view
   }
