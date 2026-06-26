@@ -138,7 +138,7 @@ function renderPage(item, allItems) {
     <a class="tab-btn" href="../index.html?tab=terms">Terms of Use</a>
   </div>
 
-  <div class="item-detail-page" style="display:block;">
+  <div class="item-detail-page page-fade-in" style="display:block;">
     <div class="container">
       <a href="../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
 

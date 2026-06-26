@@ -742,6 +742,11 @@ footer {
   opacity: 0;
 }
 
+/* Used on generated static item pages, which load fresh each time (no JS toggle needed) */
+.page-fade-in {
+  animation: fadeInUp 0.4s ease-out;
+}
+
 /* Staggered load animation using index tracking if needed, or simple entry */
 @keyframes fadeInUp {
   from {
