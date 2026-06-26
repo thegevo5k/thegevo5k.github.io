@@ -410,6 +410,8 @@ footer {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .tab-btn:hover {
