@@ -351,12 +351,58 @@
 
   #promo-app {
     flex: 1;
-    overflow-y: auto;
-    padding: 30px;
+    display: flex;
+    overflow: hidden;
   }
 
-  #promo-form {
-    max-width: 480px;
+  #promo-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #161616;
+    border-right: 1px solid #2a2a2a;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .promo-entry-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    background: #1f1f1f;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    color: #ddd;
+    font-weight: normal;
+  }
+
+  .promo-entry-item:hover { border-color: #444; }
+
+  .promo-entry-item.active {
+    border-color: var(--gold);
+    background: #262218;
+  }
+
+  .promo-entry-item .entry-item-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+
+  .promo-entry-item .entry-item-sku {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: capitalize;
+  }
+
+  #promo-form-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 30px;
+    max-width: 560px;
   }
 </style>
 </head>
@@ -402,25 +448,14 @@
   </div>
 
   <div id="promo-app" style="display:none;">
-    <div id="promo-form">
-      <label>Homepage Status
-        <select id="p-status">
-          <option value="coming_soon">Coming Soon</option>
-          <option value="out_now">Out Now</option>
-        </select>
-      </label>
-
-      <div id="p-coming-soon-fields">
-        <label>Image Path
-          <input type="text" id="p-image" value="images/Promo.jpg" placeholder="images/Promo.jpg">
-        </label>
+    <div id="promo-sidebar">
+      <button id="btn-promo-new-entry" class="btn-secondary" style="width:100%; margin-bottom:10px;">+ New Entry</button>
+      <div id="promo-entry-list">
+        <p class="empty-hint">No entries yet. Click "+ New Entry" to start.</p>
       </div>
-
-      <div id="p-out-now-fields" style="display:none;">
-        <label>YouTube URL
-          <input type="text" id="p-youtube" placeholder="https://www.youtube.com/watch?v=...">
-        </label>
-      </div>
+    </div>
+    <div id="promo-form-container">
+      <p class="empty-hint">Select an entry on the left, or click "+ New Entry" to create one.</p>
     </div>
   </div>
 
@@ -884,36 +919,125 @@
     document.getElementById('downloads-toolbar').style.display = mode === 'downloads' ? 'flex' : 'none';
     document.getElementById('promo-toolbar').style.display = mode === 'promo' ? 'flex' : 'none';
     document.getElementById('app').style.display = mode === 'downloads' ? 'flex' : 'none';
-    document.getElementById('promo-app').style.display = mode === 'promo' ? 'block' : 'none';
+    document.getElementById('promo-app').style.display = mode === 'promo' ? 'flex' : 'none';
   }
 
   document.getElementById('mode-downloads').addEventListener('click', () => setMode('downloads'));
   document.getElementById('mode-promo').addEventListener('click', () => setMode('promo'));
 
-  // ---------- promo.json editing ----------
+  // ---------- promo.json editing (list of homepage entries) ----------
 
-  let promoData = { status: 'coming_soon', image: 'images/Promo.jpg', youtubeUrl: '' };
+  let promoData = [{ header: 'Coming Soon', description: '', mediaType: 'image', media: 'images/Promo.jpg' }];
   let promoFileHandle = null;
+  let selectedPromoIndex = null;
 
-  function renderPromoForm() {
-    document.getElementById('p-status').value = promoData.status || 'coming_soon';
-    document.getElementById('p-image').value = promoData.image || '';
-    document.getElementById('p-youtube').value = promoData.youtubeUrl || '';
-    toggleStatusFields();
+  function renderPromoSidebar() {
+    const list = document.getElementById('promo-entry-list');
+    if (!promoData.length) {
+      list.innerHTML = `<p class="empty-hint">No entries yet. Click "+ New Entry" to start.</p>`;
+      return;
+    }
+
+    list.innerHTML = promoData.map((entry, i) => `
+      <button class="promo-entry-item ${i === selectedPromoIndex ? 'active' : ''}" data-index="${i}">
+        <span class="entry-item-name">${escapeHtml(entry.header) || '(untitled)'}</span>
+        <span class="entry-item-sku">${entry.mediaType || 'image'}</span>
+      </button>
+    `).join('');
+
+    list.querySelectorAll('.promo-entry-item').forEach(btn => {
+      btn.addEventListener('click', () => selectPromoEntry(Number(btn.dataset.index)));
+    });
   }
 
-  function toggleStatusFields() {
-    const isOutNow = document.getElementById('p-status').value === 'out_now';
-    document.getElementById('p-coming-soon-fields').style.display = isOutNow ? 'none' : 'block';
-    document.getElementById('p-out-now-fields').style.display = isOutNow ? 'block' : 'none';
+  function selectPromoEntry(i) {
+    selectedPromoIndex = i;
+    renderPromoSidebar();
+    renderPromoEntryForm();
   }
 
-  document.getElementById('p-status').addEventListener('change', (e) => {
-    promoData.status = e.target.value;
-    toggleStatusFields();
-  });
-  document.getElementById('p-image').addEventListener('input', (e) => { promoData.image = e.target.value; });
-  document.getElementById('p-youtube').addEventListener('input', (e) => { promoData.youtubeUrl = e.target.value; });
+  function addPromoEntry() {
+    promoData.push({ header: '', description: '', mediaType: 'image', media: '' });
+    selectPromoEntry(promoData.length - 1);
+  }
+
+  function deletePromoEntry(i) {
+    if (!confirm('Delete this homepage entry? This cannot be undone.')) return;
+    promoData.splice(i, 1);
+    selectedPromoIndex = null;
+    renderPromoSidebar();
+    renderPromoEntryForm();
+  }
+
+  function movePromoEntry(i, direction) {
+    const j = i + direction;
+    if (j < 0 || j >= promoData.length) return;
+    [promoData[i], promoData[j]] = [promoData[j], promoData[i]];
+    selectedPromoIndex = j;
+    renderPromoSidebar();
+    renderPromoEntryForm();
+  }
+
+  function renderPromoEntryForm() {
+    const container = document.getElementById('promo-form-container');
+    if (selectedPromoIndex === null || !promoData[selectedPromoIndex]) {
+      container.innerHTML = `<p class="empty-hint">Select an entry on the left, or click "+ New Entry" to create one.</p>`;
+      return;
+    }
+
+    const entry = promoData[selectedPromoIndex];
+    const isVideo = entry.mediaType === 'video';
+
+    container.innerHTML = `
+      <div class="form-toolbar">
+        <span class="form-id">Entry ${selectedPromoIndex + 1} of ${promoData.length}</span>
+        <div class="form-toolbar-actions">
+          <button class="btn-secondary" id="btn-promo-move-up" type="button">↑ Move Up</button>
+          <button class="btn-secondary" id="btn-promo-move-down" type="button">↓ Move Down</button>
+          <button class="btn-danger" id="btn-promo-delete" type="button">Delete</button>
+        </div>
+      </div>
+
+      <label>Header Text
+        <input type="text" id="pe-header" value="${escapeAttr(entry.header)}" placeholder="Coming Soon">
+      </label>
+
+      <label>Description (shown below the media)
+        <textarea id="pe-description" rows="3" placeholder="Optional supporting text">${escapeHtml(entry.description)}</textarea>
+      </label>
+
+      <label>Media Type
+        <select id="pe-media-type">
+          <option value="image" ${!isVideo ? 'selected' : ''}>Image</option>
+          <option value="video" ${isVideo ? 'selected' : ''}>YouTube Video</option>
+        </select>
+      </label>
+
+      <label>
+        ${isVideo ? 'YouTube URL' : 'Image Path'}
+        <input type="text" id="pe-media" value="${escapeAttr(entry.media)}"
+          placeholder="${isVideo ? 'https://www.youtube.com/watch?v=...' : 'images/Promo.jpg'}">
+      </label>
+    `;
+
+    document.getElementById('pe-header').addEventListener('input', (e) => {
+      entry.header = e.target.value;
+      renderPromoSidebar();
+    });
+    document.getElementById('pe-description').addEventListener('input', (e) => { entry.description = e.target.value; });
+    document.getElementById('pe-media').addEventListener('input', (e) => { entry.media = e.target.value; });
+    document.getElementById('pe-media-type').addEventListener('change', (e) => {
+      entry.mediaType = e.target.value;
+      renderPromoSidebar();
+      renderPromoEntryForm();
+    });
+
+    document.getElementById('btn-promo-delete').addEventListener('click', () => deletePromoEntry(selectedPromoIndex));
+    document.getElementById('btn-promo-move-up').addEventListener('click', () => movePromoEntry(selectedPromoIndex, -1));
+    document.getElementById('btn-promo-move-down').addEventListener('click', () => movePromoEntry(selectedPromoIndex, 1));
+  }
+
+  document.getElementById('btn-promo-new-entry').addEventListener('click', addPromoEntry);
 
   async function openPromoFile() {
     try {
@@ -923,9 +1047,12 @@
         });
         promoFileHandle = handle;
         const file = await handle.getFile();
-        promoData = JSON.parse(await file.text());
-        renderPromoForm();
-        setStatus(`Loaded promo settings from ${handle.name}.`);
+        const parsed = JSON.parse(await file.text());
+        promoData = Array.isArray(parsed) ? parsed : [parsed];
+        selectedPromoIndex = null;
+        renderPromoSidebar();
+        renderPromoEntryForm();
+        setStatus(`Loaded ${promoData.length} homepage entr${promoData.length === 1 ? 'y' : 'ies'} from ${handle.name}.`);
       } else {
         document.getElementById('fallback-promo-file-input').click();
       }
@@ -940,10 +1067,13 @@
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        promoData = JSON.parse(reader.result);
+        const parsed = JSON.parse(reader.result);
+        promoData = Array.isArray(parsed) ? parsed : [parsed];
         promoFileHandle = null;
-        renderPromoForm();
-        setStatus(`Loaded promo settings from ${file.name}. Use "Download Copy" to save changes.`);
+        selectedPromoIndex = null;
+        renderPromoSidebar();
+        renderPromoEntryForm();
+        setStatus(`Loaded ${promoData.length} homepage entr${promoData.length === 1 ? 'y' : 'ies'} from ${file.name}. Use "Download Copy" to save changes.`);
       } catch (err) {
         alert('That file is not valid JSON: ' + err.message);
       }
@@ -957,7 +1087,7 @@
         const writable = await promoFileHandle.createWritable();
         await writable.write(JSON.stringify(promoData, null, 2));
         await writable.close();
-        setStatus(`Saved promo settings to ${promoFileHandle.name} at ${new Date().toLocaleTimeString()}.`);
+        setStatus(`Saved ${promoData.length} homepage entr${promoData.length === 1 ? 'y' : 'ies'} to ${promoFileHandle.name} at ${new Date().toLocaleTimeString()}.`);
       } catch (err) {
         alert('Could not save file: ' + err.message);
       }
@@ -995,7 +1125,8 @@
   document.getElementById('btn-promo-save').addEventListener('click', savePromoFile);
   document.getElementById('btn-promo-download').addEventListener('click', downloadPromoCopy);
 
-  renderPromoForm();
+  renderPromoSidebar();
+  renderPromoEntryForm();
   renderSidebar();
   renderForm();
 </script>

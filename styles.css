@@ -443,6 +443,16 @@ footer {
   margin-bottom: 2.5rem;
 }
 
+.promo-banner:last-child {
+  margin-bottom: 0;
+}
+
+.promo-description {
+  color: #ccc;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
 .promo-title {
   color: var(--gold);
   border-bottom: 2px solid var(--teal);

@@ -334,36 +334,51 @@ async function renderPromoBanner() {
   const container = document.getElementById('promo-banner-container');
   if (!container) return;
 
-  let promo = { status: 'coming_soon', image: 'images/Promo.jpg', youtubeUrl: '' };
+  let entries = [{ header: 'Coming Soon', description: '', mediaType: 'image', media: 'images/Promo.jpg' }];
 
   try {
     const response = await fetch(`promo.json?t=${Date.now()}`);
-    if (response.ok) promo = { ...promo, ...(await response.json()) };
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) entries = data;
+    }
   } catch (e) {
     // promo.json missing or unreachable — fall back to the default Coming Soon banner
   }
 
-  if (promo.status === 'out_now') {
-    const videoId = extractYouTubeId(promo.youtubeUrl);
-    container.innerHTML = `
-      <div class="promo-banner">
-        <h2 class="promo-title">Out Now</h2>
-        ${videoId
-          ? `<div class="promo-video-wrap">
-               <iframe src="https://www.youtube.com/embed/${videoId}" title="Out Now" frameborder="0"
-                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-             </div>`
-          : `<p class="empty-state">No video link set yet.</p>`}
-      </div>
-    `;
+  container.innerHTML = entries.map(renderPromoEntry).join('');
+}
+
+function renderPromoEntry(entry) {
+  const header = entry.header || '';
+  const description = entry.description || '';
+
+  let mediaHtml = '';
+  if (entry.mediaType === 'video') {
+    const videoId = extractYouTubeId(entry.media);
+    mediaHtml = videoId
+      ? `<div class="promo-video-wrap">
+           <iframe src="https://www.youtube.com/embed/${videoId}" title="${escapeHtml(header) || 'Video'}" frameborder="0"
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+         </div>`
+      : `<p class="empty-state">No video link set yet.</p>`;
   } else {
-    container.innerHTML = `
-      <div class="promo-banner">
-        <h2 class="promo-title">Coming Soon</h2>
-        <img src="${promo.image}" alt="Coming Soon" class="promo-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
-      </div>
-    `;
+    mediaHtml = `<img src="${escapeHtml(entry.media || 'images/generic.jpg')}" alt="${escapeHtml(header) || 'Promo image'}" class="promo-image" onerror="this.onerror=null; this.src='images/generic.jpg';">`;
   }
+
+  return `
+    <div class="promo-banner">
+      ${header ? `<h2 class="promo-title">${escapeHtml(header)}</h2>` : ''}
+      ${mediaHtml}
+      ${description ? `<p class="promo-description">${escapeHtml(description)}</p>` : ''}
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 }
 
 function extractYouTubeId(url) {
