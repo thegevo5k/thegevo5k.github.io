@@ -9,6 +9,17 @@
 const fs = require('fs');
 const path = require('path');
 
+// Keep this list in sync with the CATEGORIES array in script.js
+const CATEGORIES = [
+  { id: 'locomotives', label: 'Locomotives' },
+  { id: 'quickdrives', label: 'Quick Drives' },
+  { id: 'dependencies', label: 'Dependencies' },
+  { id: 'routes', label: 'Routes' },
+  { id: 'rollingstock', label: 'Rolling Stock' },
+  { id: 'scenery', label: 'Scenery' },
+  { id: 'sounds', label: 'Sounds' }
+];
+
 const ROOT = __dirname;
 const SITE_URL = 'https://www.weplaysimulators.com';
 const downloads = JSON.parse(fs.readFileSync(path.join(ROOT, 'downloads.json'), 'utf8'));
@@ -114,6 +125,18 @@ function renderPage(item, allItems) {
     <a href="../index.html"><img src="../logo.png" alt="We Play Simulators Logo" class="logo"></a>
     <h1>We Play Simulators</h1>
   </header>
+
+  <div class="tab-nav">
+    <a class="tab-btn" href="../index.html">Home</a>
+    <div class="tab-dropdown" id="downloads-dropdown-wrapper">
+      <button class="tab-btn" id="downloads-tab-btn">Downloads ▾</button>
+      <div class="tab-dropdown-menu" id="downloads-dropdown-menu">
+        <a href="../index.html?tab=downloads">Latest Releases</a>
+        ${CATEGORIES.map(cat => `<a href="../index.html?tab=downloads&category=${cat.id}">${cat.label}</a>`).join('')}
+      </div>
+    </div>
+    <a class="tab-btn" href="../index.html?tab=terms">Terms of Use</a>
+  </div>
 
   <div class="item-detail-page" style="display:block;">
     <div class="container">

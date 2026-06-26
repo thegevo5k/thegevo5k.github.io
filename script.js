@@ -778,6 +778,7 @@ window.onload = function() {
 async function initStaticItemPage(item) {
   currentDetailItem = item;
   setupLightbox();
+  setupTabs();
   renderItemImages(item);
 
   try {
