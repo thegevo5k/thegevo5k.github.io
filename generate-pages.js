@@ -140,7 +140,7 @@ function renderPage(item, allItems) {
 
   <div class="item-detail-page" style="display:block;">
     <div class="container">
-      <a href="../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;">← Back to Catalog</a>
+      <a href="../index.html" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
 
       <div id="detail-content">
         <div class="modal-header" style="margin-bottom: 20px;">

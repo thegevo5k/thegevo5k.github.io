@@ -775,6 +775,21 @@ window.onload = function() {
 // Bootstraps a generated static /downloads/<sku>.html page: the item's own data is already
 // embedded inline (window.STATIC_ITEM) so the slideshow renders instantly, but we still fetch
 // the full catalog so internal SKU requirement references (e.g. "Charger Dependencies") resolve.
+// Used by the "← Back to Catalog" link on static item pages. If the visitor actually
+// navigated here from somewhere else on this site, go back in history (restoring
+// whatever tab/category/scroll position they had). Otherwise — e.g. arriving directly
+// from a Google search result — there's nothing useful to go "back" to, so just follow
+// the link's normal href to the homepage.
+function goBackToCatalog(event) {
+  const cameFromThisSite = document.referrer && document.referrer.includes(window.location.host);
+  if (cameFromThisSite && window.history.length > 1) {
+    event.preventDefault();
+    window.history.back();
+    return false;
+  }
+  return true;
+}
+
 async function initStaticItemPage(item) {
   currentDetailItem = item;
   setupLightbox();
