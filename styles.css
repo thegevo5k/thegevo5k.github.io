@@ -412,6 +412,9 @@ footer {
   transition: all 0.2s;
   text-decoration: none;
   display: inline-block;
+  line-height: 1.2;
+  vertical-align: middle;
+  box-sizing: border-box;
 }
 
 .tab-btn:hover {
@@ -664,6 +667,8 @@ footer {
   padding: 10px 14px;
   width: 100%;
   transition: background 0.2s, border-color 0.2s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .link-preview-item:hover {
