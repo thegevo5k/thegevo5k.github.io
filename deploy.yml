@@ -29,7 +29,7 @@ jobs:
           node-version: 20
 
       - name: Generate static item pages + sitemap
-        run: node scripts/generate-pages.js
+        run: node generate-pages.js
 
       - name: Upload site as Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.join(__dirname, '..');
+const ROOT = __dirname;
 const SITE_URL = 'https://www.weplaysimulators.com';
 const downloads = JSON.parse(fs.readFileSync(path.join(ROOT, 'downloads.json'), 'utf8'));
 
