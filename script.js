@@ -408,6 +408,16 @@ function renderDownloadsGrid() {
     grid.innerHTML = `<p class="empty-state">No matching downloads found.</p>`;
   }
 
+  // Remember this exact view (ignoring an active search, which isn't a persisted state)
+  // so static item pages can reliably send the "Back to Catalog" button here, instead
+  // of relying on browser history/referrer quirks.
+  try {
+    sessionStorage.setItem('wps_last_downloads_url', categoryUrl(selectedCategory));
+  } catch (e) {
+    // sessionStorage unavailable (private browsing, etc.) — back button will just fall
+    // back to the default Latest Releases view, which is a safe default.
+  }
+
   if (menu && !searchTerm) {
     menu.querySelectorAll('a[data-category]').forEach(link => {
       link.classList.toggle('active', link.dataset.category === selectedCategory);
@@ -775,19 +785,24 @@ window.onload = function() {
 // Bootstraps a generated static /downloads/<sku>.html page: the item's own data is already
 // embedded inline (window.STATIC_ITEM) so the slideshow renders instantly, but we still fetch
 // the full catalog so internal SKU requirement references (e.g. "Charger Dependencies") resolve.
-// Used by the "← Back to Catalog" link on static item pages. If the visitor actually
-// navigated here from somewhere else on this site, go back in history (restoring
-// whatever tab/category/scroll position they had). Otherwise — e.g. arriving directly
-// from a Google search result — there's nothing useful to go "back" to, so just follow
-// the link's normal href to the homepage.
+// Used by the "← Back to Catalog" link on static item pages. Reads the last Downloads
+// view (tab/category) the homepage recorded in sessionStorage, so this always returns
+// to the right place rather than guessing from browser history/referrer — which can
+// behave inconsistently once a real page navigation (not a same-document SPA jump) is
+// involved, as it is whenever you click into one of these static item pages.
 function goBackToCatalog(event) {
-  const cameFromThisSite = document.referrer && document.referrer.includes(window.location.host);
-  if (cameFromThisSite && window.history.length > 1) {
-    event.preventDefault();
-    window.history.back();
-    return false;
+  event.preventDefault();
+
+  let target = '../index.html?tab=downloads';
+  try {
+    const lastUrl = sessionStorage.getItem('wps_last_downloads_url');
+    if (lastUrl) target = `../index.html${lastUrl}`;
+  } catch (e) {
+    // sessionStorage unavailable — fall back to the default Latest Releases view
   }
-  return true;
+
+  window.location.href = target;
+  return false;
 }
 
 async function initStaticItemPage(item) {
