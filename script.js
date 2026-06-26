@@ -14,6 +14,7 @@ async function loadDownloads() {
     setupSearch();
     setupLightbox();
     setupTabs();
+    renderPromoBanner();
 
     const urlParams = new URLSearchParams(window.location.search);
     const itemSku = urlParams.get('item');
@@ -232,7 +233,24 @@ function matchesSearch(item) {
 }
 
 function getImagePath(sku, number = 1) {
-  return `images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
+  return `${assetPrefix()}images/${sku}/${number.toString().padStart(2, '0')}.jpg`;
+}
+
+// Static /downloads/<sku>.html pages live one directory deeper than the homepage,
+// so image paths need a "../" prefix there.
+function assetPrefix() {
+  return window.STATIC_ITEM ? '../' : '';
+}
+
+function genericImagePath() {
+  return `${assetPrefix()}images/generic.jpg`;
+}
+
+// Static pages link to sibling pages directly (same /downloads/ folder); the homepage
+// needs to descend into /downloads/ first.
+function itemPageHref(sku) {
+  const slug = String(sku).toLowerCase();
+  return window.STATIC_ITEM ? `${slug}.html` : `downloads/${slug}.html`;
 }
 
 function formatReleaseDate(dateStr) {
@@ -312,6 +330,48 @@ function setupFooterLinks() {
   });
 }
 
+async function renderPromoBanner() {
+  const container = document.getElementById('promo-banner-container');
+  if (!container) return;
+
+  let promo = { status: 'coming_soon', image: 'images/Promo.jpg', youtubeUrl: '' };
+
+  try {
+    const response = await fetch(`promo.json?t=${Date.now()}`);
+    if (response.ok) promo = { ...promo, ...(await response.json()) };
+  } catch (e) {
+    // promo.json missing or unreachable — fall back to the default Coming Soon banner
+  }
+
+  if (promo.status === 'out_now') {
+    const videoId = extractYouTubeId(promo.youtubeUrl);
+    container.innerHTML = `
+      <div class="promo-banner">
+        <h2 class="promo-title">Out Now</h2>
+        ${videoId
+          ? `<div class="promo-video-wrap">
+               <iframe src="https://www.youtube.com/embed/${videoId}" title="Out Now" frameborder="0"
+                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+             </div>`
+          : `<p class="empty-state">No video link set yet.</p>`}
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="promo-banner">
+        <h2 class="promo-title">Coming Soon</h2>
+        <img src="${promo.image}" alt="Coming Soon" class="promo-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
+      </div>
+    `;
+  }
+}
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
 function sortByReleaseDate(items) {
   return items.slice().sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
 }
@@ -370,11 +430,11 @@ function renderSection(containerId, items) {
     div.innerHTML = `
       <div class="image-wrap">
         <span class="category-badge ${categoryClass}">${item.category}</span>
-        <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
+        <img src="${coverSrc}" alt="${item.name}" class="item-image" onerror="this.onerror=null; this.src=genericImagePath();">
       </div>
       <h3>${item.name}</h3>
       <p>${item.short}</p>
-      <button onclick="showItemDetail('${item.sku}')" class="btn-small">View & Download</button>
+      <a href="${itemPageHref(item.sku)}" class="btn-small">View & Download</a>
     `;
     container.appendChild(div);
   });
@@ -493,7 +553,7 @@ function showCurrentDetailImage() {
   img.onerror = function() {
     console.warn('Image failed to load, using generic fallback:', this.src);
     this.onerror = null;
-    this.src = 'images/generic.jpg';
+    this.src = genericImagePath();
   };
 
   // Keep the lightbox in sync if it's currently showing this item's slideshow
@@ -503,7 +563,7 @@ function showCurrentDetailImage() {
     lightboxImg.src = src;
     lightboxImg.onerror = function() {
       this.onerror = null;
-      this.src = 'images/generic.jpg';
+      this.src = genericImagePath();
     };
   }
 }
@@ -617,18 +677,17 @@ function renderInternalPreviewCard(grid, sku) {
   const dep = allDownloads.find(d => d.sku === sku);
   if (!dep) return;
 
-  const div = document.createElement('div');
-  div.className = 'link-preview-item';
-  div.style.cursor = 'pointer';
-  div.innerHTML = `
-    <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.onerror=null; this.src='images/generic.jpg';">
+  const a = document.createElement('a');
+  a.className = 'link-preview-item';
+  a.href = itemPageHref(dep.sku);
+  a.innerHTML = `
+    <img src="${getImagePath(dep.sku, 1)}" alt="${dep.name}" class="item-image" onerror="this.onerror=null; this.src=genericImagePath();">
     <div class="link-preview-text">
       <h3 class="link-preview-title">${dep.name}</h3>
       <p class="link-preview-subtitle">${dep.category || ''}</p>
     </div>
   `;
-  div.onclick = () => showItemDetail(dep.sku);
-  grid.appendChild(div);
+  grid.appendChild(a);
 }
 
 function renderLinkPreviewCard(grid, url, linkIcon) {
@@ -700,7 +759,33 @@ window.onpopstate = function() {
   }
 };
 
-window.onload = loadDownloads;
+window.onload = function() {
+  if (window.STATIC_ITEM) {
+    initStaticItemPage(window.STATIC_ITEM);
+  } else {
+    loadDownloads();
+  }
+};
+
+// Bootstraps a generated static /downloads/<sku>.html page: the item's own data is already
+// embedded inline (window.STATIC_ITEM) so the slideshow renders instantly, but we still fetch
+// the full catalog so internal SKU requirement references (e.g. "Charger Dependencies") resolve.
+async function initStaticItemPage(item) {
+  currentDetailItem = item;
+  setupLightbox();
+  renderItemImages(item);
+
+  try {
+    const response = await fetch('../downloads.json');
+    allDownloads = await response.json();
+  } catch (e) {
+    allDownloads = [item];
+  }
+
+  if (item.requirements && item.requirements.length > 0) {
+    renderRequirements(item.requirements);
+  }
+}
 
 // Automatically return to the catalog if a nav bar shortcut link is clicked while viewing a product
 window.addEventListener('hashchange', () => {
