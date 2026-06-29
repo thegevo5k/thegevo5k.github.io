@@ -1,17 +1,78 @@
 [
   {
     "id": 1,
-    "sku": "WPS-PLACEHOLDER",
+    "sku": "WPS-ALC-01",
     "category": "Locomotives",
-    "name": "{placeholder-product}",
-    "short": "",
-    "description": "",
+    "name": "Amtrak ALC-42",
+    "short": "The Amtrak ALC-42 has arrived to Train Simulator Classic in 6 unique liveries, custom sounds and high fidelity textures.",
+    "description": "We welcome Amtrak's newest locomotive to Train Simulator Classic. the unique Siemens ALC-42! Features liveries include Day One, Phase VI, Phase VII, America 250, Freedom 250 and U.S. Department of Transportation 250. A custom curated soundset has been compiled by a variety of community members and railfans alike, as well as in-house sounds recorded off of a real ALC-42 locomotive. Baked and textured in Substance Painter, this locomotive comes with high-fidelity 4K textures. Included are new lights (including engine room, numberboard and marker lights) and the ability to cast light on the ground. The Siemens Q517-01 alerter is also included, which changes alerter intervals based on speed, complete with a reset procedure.",
     "version": "1.0",
     "size": "Unavailable",
     "compatibility": "TSC 64-bit",
     "download_url": "#",
-    "releaseDate": "2026-06-26",
-    "requirements": [],
+    "releaseDate": "2026-07-04",
+    "requirements": [
+      {
+        "skus": [
+          "WPS-CHARGER-DEP"
+        ],
+        "urls": [
+          "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/"
+        ]
+      }
+    ],
+    "hidden": true
+  },
+  {
+    "id": 2,
+    "sku": "WPS-CHARGER-DEP",
+    "category": "Dependencies",
+    "name": "Charger Dependencies",
+    "short": "This package has all of the dependencies for our Charger series of locomotives.",
+    "description": "The Charger Dependencies are a collection of sounds, artwork and scripts for our Siemens Charger locomotives. These are essential for ensuring the locomotive functions and sounds as it should. If more Chargers get released, this package will be updated with the appropriate fixes and additions. Should you choose not to download it, the locomotive simply will not work.",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "releaseDate": "2026-07-04",
+    "requirements": [
+      {
+        "skus": [],
+        "urls": [
+          "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/"
+        ]
+      }
+    ],
+    "hidden": true
+  },
+  {
+    "id": 3,
+    "sku": "WPS-ALC-01-QD",
+    "category": "Quick Drives",
+    "name": "Amtrak ALC-42 Quick Drives",
+    "short": "This package includes 212 Quick Drives for the Amtrak ALC-42",
+    "description": "Included are 212 Quick Drives for the Amtrak ALC-42. The consists are compiled with every variation of ALC-42 put together, plus the ability to have a P42DC working in the consist. The consists included are the California Zephyr, Cardinal, Empire Builder, Floridian, Southwest Chief and Sunset Limited.",
+    "version": "1.0",
+    "size": "Unavailable",
+    "compatibility": "TSC 64-bit",
+    "download_url": "#",
+    "releaseDate": "2026-07-04",
+    "requirements": [
+      {
+        "skus": [
+          "WPS-ALC-01",
+          "WPS-CHARGER-DEP"
+        ],
+        "urls": [
+          "https://store.steampowered.com/app/258643/Train_Simulator_NEC_New_YorkNew_Haven_Route_AddOn/",
+          "https://store.steampowered.com/app/2202020/Train_Simulator_E60_Electric_Locomotive_AddOn/",
+          "https://store.steampowered.com/app/222627/Train_Simulator_Amtrak_P42_DC_Empire_Builder_Loco_AddOn/",
+          "https://www.trainsimcommunity.com/mods/c1-train-sim-classic/c87-models/i1529-amtrak-viewliner-ii-baggages",
+          "https://www.trainsimcommunity.com/mods/c1-train-sim-classic/c77-enhancement-packs/i3499-amfleet-i-enhancement-pack",
+          "https://www.trainsimarchive.org/trurail-simulations/amtk-p42dc-ep"
+        ]
+      }
+    ],
     "hidden": true
   }
 ]
