@@ -397,24 +397,25 @@ function renderDownloadsGrid() {
   if (!grid || !heading) return;
 
   const menu = document.getElementById('downloads-dropdown-menu');
+  const visibleDownloads = allDownloads.filter(d => !d.hidden);
   let pool;
 
   if (searchTerm) {
     // Search is its own view: searches the whole catalog (title + full description),
     // independent of whatever category is currently selected.
     heading.textContent = `Search Results for "${rawSearchTerm}"`;
-    pool = sortByReleaseDate(allDownloads.filter(matchesSearch));
+    pool = sortByReleaseDate(visibleDownloads.filter(matchesSearch));
 
     if (menu) {
       menu.querySelectorAll('a[data-category]').forEach(link => link.classList.remove('active'));
     }
   } else if (selectedCategory === 'latest') {
     heading.textContent = 'Latest Releases';
-    pool = sortByReleaseDate(allDownloads).slice(0, 6);
+    pool = sortByReleaseDate(visibleDownloads).slice(0, 6);
   } else {
     const cat = CATEGORIES.find(c => c.id === selectedCategory);
     heading.textContent = cat ? cat.label : 'Downloads';
-    pool = sortByReleaseDate(allDownloads.filter(d => cat && d.category === cat.category));
+    pool = sortByReleaseDate(visibleDownloads.filter(d => cat && d.category === cat.category));
   }
 
   renderSection('downloads-grid', pool);
@@ -820,7 +821,50 @@ function goBackToCatalog(event) {
   return false;
 }
 
+// Soft PIN gate for items marked "hidden" in downloads.json. This only keeps a static
+// page out of casual browsing/search results — it is NOT real security, since the page's
+// content is still present in the page source for anyone who looks. It's meant purely to
+// stop a hidden product from being stumbled into accidentally.
+const PIN_CODE = '051126';
+const PIN_SESSION_KEY = 'wps_pin_unlocked';
+
+function setupPinGate() {
+  if (!window.PAGE_HIDDEN) return;
+
+  try {
+    if (sessionStorage.getItem(PIN_SESSION_KEY) === 'true') return;
+  } catch (e) {
+    // sessionStorage unavailable — gate will just re-prompt every visit, which is fine
+  }
+
+  const overlay = document.getElementById('pin-gate-overlay');
+  if (!overlay) return;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const input = document.getElementById('pin-gate-input');
+  const errorEl = document.getElementById('pin-gate-error');
+  const form = document.getElementById('pin-gate-form');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value.trim() === PIN_CODE) {
+      try { sessionStorage.setItem(PIN_SESSION_KEY, 'true'); } catch (e) {}
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    } else {
+      errorEl.textContent = 'Incorrect PIN. Try again.';
+      input.value = '';
+      input.focus();
+    }
+  });
+
+  input.focus();
+}
+
 async function initStaticItemPage(item) {
+  setupPinGate();
   currentDetailItem = item;
   setupLightbox();
   setupTabs();

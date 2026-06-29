@@ -88,7 +88,7 @@ function renderPage(item, allItems) {
   <title>${escapeHtml(item.name)} | We Play Simulators</title>
 
   <meta name="description" content="${escapeHtml(description)}">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="${item.hidden ? 'noindex, nofollow' : 'index, follow'}">
   <link rel="canonical" href="${pageUrl}">
 
   <meta property="og:type" content="website">
@@ -138,6 +138,20 @@ function renderPage(item, allItems) {
     <a class="tab-btn" href="../../?tab=terms">Terms of Use</a>
   </div>
 
+  ${item.hidden ? `
+  <div id="pin-gate-overlay" class="pin-gate-overlay">
+    <div class="pin-gate-box">
+      <h2>PIN Required</h2>
+      <p>This page is hidden from the catalog. Enter the PIN to view it.</p>
+      <form id="pin-gate-form">
+        <input type="password" id="pin-gate-input" inputmode="numeric" placeholder="Enter PIN" autocomplete="off">
+        <button type="submit" class="btn-small">Unlock</button>
+      </form>
+      <p id="pin-gate-error" class="pin-gate-error"></p>
+    </div>
+  </div>
+  ` : ''}
+
   <div class="item-detail-page page-fade-in" style="display:block;">
     <div class="container">
       <a href="../../" class="btn-small" style="margin-bottom: 20px; display:inline-block;" onclick="return goBackToCatalog(event);">← Back to Catalog</a>
@@ -179,6 +193,7 @@ function renderPage(item, allItems) {
     // Tells script.js this is a standalone item page (not the homepage SPA),
     // so it can skip catalog/search/tab setup and just enhance this one item.
     window.STATIC_ITEM = ${JSON.stringify(item).replace(/</g, '\\u003c')};
+    window.PAGE_HIDDEN = ${item.hidden ? 'true' : 'false'};
   </script>
   <script src="../../script.js"></script>
 </body>
@@ -216,7 +231,7 @@ function main() {
     fs.writeFileSync(path.join(slugDir, 'index.html'), html);
   });
 
-  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), generateSitemap(downloads));
+  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), generateSitemap(downloads.filter(item => !item.hidden)));
 
   console.log(`Generated ${downloads.length} item page(s) and sitemap.xml`);
 }

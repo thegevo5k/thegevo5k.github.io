@@ -161,6 +161,26 @@
     margin-right: 4px;
   }
 
+  .entry-hidden-badge {
+    margin-right: 4px;
+  }
+
+  .hidden-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: none;
+    color: #ccc;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .hidden-checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+  }
+
   .empty-hint {
     color: #777;
     font-size: 0.85rem;
@@ -527,9 +547,10 @@
       const e = entries[i];
       const flagged = !e.sku || !e.name || dupSet.has(e.sku);
       const warn = flagged ? `<span class="entry-warn" title="Missing SKU/Name or duplicate SKU">⚠</span>` : '';
+      const hiddenBadge = e.hidden ? `<span class="entry-hidden-badge" title="Hidden / PIN-protected">🔒</span>` : '';
       return `
         <button class="entry-item ${i === selectedIndex ? 'active' : ''}" data-index="${i}">
-          <span>${warn}<span class="entry-item-name">${escapeHtml(e.name) || '(untitled)'}</span></span>
+          <span>${warn}${hiddenBadge}<span class="entry-item-name">${escapeHtml(e.name) || '(untitled)'}</span></span>
           <span class="entry-item-sku">${escapeHtml(e.sku) || '(no sku)'}</span>
         </button>
       `;
@@ -566,7 +587,8 @@
       compatibility: 'TSC 64-bit',
       download_url: '#',
       releaseDate: new Date().toISOString().slice(0, 10),
-      requirements: []
+      requirements: [],
+      hidden: false
     };
     entries.push(entry);
     selectEntry(entries.length - 1);
@@ -664,6 +686,11 @@
         <input type="text" id="f-download_url" value="${escapeAttr(e.download_url)}">
       </label>
 
+      <label class="hidden-checkbox-label">
+        <input type="checkbox" id="f-hidden" ${e.hidden ? 'checked' : ''}>
+        Hidden (PIN-protected, excluded from catalog/search/sitemap — PIN: 051126)
+      </label>
+
       <div class="requirements-editor">
         <div class="requirements-header">
           <h3>Requirements</h3>
@@ -683,6 +710,11 @@
     bindField('f-compatibility', v => { e.compatibility = v; });
     bindField('f-releaseDate', v => { e.releaseDate = v; });
     bindField('f-download_url', v => { e.download_url = v; });
+
+    document.getElementById('f-hidden').addEventListener('change', (ev) => {
+      e.hidden = ev.target.checked;
+      renderSidebar();
+    });
 
     document.getElementById('btn-delete').addEventListener('click', () => deleteEntry(selectedIndex));
     document.getElementById('btn-duplicate').addEventListener('click', () => duplicateEntry(selectedIndex));

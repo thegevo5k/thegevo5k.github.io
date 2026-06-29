@@ -11,6 +11,7 @@
     "compatibility": "TSC 64-bit",
     "download_url": "#",
     "releaseDate": "2026-06-26",
-    "requirements": []
+    "requirements": [],
+    "hidden": true
   }
 ]

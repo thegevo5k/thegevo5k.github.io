@@ -503,6 +503,68 @@ footer {
   display: flex;
 }
 
+/* ==================== PIN GATE (hidden products) ==================== */
+
+.pin-gate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(10, 10, 10, 0.97);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.pin-gate-overlay.open {
+  display: flex;
+}
+
+.pin-gate-box {
+  max-width: 360px;
+  text-align: center;
+}
+
+.pin-gate-box h2 {
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.pin-gate-box p {
+  color: #999;
+  margin-bottom: 1.2rem;
+}
+
+#pin-gate-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+#pin-gate-input {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #ddd;
+  font-size: 1rem;
+  text-align: center;
+  width: 140px;
+  outline: none;
+}
+
+#pin-gate-input:focus {
+  border-color: var(--gold);
+}
+
+.pin-gate-error {
+  color: #e85a5a;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  min-height: 1em;
+}
+
 .lightbox-img {
   max-width: 92vw;
   max-height: 92vh;
