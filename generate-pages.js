@@ -154,6 +154,7 @@ function renderPage(item, allItems) {
         <button type="submit" class="btn-small">Unlock</button>
       </form>
       <p id="pin-gate-error" class="pin-gate-error"></p>
+      <a href="../../" class="pin-gate-exit">Exit to homepage →</a>
     </div>
   </div>
   ` : ''}

@@ -846,6 +846,7 @@ function setupPinGate() {
   const input = document.getElementById('pin-gate-input');
   const errorEl = document.getElementById('pin-gate-error');
   const form = document.getElementById('pin-gate-form');
+  let attempts = 0;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -854,7 +855,10 @@ function setupPinGate() {
       overlay.classList.remove('open');
       document.body.style.overflow = '';
     } else {
-      errorEl.textContent = 'Incorrect PIN. Try again.';
+      attempts++;
+      errorEl.textContent = attempts >= 3
+        ? 'Incorrect PIN. If you don\'t have it, use "Exit to homepage" below.'
+        : 'Incorrect PIN. Try again.';
       input.value = '';
       input.focus();
     }

@@ -586,6 +586,19 @@ footer {
   min-height: 1em;
 }
 
+.pin-gate-exit {
+  display: inline-block;
+  margin-top: 1.2rem;
+  color: #888;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.pin-gate-exit:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
 .lightbox-img {
   max-width: 92vw;
   max-height: 92vh;
