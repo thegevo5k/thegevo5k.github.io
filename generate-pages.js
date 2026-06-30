@@ -67,6 +67,12 @@ function renderStaticRequirements(requirements, allItems) {
   `;
 }
 
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
 function formatReleaseDate(dateStr) {
   const parts = String(dateStr || '').split('-').map(Number);
   if (parts.length !== 3 || parts.some(isNaN)) return dateStr || '';
@@ -174,12 +180,25 @@ function renderPage(item, allItems) {
 
         <p class="detail-description">${escapeHtml(item.description)}</p>
 
+        ${(() => {
+          const videoId = extractYouTubeId(item.youtubeUrl);
+          if (!videoId) return '';
+          return `
+            <h3 class="detail-section-title detail-section-title-sm">Video</h3>
+            <div class="promo-video-wrap product-video-wrap">
+              <iframe src="https://www.youtube.com/embed/${videoId}" title="${escapeHtml(item.name)} video" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          `;
+        })()}
+
         ${renderStaticRequirements(item.requirements, allItems)}
 
         <div style="margin-top: 30px;">
           ${item.download_url === '#'
             ? `<span class="btn-small" style="background:#444; color:#888; cursor:not-allowed; font-size:1.1rem; padding:16px 32px;">Unavailable</span>`
             : `<a href="${escapeHtml(item.download_url)}" target="_blank" class="btn-small" style="font-size:1.1rem; padding:16px 32px;">Download</a>`}
+          ${item.manualUrl ? `<a href="${escapeHtml(item.manualUrl)}" target="_blank" class="btn-small btn-manual" style="font-size:1.1rem; padding:16px 32px;">Manual</a>` : ''}
         </div>
       </div>
     </div>

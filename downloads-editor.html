@@ -430,6 +430,9 @@
 
   <header>
     <h1>WPS Downloads.json Editor</h1>
+    <div class="toolbar">
+      <button id="btn-link-folder" class="btn-secondary">🔗 Link Site Folder</button>
+    </div>
     <div class="toolbar" id="downloads-toolbar">
       <button id="btn-open">Open downloads.json</button>
       <button id="btn-save" class="btn-secondary">Save</button>
@@ -588,7 +591,9 @@
       download_url: '#',
       releaseDate: new Date().toISOString().slice(0, 10),
       requirements: [],
-      hidden: false
+      hidden: false,
+      manualUrl: '',
+      youtubeUrl: ''
     };
     entries.push(entry);
     selectEntry(entries.length - 1);
@@ -686,6 +691,14 @@
         <input type="text" id="f-download_url" value="${escapeAttr(e.download_url)}">
       </label>
 
+      <label>Manual URL <span style="text-transform:none; color:#777;">(optional — adds a "Manual" button)</span>
+        <input type="text" id="f-manualUrl" value="${escapeAttr(e.manualUrl)}" placeholder="https://...">
+      </label>
+
+      <label>YouTube URL <span style="text-transform:none; color:#777;">(optional — adds a video section)</span>
+        <input type="text" id="f-youtubeUrl" value="${escapeAttr(e.youtubeUrl)}" placeholder="https://www.youtube.com/watch?v=...">
+      </label>
+
       <label class="hidden-checkbox-label">
         <input type="checkbox" id="f-hidden" ${e.hidden ? 'checked' : ''}>
         Hidden (PIN-protected, excluded from catalog/search/sitemap — PIN: 051126)
@@ -710,6 +723,8 @@
     bindField('f-compatibility', v => { e.compatibility = v; });
     bindField('f-releaseDate', v => { e.releaseDate = v; });
     bindField('f-download_url', v => { e.download_url = v; });
+    bindField('f-manualUrl', v => { e.manualUrl = v; });
+    bindField('f-youtubeUrl', v => { e.youtubeUrl = v; });
 
     document.getElementById('f-hidden').addEventListener('change', (ev) => {
       e.hidden = ev.target.checked;
@@ -844,6 +859,123 @@
   }
 
   // ---------- open / save / download ----------
+
+  // ---------- remembered site folder (so files auto-load on future visits) ----------
+  //
+  // The File System Access API can't silently read files without at least one user
+  // gesture (a security requirement, same reason cloud apps need a one-time auth flow
+  // too). What we CAN do: remember the folder handle itself in IndexedDB after the first
+  // pick, then on every later visit just re-request permission for that same remembered
+  // folder (one quick "Allow" click, no file picker dialog) and auto-load both files from it.
+
+  const DB_NAME = 'wps-editor';
+  const STORE_NAME = 'handles';
+  const FOLDER_KEY = 'site-folder';
+
+  function openHandleDb() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveFolderHandle(handle) {
+    const db = await openHandleDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put(handle, FOLDER_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function loadFolderHandle() {
+    const db = await openHandleDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(FOLDER_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function loadBothFilesFromFolder(folderHandle, { silent } = { silent: false }) {
+    // Re-confirm read/write permission for this remembered folder. On the very first
+    // visit this shows a one-click "Allow" prompt; the browser may also silently grant
+    // it without any prompt at all if it still trusts this site for that folder.
+    const permission = await folderHandle.queryPermission({ mode: 'readwrite' });
+    if (permission !== 'granted') {
+      if (silent) return false; // don't surprise the user with a permission popup on auto-load
+      const result = await folderHandle.requestPermission({ mode: 'readwrite' });
+      if (result !== 'granted') return false;
+    }
+
+    let loadedAny = false;
+
+    try {
+      const dlHandle = await folderHandle.getFileHandle('downloads.json');
+      fileHandle = dlHandle;
+      const file = await dlHandle.getFile();
+      entries = JSON.parse(await file.text());
+      selectedIndex = null;
+      renderSidebar();
+      renderForm();
+      loadedAny = true;
+    } catch (e) {
+      console.warn('Could not load downloads.json from remembered folder:', e);
+    }
+
+    try {
+      const promoHandle = await folderHandle.getFileHandle('promo.json');
+      promoFileHandle = promoHandle;
+      const file = await promoHandle.getFile();
+      const parsed = JSON.parse(await file.text());
+      promoData = Array.isArray(parsed) ? parsed : [parsed];
+      selectedPromoIndex = null;
+      renderPromoSidebar();
+      renderPromoEntryForm();
+      loadedAny = true;
+    } catch (e) {
+      console.warn('Could not load promo.json from remembered folder:', e);
+    }
+
+    return loadedAny;
+  }
+
+  async function chooseSiteFolder() {
+    if (!('showDirectoryPicker' in window)) {
+      alert('Your browser doesn\'t support folder access. Use the individual "Open" buttons instead, or switch to Chrome/Edge.');
+      return;
+    }
+
+    try {
+      const folderHandle = await window.showDirectoryPicker();
+      await saveFolderHandle(folderHandle);
+      const loaded = await loadBothFilesFromFolder(folderHandle, { silent: false });
+      setStatus(loaded
+        ? 'Site folder linked — downloads.json and promo.json will auto-load here from now on.'
+        : 'Folder selected, but downloads.json / promo.json weren\'t found in it.');
+    } catch (err) {
+      if (err.name !== 'AbortError') alert('Could not access folder: ' + err.message);
+    }
+  }
+
+  async function tryAutoLoadOnStartup() {
+    if (!('showDirectoryPicker' in window)) return;
+
+    try {
+      const folderHandle = await loadFolderHandle();
+      if (!folderHandle) return;
+      const loaded = await loadBothFilesFromFolder(folderHandle, { silent: true });
+      if (loaded) {
+        setStatus('Auto-loaded downloads.json and promo.json from your remembered site folder.');
+      }
+    } catch (e) {
+      console.warn('Auto-load from remembered folder failed:', e);
+    }
+  }
 
   async function openFile() {
     try {
@@ -1156,11 +1288,14 @@
   document.getElementById('btn-promo-open').addEventListener('click', openPromoFile);
   document.getElementById('btn-promo-save').addEventListener('click', savePromoFile);
   document.getElementById('btn-promo-download').addEventListener('click', downloadPromoCopy);
+  document.getElementById('btn-link-folder').addEventListener('click', chooseSiteFolder);
 
   renderPromoSidebar();
   renderPromoEntryForm();
   renderSidebar();
   renderForm();
+
+  tryAutoLoadOnStartup();
 </script>
 </body>
 </html>

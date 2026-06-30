@@ -386,6 +386,27 @@ footer {
   margin-bottom: 0;
 }
 
+.detail-section-title-sm {
+  font-size: 0.95rem;
+  margin-top: 1.5rem;
+  margin-bottom: 14px;
+}
+
+.product-video-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.btn-manual {
+  background: transparent;
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  margin-left: 12px;
+}
+
+.btn-manual:hover {
+  background: rgba(232, 185, 35, 0.12);
+}
+
 /* ==================== TABS ==================== */
 
 .tab-nav {
