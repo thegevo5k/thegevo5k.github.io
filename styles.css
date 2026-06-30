@@ -168,6 +168,8 @@ h2 {
   display: inline-block;
   margin-top: 12px;
   font-weight: bold;
+  box-sizing: border-box;
+  border: 2px solid transparent;
 }
 
 .btn-small:hover { 
@@ -401,6 +403,7 @@ footer {
   color: var(--gold);
   border: 2px solid var(--gold);
   margin-left: 12px;
+  box-sizing: border-box;
 }
 
 .btn-manual:hover {
